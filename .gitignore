@@ -1,0 +1,44 @@
+# Dependencies
+node_modules/
+
+# Build and test output
+dist/
+coverage/
+*.tsbuildinfo
+.vitest/
+
+# Generated diagrams and local scratch
+out/
+tmp/
+*.local.*
+
+# Logs
+*.log
+npm-debug.log*
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Editors and OS
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Agent and harness files (local tooling, not part of the project)
+/AGENTS.md
+/CLAUDE.md
+/GEMINI.md
+.atl/
+.pi/
+.claude/
+.codex/
+.cursor/
+.gemini/
+.codegraph/
+.playwright-mcp/
+odd/

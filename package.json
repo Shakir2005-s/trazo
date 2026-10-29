@@ -1,0 +1,54 @@
+{
+  "name": "trazo",
+  "version": "0.1.0",
+  "description": "Diagrams your agent gets right the first time: semantic JSON in, laid-out interactive HTML out.",
+  "license": "Apache-2.0",
+  "author": "Heidenber Palacio Garzón",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "bin": {
+    "trazo": "./dist/cli/main.js"
+  },
+  "exports": {
+    ".": "./dist/index.js"
+  },
+  "files": [
+    "dist",
+    "examples",
+    "LICENSE",
+    "NOTICE",
+    "THIRD_PARTY_NOTICES.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "prepublishOnly": "npm run gen:check && npm run build && npm test",
+    "test:watch": "vitest",
+    "gen": "node scripts/gen-metrics.mjs && node scripts/gen-icons.mjs && node scripts/gen-font.mjs && node scripts/gen-notices.mjs",
+    "gen:check": "node scripts/gen-metrics.mjs --check && node scripts/gen-icons.mjs --check && node scripts/gen-font.mjs --check && node scripts/gen-notices.mjs --check"
+  },
+  "keywords": [
+    "diagram",
+    "architecture",
+    "erd",
+    "sequence",
+    "workflow",
+    "agent",
+    "elk"
+  ],
+  "dependencies": {
+    "elkjs": "^0.12.1",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@fontsource/inter": "^5.3.0",
+    "@types/node": "^26.6.6",
+    "lucide-static": "^1.64.0",
+    "opentype.js": "^2.0.0",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.5"
+  }
+}
