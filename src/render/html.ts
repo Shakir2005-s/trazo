@@ -38,8 +38,8 @@ export function renderHtml(scene: Scene): string {
     <h1>${title}</h1>${desc}
   </div>
   <div class="actions">
-    ${button("fit", "Fit to screen", ["maximize"])}
-    ${button("theme", "Toggle theme", ["sun", "moon"])}
+    ${button("fullscreen", "Enter full screen", ["maximize", "minimize"])}
+    ${button("theme", scene.theme === "dark" ? "Switch to light theme" : "Switch to dark theme", ["sun", "moon"])}
   </div>
 </header>
 <main>

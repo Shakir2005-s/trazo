@@ -53,10 +53,11 @@ button { display: inline-flex; align-items: center; justify-content: center; wid
 button:hover { color: var(--t-text); border-color: var(--t-muted); }
 button:focus-visible { outline: 2px solid var(--t-accent); outline-offset: 2px; }
 button svg { width: 18px; height: 18px; }
-[data-theme="dark"] .i-sun, :root:not([data-theme="dark"]) .i-moon { display: none; }
+[data-theme="dark"] .i-moon, :root:not([data-theme="dark"]) .i-sun { display: none; }
+.is-fullscreen .i-maximize, :root:not(.is-fullscreen) .i-minimize { display: none; }
 main { flex: 1; overflow: auto; padding: 24px; }
 .stage { margin: 0 auto; }
 .stage svg.diagram { display: block; width: 100%; height: auto; max-height: calc(100vh - 140px); }
-.actual .stage svg.diagram { max-height: none; }
+.is-fullscreen .stage { max-width: none !important; }
 `;
 }

@@ -128,10 +128,26 @@ describe("renderHtml", () => {
     expect(count(html, /data:font\/woff2;base64,/g)).toBe(2);
   });
 
-  it("has the fit and theme buttons", () => {
+  it("has the full screen and theme buttons", () => {
     const html = renderHtml(scene);
-    expect(html).toContain('aria-label="Fit to screen"');
-    expect(html).toContain('aria-label="Toggle theme"');
+    expect(html).toContain('id="fullscreen" aria-label="Enter full screen"');
+    expect(html).toContain("requestFullscreen");
+    expect(html).not.toContain('id="fit"');
+  });
+
+  it("labels the theme button with the theme it switches to", () => {
+    expect(renderHtml({ ...scene, theme: "dark" })).toContain('id="theme" aria-label="Switch to light theme"');
+    expect(renderHtml({ ...scene, theme: "light" })).toContain('id="theme" aria-label="Switch to dark theme"');
+  });
+
+  it("shows the sun in dark mode and the moon in light mode", () => {
+    const html = renderHtml(scene);
+    expect(html).toContain('[data-theme="dark"] .i-moon, :root:not([data-theme="dark"]) .i-sun { display: none; }');
+  });
+
+  it("swaps the full screen icon while in full screen", () => {
+    const html = renderHtml(scene);
+    expect(html).toContain(".is-fullscreen .i-maximize, :root:not(.is-fullscreen) .i-minimize { display: none; }");
   });
 
   it("loads nothing from the network", () => {

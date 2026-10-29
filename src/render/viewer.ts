@@ -1,19 +1,31 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2026 Heidenber Palacio Garzón
 
-/** Theme toggle and fit/actual-size switch. Pan and zoom live in a later task. */
+/** Theme toggle and full screen. Pan and zoom live in a later task. */
 export const VIEWER_SCRIPT = `(function () {
   var root = document.documentElement;
-  var main = document.querySelector("main");
-  var stage = document.querySelector(".stage");
-  var svg = stage.querySelector("svg.diagram");
-  var size = svg.viewBox.baseVal;
-  document.getElementById("theme").addEventListener("click", function () {
-    root.setAttribute("data-theme", root.getAttribute("data-theme") === "dark" ? "light" : "dark");
+  var theme = document.getElementById("theme");
+  var full = document.getElementById("fullscreen");
+  var label = function (button, text) {
+    button.setAttribute("aria-label", text);
+    button.setAttribute("title", text);
+  };
+  theme.addEventListener("click", function () {
+    var dark = root.getAttribute("data-theme") !== "dark";
+    root.setAttribute("data-theme", dark ? "dark" : "light");
+    label(theme, dark ? "Switch to light theme" : "Switch to dark theme");
   });
-  document.getElementById("fit").addEventListener("click", function () {
-    var actual = main.classList.toggle("actual");
-    stage.style.width = actual ? size.width + "px" : "";
-    if (!actual) main.scrollTo(0, 0);
+  if (!root.requestFullscreen) {
+    full.hidden = true;
+    return;
+  }
+  full.addEventListener("click", function () {
+    if (document.fullscreenElement) document.exitFullscreen();
+    else root.requestFullscreen();
+  });
+  document.addEventListener("fullscreenchange", function () {
+    var on = Boolean(document.fullscreenElement);
+    root.classList.toggle("is-fullscreen", on);
+    label(full, on ? "Exit full screen" : "Enter full screen");
   });
 })();`;
