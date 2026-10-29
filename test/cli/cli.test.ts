@@ -1,0 +1,275 @@
+// SPDX-License-Identifier: Apache-2.0
+// Copyright 2026 Heidenber Palacio Garzón
+
+import { spawnSync } from "node:child_process";
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join, resolve } from "node:path";
+import { beforeEach, describe, expect, it } from "vitest";
+
+const BIN = resolve("dist/cli/main.js");
+const USAGE_TAIL = 'run "trazo --help" for usage\n';
+
+const valid = {
+  type: "architecture",
+  title: "Tiny",
+  nodes: [{ id: "a" }, { id: "b" }],
+  edges: ["a -> b"],
+};
+const withWarning = { ...valid, edges: ["a -> b", "a -> b"] };
+const invalid = { ...valid, edges: ["a -> zz"] };
+const INVALID_STDERR = 'error  edges[0].to: unknown node "zz"\n';
+const WARNING_LINE = "warn   edges[1]: same as edges[0]\n";
+
+let dir: string;
+beforeEach(() => {
+  dir = mkdtempSync(join(tmpdir(), "trazo-cli-"));
+});
+
+function run(args: string[], input?: string) {
+  const result = spawnSync(process.execPath, [BIN, ...args], {
+    cwd: dir,
+    encoding: "utf8",
+    ...(input === undefined ? {} : { input }),
+  });
+  return { code: result.status, stdout: result.stdout, stderr: result.stderr };
+}
+
+function write(name: string, value: unknown): string {
+  const path = join(dir, name);
+  writeFileSync(path, typeof value === "string" ? value : JSON.stringify(value));
+  return path;
+}
+
+const usageError = (message: string) => `error: ${message}\n${USAGE_TAIL}`;
+
+describe("make", () => {
+  it("writes html next to the input and prints the absolute path", () => {
+    write("d.json", valid);
+    const r = run(["make", "d.json"]);
+    expect(r).toEqual({ code: 0, stdout: `${join(dir, "d.html")}\n`, stderr: "" });
+    expect(readFileSync(join(dir, "d.html"), "utf8").startsWith("<!doctype html>")).toBe(true);
+  });
+
+  it("keeps the input's directory for the default output", () => {
+    mkdirSync(join(dir, "sub"));
+    write("sub/checkout.json", valid);
+    const r = run(["make", "sub/checkout.json"]);
+    expect(r).toEqual({ code: 0, stdout: `${join(dir, "sub", "checkout.html")}\n`, stderr: "" });
+    expect(existsSync(join(dir, "sub", "checkout.html"))).toBe(true);
+  });
+
+  it("honours -o and --out", () => {
+    write("d.json", valid);
+    expect(run(["make", "d.json", "-o", "x.html"])).toEqual({
+      code: 0,
+      stdout: `${join(dir, "x.html")}\n`,
+      stderr: "",
+    });
+    expect(run(["make", "d.json", "--out", "y.html"]).stdout).toBe(`${join(dir, "y.html")}\n`);
+    expect(existsSync(join(dir, "d.html"))).toBe(false);
+    expect(existsSync(join(dir, "y.html"))).toBe(true);
+  });
+
+  it("writes html to stdout with -o -", () => {
+    write("d.json", valid);
+    const r = run(["make", "d.json", "-o", "-"]);
+    expect(r.code).toBe(0);
+    expect(r.stderr).toBe("");
+    expect(r.stdout.startsWith("<!doctype html>")).toBe(true);
+    expect(existsSync(join(dir, "d.html"))).toBe(false);
+  });
+
+  it("applies --theme dark", () => {
+    write("d.json", valid);
+    const r = run(["make", "d.json", "--theme", "dark"]);
+    expect(r.code).toBe(0);
+    expect(readFileSync(join(dir, "d.html"), "utf8")).toContain('data-theme="dark"');
+  });
+
+  it("reads stdin and writes html to stdout", () => {
+    const r = run(["make", "-"], JSON.stringify(valid));
+    expect(r.code).toBe(0);
+    expect(r.stderr).toBe("");
+    expect(r.stdout.startsWith("<!doctype html>")).toBe(true);
+  });
+
+  it("reads stdin and honours -o", () => {
+    const r = run(["make", "-", "-o", "s.html"], JSON.stringify(valid));
+    expect(r).toEqual({ code: 0, stdout: `${join(dir, "s.html")}\n`, stderr: "" });
+    expect(existsSync(join(dir, "s.html"))).toBe(true);
+  });
+
+  it("prints warnings to stderr and still succeeds", () => {
+    write("d.json", withWarning);
+    const r = run(["make", "d.json"]);
+    expect(r).toEqual({ code: 0, stdout: `${join(dir, "d.html")}\n`, stderr: WARNING_LINE });
+  });
+
+  it("rejects an invalid diagram without creating the output", () => {
+    write("d.json", invalid);
+    const r = run(["make", "d.json"]);
+    expect(r).toEqual({ code: 1, stdout: "", stderr: INVALID_STDERR });
+    expect(existsSync(join(dir, "d.html"))).toBe(false);
+  });
+
+  it("leaves an existing output byte-identical on invalid input", () => {
+    write("d.json", invalid);
+    const out = write("d.html", "previous contents");
+    const r = run(["make", "d.json"]);
+    expect(r).toEqual({ code: 1, stdout: "", stderr: INVALID_STDERR });
+    expect(readFileSync(out, "utf8")).toBe("previous contents");
+  });
+
+  it("reports invalid JSON with line and column", () => {
+    write("d.json", '{"type": }');
+    const r = run(["make", "d.json"]);
+    expect(r).toEqual({
+      code: 1,
+      stdout: "",
+      stderr:
+        "error  $: invalid JSON at line 1, column 10 → look for a trailing comma, a missing quote or an unescaped character there\n",
+    });
+  });
+
+  it("prints a json success line", () => {
+    write("d.json", valid);
+    const r = run(["make", "d.json", "--json"]);
+    expect(r).toEqual({
+      code: 0,
+      stdout: `${JSON.stringify({ ok: true, output: join(dir, "d.html"), issues: [] })}\n`,
+      stderr: "",
+    });
+  });
+
+  it("includes warnings in the json success line", () => {
+    write("d.json", withWarning);
+    const r = run(["make", "d.json", "--json"]);
+    expect(r.code).toBe(0);
+    expect(r.stderr).toBe("");
+    const line = JSON.parse(r.stdout) as { ok: boolean; issues: { code: string }[] };
+    expect(line.ok).toBe(true);
+    expect(line.issues.map((i) => i.code)).toEqual(["edge/duplicate"]);
+  });
+
+  it("prints a json failure line", () => {
+    write("d.json", invalid);
+    const r = run(["make", "d.json", "--json"]);
+    expect(r.code).toBe(1);
+    expect(r.stderr).toBe("");
+    expect(r.stdout.endsWith("\n")).toBe(true);
+    expect(JSON.parse(r.stdout)).toEqual({
+      ok: false,
+      issues: [{ severity: "error", code: "ref/unknown-node", path: "edges[0].to", message: 'unknown node "zz"' }],
+    });
+    expect(existsSync(join(dir, "d.html"))).toBe(false);
+  });
+
+  it("rejects --json when html goes to stdout", () => {
+    write("d.json", valid);
+    expect(run(["make", "d.json", "-o", "-", "--json"])).toEqual({
+      code: 2,
+      stdout: "",
+      stderr: usageError("--json cannot be combined with html on stdout"),
+    });
+  });
+});
+
+describe("check", () => {
+  it("prints ok and writes nothing", () => {
+    write("d.json", valid);
+    expect(run(["check", "d.json"])).toEqual({ code: 0, stdout: "ok\n", stderr: "" });
+    expect(existsSync(join(dir, "d.html"))).toBe(false);
+  });
+
+  it("reads stdin", () => {
+    expect(run(["check", "-"], JSON.stringify(valid))).toEqual({ code: 0, stdout: "ok\n", stderr: "" });
+  });
+
+  it("prints warnings to stderr", () => {
+    write("d.json", withWarning);
+    expect(run(["check", "d.json"])).toEqual({ code: 0, stdout: "ok\n", stderr: WARNING_LINE });
+  });
+
+  it("reports an invalid diagram", () => {
+    write("d.json", invalid);
+    expect(run(["check", "d.json"])).toEqual({ code: 1, stdout: "", stderr: INVALID_STDERR });
+  });
+
+  it("prints json shapes", () => {
+    write("ok.json", valid);
+    write("bad.json", invalid);
+    expect(run(["check", "ok.json", "--json"])).toEqual({
+      code: 0,
+      stdout: '{"ok":true,"issues":[]}\n',
+      stderr: "",
+    });
+    const bad = run(["check", "bad.json", "--json"]);
+    expect(bad.code).toBe(1);
+    expect(bad.stderr).toBe("");
+    expect((JSON.parse(bad.stdout) as { ok: boolean }).ok).toBe(false);
+  });
+});
+
+describe("usage errors", () => {
+  it("suggests a command", () => {
+    expect(run(["mkae", "d.json"])).toEqual({
+      code: 2,
+      stdout: "",
+      stderr: usageError('unknown command "mkae" (did you mean "make"?)'),
+    });
+  });
+
+  it("reports an unknown command without a suggestion", () => {
+    expect(run(["zzzzzz"]).stderr).toBe(usageError('unknown command "zzzzzz"'));
+  });
+
+  it("reports a missing input", () => {
+    expect(run(["make"])).toEqual({ code: 2, stdout: "", stderr: usageError("missing <input>") });
+    expect(run([])).toEqual({ code: 2, stdout: "", stderr: usageError("missing command") });
+ 
+  });
+
+  it("reports an unknown option", () => {
+    const r = run(["make", "d.json", "--bogus"]);
+    expect(r.code).toBe(2);
+    expect(r.stdout).toBe("");
+    expect(r.stderr).toBe(usageError('unknown option "--bogus"'));
+  });
+
+  it("reports a bad theme", () => {
+    write("d.json", valid);
+    expect(run(["make", "d.json", "--theme", "blue"])).toEqual({
+      code: 2,
+      stdout: "",
+      stderr: usageError('invalid --theme "blue" (use light or dark)'),
+    });
+  });
+
+  it("reports a missing file", () => {
+    expect(run(["make", "nope.json"])).toEqual({
+      code: 2,
+      stdout: "",
+      stderr: usageError('cannot read "nope.json"'),
+    });
+  });
+});
+
+describe("--help and --version", () => {
+  it("prints usage for --help and -h", () => {
+    for (const flag of ["--help", "-h"]) {
+      const r = run([flag]);
+      expect(r.code).toBe(0);
+      expect(r.stderr).toBe("");
+      for (const word of ["trazo make", "trazo check", "--out", "--theme", "--json", "--version"]) {
+        expect(r.stdout).toContain(word);
+      }
+    }
+  });
+
+  it("prints the version", () => {
+    for (const flag of ["--version", "-v"]) {
+      expect(run([flag])).toEqual({ code: 0, stdout: "0.1.0\n", stderr: "" });
+    }
+  });
+});

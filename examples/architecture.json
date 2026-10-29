@@ -1,0 +1,38 @@
+{
+  "type": "architecture",
+  "title": "Photo Print Shop",
+  "description": "How an order moves from the storefront to the print lab.",
+  "nodes": [
+    { "id": "customer", "label": "Customer", "kind": "user" },
+    { "id": "storefront", "label": "Storefront", "kind": "client" },
+    { "id": "gateway", "label": "API Gateway", "kind": "gateway" },
+    {
+      "id": "orders",
+      "label": "Orders Service",
+      "kind": "service",
+      "note": "Owns the order lifecycle: created, paid, printing, shipped.",
+      "source": "services/orders/src/index.ts:24"
+    },
+    { "id": "catalog", "label": "Catalog Service", "kind": "service" },
+    { "id": "ordersdb", "label": "Orders DB", "kind": "database" },
+    { "id": "cache", "label": "Price Cache", "kind": "cache" },
+    { "id": "events", "label": "Order Events", "kind": "queue" },
+    { "id": "labworker", "label": "Print Lab Worker", "kind": "function" },
+    { "id": "payments", "label": "Payment Provider", "kind": "external" }
+  ],
+  "groups": [
+    { "id": "backend", "label": "Backend", "children": ["orders", "catalog", "data", "events"] },
+    { "id": "data", "label": "Data Stores", "children": ["ordersdb", "cache"] }
+  ],
+  "edges": [
+    "customer -> storefront: browses",
+    "storefront -> gateway: HTTPS",
+    "gateway -> orders: create order",
+    "gateway -> catalog: list products",
+    "catalog -> cache: read prices",
+    "orders -> ordersdb: save order",
+    "orders -> payments: charge card",
+    "orders ~> events: order.paid",
+    "events ~> labworker: deliver job"
+  ]
+}
