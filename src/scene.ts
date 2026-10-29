@@ -23,11 +23,14 @@ export interface TextBlock {
   anchor: "start" | "middle";
 }
 
+export type NodeShape = "box" | "pill" | "end" | "diamond" | "subprocess";
+
 export interface SceneNode extends Box {
   id: string;
   kind: string;
   /** Lucide icon name. */
-  icon: string;
+  icon?: string;
+  shape: NodeShape;
   label: TextBlock;
   note?: string;
   source?: string;
@@ -37,6 +40,9 @@ export interface SceneGroup extends Box {
   id: string;
   label: TextBlock;
   depth: number;
+  variant: "group" | "lane";
+  /** Width of the label column at the left of a lane band. */
+  header?: number;
 }
 
 export interface SceneEdge {

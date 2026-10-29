@@ -2,7 +2,7 @@
 // Copyright 2026 Heidenber Palacio Garzón
 
 import { beforeAll, describe, expect, it } from "vitest";
-import { layoutArchitecture } from "../../src/layout/architecture.js";
+import { layoutDiagram } from "../../src/layout/index.js";
 import { validateDiagram } from "../../src/model/index.js";
 import { renderHtml } from "../../src/render/html.js";
 import { renderSvg } from "../../src/render/svg.js";
@@ -28,7 +28,7 @@ beforeAll(async () => {
     edges: ["web -> api: HTTPS", "api -> db: SQL", "api ~> queue: order.created"],
   });
   expect(issues.filter((i) => i.severity === "error")).toEqual([]);
-  scene = await layoutArchitecture(diagram!);
+  scene = await layoutDiagram(diagram!);
 });
 
 const count = (s: string, re: RegExp) => (s.match(re) ?? []).length;

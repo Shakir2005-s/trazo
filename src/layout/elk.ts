@@ -8,6 +8,14 @@ import type { Box, Point } from "../scene.js";
 // runtime it is the constructor itself.
 const ELK = ElkModule as unknown as new () => ElkInstance;
 
+export interface LayoutPort {
+  id: string;
+  side: "NORTH" | "SOUTH" | "EAST" | "WEST";
+  /** Position relative to the box origin. */
+  x: number;
+  y: number;
+}
+
 export interface LayoutBox {
   id: string;
   width: number;
@@ -16,12 +24,26 @@ export interface LayoutBox {
   padding?: { top: number; left: number; bottom: number; right: number };
   minWidth?: number;
   minHeight?: number;
+  /** Preset position, used only with the interactive strategies. */
+  x?: number;
+  y?: number;
+  /** Fixed attachment points; edges refer to them through fromPort/toPort. */
+  ports?: LayoutPort[];
+}
+
+export interface LayoutOptions {
+  /** Keep the preset positions of the boxes as layering, ordering and placement hints. */
+  interactive?: boolean;
+  /** Gap between layers; defaults to LAYER_SPACING. */
+  layerSpacing?: number;
 }
 
 export interface LayoutEdge {
   id: string;
   from: string;
   to: string;
+  fromPort?: string;
+  toPort?: string;
   label?: { width: number; height: number };
 }
 
@@ -46,6 +68,16 @@ interface ElkNode {
   children?: ElkNode[];
   edges?: ElkEdge[];
   layoutOptions?: Record<string, string>;
+  ports?: ElkPort[];
+}
+
+interface ElkPort {
+  id: string;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  layoutOptions: Record<string, string>;
 }
 
 interface ElkEdge {
@@ -61,10 +93,24 @@ const half = (v: number) => Math.round(v * 2) / 2;
 
 function toElk(box: LayoutBox): ElkNode {
   const node: ElkNode = { id: box.id, width: box.width, height: box.height };
+  if (box.x !== undefined) node.x = box.x;
+  if (box.y !== undefined) node.y = box.y;
+  if (box.ports?.length) {
+    node.ports = box.ports.map((port) => ({
+      id: port.id,
+      x: port.x,
+      y: port.y,
+      width: 0,
+      height: 0,
+      layoutOptions: { "elk.port.side": port.side },
+    }));
+    node.layoutOptions = { "elk.portConstraints": "FIXED_POS" };
+  }
   if (box.children?.length) {
     const p = box.padding ?? GROUP_PADDING;
     node.children = box.children.map(toElk);
     node.layoutOptions = {
+      ...node.layoutOptions,
       "elk.padding": `[top=${p.top},left=${p.left},bottom=${p.bottom},right=${p.right}]`,
       "elk.nodeSize.constraints": "MINIMUM_SIZE",
       "elk.nodeSize.minimum": `(${box.minWidth ?? box.width},${box.minHeight ?? box.height})`,
@@ -77,12 +123,13 @@ export async function layoutElk(
   boxes: LayoutBox[],
   edges: LayoutEdge[],
   direction: "RIGHT" | "DOWN",
+  options: LayoutOptions = {},
 ): Promise<LayoutResult> {
   const root: ElkNode = {
     id: "root",
     children: boxes.map(toElk),
     edges: edges.map((e) => {
-      const edge: ElkEdge = { id: e.id, sources: [e.from], targets: [e.to] };
+      const edge: ElkEdge = { id: e.id, sources: [e.fromPort ?? e.from], targets: [e.toPort ?? e.to] };
       // ELK skips placement for labels without text; the real text is drawn later.
       if (e.label) edge.labels = [{ id: `${e.id}:label`, text: e.id, width: e.label.width, height: e.label.height }];
       return edge;
@@ -96,10 +143,21 @@ export async function layoutElk(
       "elk.randomSeed": "1",
       "elk.edgeLabels.inline": "true",
       "elk.spacing.nodeNode": String(NODE_SPACING),
-      "elk.layered.spacing.nodeNodeBetweenLayers": String(LAYER_SPACING),
+      "elk.layered.spacing.nodeNodeBetweenLayers": String(options.layerSpacing ?? LAYER_SPACING),
       "elk.padding": `[top=${ROOT_PADDING},left=${ROOT_PADDING},bottom=${ROOT_PADDING},right=${ROOT_PADDING}]`,
     },
   };
+
+  if (options.interactive) {
+    // Layering and ordering follow the preset coordinates instead of the graph
+    // alone; lane layouts rely on this to keep each step in its band.
+    Object.assign(root.layoutOptions!, {
+      "elk.layered.layering.strategy": "INTERACTIVE",
+      "elk.layered.crossingMinimization.strategy": "INTERACTIVE",
+      "elk.layered.nodePlacement.strategy": "INTERACTIVE",
+      "elk.layered.cycleBreaking.strategy": "INTERACTIVE",
+    });
+  }
 
   const laid = (await new ELK().layout(root as never)) as unknown as ElkNode;
 

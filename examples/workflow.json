@@ -1,0 +1,36 @@
+{
+  "type": "workflow",
+  "title": "Purchase Request",
+  "description": "From a team's request to a paid vendor invoice.",
+  "lanes": [
+    { "id": "requester", "label": "Requester", "steps": ["start", "submit", "end"] },
+    { "id": "procurement", "label": "Procurement", "steps": ["check", "reject", "vendor", "order", "delivery"] },
+    { "id": "finance", "label": "Finance", "steps": ["pay", "paid"] }
+  ],
+  "steps": [
+    { "id": "start", "kind": "start" },
+    { "id": "submit", "label": "Submit request", "note": "Item, quantity and cost center." },
+    { "id": "check", "label": "Within budget?", "kind": "decision" },
+    { "id": "reject", "label": "Notify rejection" },
+    { "id": "vendor", "label": "Vendor onboarding", "kind": "subprocess", "note": "Skipped for vendors already approved." },
+    { "id": "order", "label": "Place order" },
+    { "id": "delivery", "label": "Wait for delivery", "kind": "wait" },
+    { "id": "pay", "label": "Send payment" },
+    { "id": "paid", "label": "Bank accepted?", "kind": "decision" },
+    { "id": "end", "kind": "end" }
+  ],
+  "edges": [
+    "start -> submit",
+    "submit -> check",
+    "check -> vendor: in budget",
+    "check -> reject: over budget",
+    "reject -> end",
+    "vendor -> order",
+    "order -> delivery",
+    "order ~> pay: invoice",
+    "delivery -> pay",
+    "pay -> paid",
+    "paid -> pay: retry",
+    "paid -> end: settled"
+  ]
+}

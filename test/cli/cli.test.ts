@@ -2,10 +2,10 @@
 // Copyright 2026 Heidenber Palacio Garzón
 
 import { spawnSync } from "node:child_process";
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
-import { beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 const BIN = resolve("dist/cli/main.js");
 const USAGE_TAIL = 'run "trazo --help" for usage\n';
@@ -24,6 +24,9 @@ const WARNING_LINE = "warn   edges[1]: same as edges[0]\n";
 let dir: string;
 beforeEach(() => {
   dir = mkdtempSync(join(tmpdir(), "trazo-cli-"));
+});
+afterEach(() => {
+  rmSync(dir, { recursive: true, force: true });
 });
 
 function run(args: string[], input?: string) {
@@ -271,5 +274,45 @@ describe("--help and --version", () => {
     for (const flag of ["--version", "-v"]) {
       expect(run([flag])).toEqual({ code: 0, stdout: "0.1.0\n", stderr: "" });
     }
+  });
+});
+
+describe("workflow diagrams", () => {
+  const flow = {
+    type: "workflow",
+    title: "Tiny flow",
+    steps: [{ id: "a", kind: "start" }, { id: "b", label: "Ok?", kind: "decision" }, { id: "c", kind: "end" }],
+    edges: ["a -> b", "b -> c: yes"],
+  };
+
+  it("makes html for a workflow", () => {
+    write("f.json", {
+      ...flow,
+      steps: [...flow.steps, { id: "d", kind: "end" }],
+      edges: ["a -> b", "b -> c: yes", "b -> d: no"],
+    });
+    const r = run(["make", "f.json"]);
+    expect(r).toEqual({ code: 0, stdout: `${join(dir, "f.html")}\n`, stderr: "" });
+    expect(readFileSync(join(dir, "f.html"), "utf8")).toContain("t-shape-diamond");
+  });
+
+  it("rejects a decision with one outgoing edge", () => {
+    write("f.json", flow);
+    const r = run(["make", "f.json"]);
+    expect(r).toEqual({
+      code: 1,
+      stdout: "",
+      stderr: "error  steps[1]: decision needs at least 2 outgoing edges (has 1)\n",
+    });
+    expect(existsSync(join(dir, "f.html"))).toBe(false);
+  });
+
+  it("suggests workflow for a misspelt type", () => {
+    write("f.json", { ...flow, type: "workflwo" });
+    const r = run(["make", "f.json"]);
+    expect(r.code).toBe(1);
+    expect(r.stdout).toBe("");
+    expect(r.stderr).toContain('"workflow"');
+    expect(existsSync(join(dir, "f.html"))).toBe(false);
   });
 });

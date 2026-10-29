@@ -4,10 +4,11 @@
 import { didYouMean, type Issue } from "../validate/issues.js";
 import { architectureSchema, buildArchitecture, type Architecture } from "./architecture.js";
 import { describe, error_, fromZod } from "./common.js";
+import { buildWorkflow, workflowSchema, type Workflow } from "./workflow.js";
 
-export type Diagram = Architecture;
+export type Diagram = Architecture | Workflow;
 
-export const DIAGRAM_TYPES = ["architecture"] as const;
+export const DIAGRAM_TYPES = ["architecture", "workflow"] as const;
 
 export interface ValidationResult {
   diagram?: Diagram;
@@ -28,6 +29,11 @@ export function validateDiagram(raw: unknown): ValidationResult {
     return { issues: [error_("schema/enum", "type", `unknown value ${JSON.stringify(type)}`, hint)] };
   }
 
+  if (type === "workflow") {
+    const parsed = workflowSchema.safeParse(raw, { reportInput: true });
+    if (!parsed.success) return { issues: fromZod(parsed.error, workflowSchema) };
+    return buildWorkflow(parsed.data);
+  }
   const parsed = architectureSchema.safeParse(raw, { reportInput: true });
   if (!parsed.success) return { issues: fromZod(parsed.error, architectureSchema) };
   return buildArchitecture(parsed.data);

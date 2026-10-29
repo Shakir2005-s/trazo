@@ -10,7 +10,8 @@ import type { Box, Point, Scene } from "../../src/scene.js";
 function diagram(raw: object): Architecture {
   const { diagram, issues } = validateDiagram({ type: "architecture", title: "T", ...raw });
   expect(issues.filter((i) => i.severity === "error")).toEqual([]);
-  return diagram!;
+  if (diagram?.type !== "architecture") throw new Error("expected an architecture diagram");
+  return diagram;
 }
 
 const sample = diagram({

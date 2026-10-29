@@ -26,6 +26,17 @@ export const SVG_CSS = `
 .t-label { fill: var(--t-muted, #52606d); }
 `;
 
+/** Appended only when a scene uses non-box shapes or lanes, so architecture output stays unchanged. */
+export const SHAPE_CSS = `
+.t-node-inner { fill: none; }
+.t-node-rule { stroke: var(--t-node-stroke, #9aa5b1); stroke-width: 1.25; }
+.t-lane-band { fill: var(--t-lane-fill, transparent); stroke: none; }
+.t-lane-odd .t-lane-band { fill: var(--t-lane-fill-odd, rgba(120, 130, 145, 0.08)); }
+.t-lane-header { fill: var(--t-lane-header, rgba(120, 130, 145, 0.12)); stroke: none; }
+.t-lane-rule { stroke: var(--t-group-stroke, #cbd2d9); stroke-width: 1; }
+.t-lane-title { fill: var(--t-muted, #52606d); }
+`;
+
 const LIGHT = `--t-bg: #f4f5f7; --t-surface: #ffffff; --t-text: #1f2933; --t-muted: #52606d; --t-border: #d8dde3;
   --t-group-fill: #eceff3; --t-group-stroke: #c3cbd4; --t-node-fill: #ffffff; --t-node-stroke: #9aa5b1;
   --t-edge: #2f6fdb; --t-accent: #2f6fdb; --t-icon: #52606d; --t-icon-data: #2b7a6f; --t-icon-edge: #96602b;`;

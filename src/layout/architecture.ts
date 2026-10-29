@@ -97,7 +97,7 @@ export async function layoutArchitecture(d: Architecture): Promise<Scene> {
       weight: 600,
       anchor: "start",
     };
-    const out: SceneNode = { id: n.id, kind: n.kind, icon: ICONS[n.kind], ...box, label };
+    const out: SceneNode = { id: n.id, kind: n.kind, icon: ICONS[n.kind], shape: "box", ...box, label };
     if (n.note !== undefined) out.note = n.note;
     if (n.source !== undefined) out.source = n.source;
     return out;
@@ -118,6 +118,7 @@ export async function layoutArchitecture(d: Architecture): Promise<Scene> {
         id: g.id,
         ...box,
         depth: depths.get(g.id) ?? 0,
+        variant: "group",
         label: {
           lines: [g.label],
           x: half(box.x + GROUP_TITLE_X),
