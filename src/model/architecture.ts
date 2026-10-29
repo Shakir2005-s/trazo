@@ -2,8 +2,9 @@
 // Copyright 2026 Heidenber Palacio Garzón
 
 import { z } from "zod";
-import { didYouMean, type Issue } from "../validate/issues.js";
-import { customIssue, error_, idSchema, parseEdge, textSchema, themeSchema, warning } from "./common.js";
+import type { Issue } from "../validate/issues.js";
+import { IdRegistry } from "../validate/refs.js";
+import { edgeSchema, error_, idSchema, textSchema, themeSchema, warning } from "./common.js";
 
 export const NODE_KINDS = [
   "client",
@@ -53,42 +54,7 @@ export interface Architecture {
   edges: ArchEdge[];
 }
 
-const edgeObject = z.strictObject({
-  from: idSchema,
-  to: idSchema,
-  label: textSchema.optional(),
-  style: z.enum(["sync", "async", "data"]).optional(),
-});
-
-const edgeSchema = z.preprocess((value, ctx) => {
-  if (typeof value !== "string") return value;
-  const parsed = parseEdge(value);
-  if (!parsed) {
-    ctx.issues.push(
-      customIssue(value, `cannot read ${JSON.stringify(value)}`, {
-        code: "edge/syntax",
-        hint: 'write "from -> to: label" (-> sync, ~> async)',
-      }),
-    );
-    return value;
-  }
-  if (parsed.arrow === "-->") {
-    ctx.issues.push(
-      customIssue(value, 'arrow "-->" is not available in architecture diagrams', {
-        code: "edge/arrow",
-        hint: "use -> for sync or ~> for async",
-      }),
-    );
-    return value;
-  }
-  const edge: z.input<typeof edgeObject> = {
-    from: parsed.from,
-    to: parsed.to,
-    style: parsed.arrow === "~>" ? "async" : "sync",
-  };
-  if (parsed.label !== undefined) edge.label = parsed.label;
-  return edge;
-}, edgeObject);
+const archEdge = edgeSchema("architecture", ["->", "~>"], ["sync", "async", "data"]);
 
 export const architectureSchema = z.strictObject({
   type: z.literal("architecture"),
@@ -116,7 +82,7 @@ export const architectureSchema = z.strictObject({
       }),
     )
     .optional(),
-  edges: z.array(edgeSchema).optional(),
+  edges: z.array(archEdge).optional(),
 });
 
 type Parsed = z.output<typeof architectureSchema>;
@@ -125,26 +91,16 @@ const LARGE_DIAGRAM = 60;
 
 export function buildArchitecture(input: Parsed): { diagram?: Architecture; issues: Issue[] } {
   const issues: Issue[] = [];
-  const firstUse = new Map<string, string>();
+  const ids = new IdRegistry(issues, { noun: "node", code: "ref/unknown-node" });
   const groupIds = new Set<string>();
 
-  const claim = (id: string, path: string) => {
-    const previous = firstUse.get(id);
-    if (previous) issues.push(error_("ref/duplicate-id", path, `duplicate id "${id}"`, `first used at ${previous}`));
-    else firstUse.set(id, path);
-  };
-  input.nodes.forEach((node, i) => claim(node.id, `nodes[${i}].id`));
+  input.nodes.forEach((node, i) => ids.claim(node.id, `nodes[${i}].id`));
   (input.groups ?? []).forEach((group, i) => {
-    claim(group.id, `groups[${i}].id`);
+    ids.claim(group.id, `groups[${i}].id`);
     groupIds.add(group.id);
   });
 
-  const known = [...firstUse.keys()];
-  const unknownNode = (id: string, path: string) => {
-    if (firstUse.has(id)) return false;
-    issues.push(error_("ref/unknown-node", path, `unknown node "${id}"`, didYouMean(id, known)));
-    return true;
-  };
+  const unknownNode = (id: string, path: string) => ids.unknown(id, path);
 
   // A child keeps its first parent; walking up from the new parent tells us
   // whether adopting a group would close a loop.

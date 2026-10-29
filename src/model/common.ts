@@ -45,6 +45,53 @@ export function parseEdge(text: string): ParsedEdge | undefined {
   return edge;
 }
 
+/**
+ * Edge schema accepting the shorthand string or the object form. `arrows`
+ * lists the shorthand arrows the diagram type supports; `styles` the values of
+ * the object form's `style` field.
+ */
+export function edgeSchema<const S extends readonly [string, ...string[]]>(
+  diagramType: string,
+  arrows: readonly Arrow[],
+  styles: S,
+) {
+  const edgeObject = z.strictObject({
+    from: idSchema,
+    to: idSchema,
+    label: textSchema.optional(),
+    style: z.enum(styles).optional(),
+  });
+  return z.preprocess((value, ctx) => {
+    if (typeof value !== "string") return value;
+    const parsed = parseEdge(value);
+    if (!parsed) {
+      ctx.issues.push(
+        customIssue(value, `cannot read ${JSON.stringify(value)}`, {
+          code: "edge/syntax",
+          hint: 'write "from -> to: label" (-> sync, ~> async)',
+        }),
+      );
+      return value;
+    }
+    if (!arrows.includes(parsed.arrow)) {
+      ctx.issues.push(
+        customIssue(value, `arrow "${parsed.arrow}" is not available in ${diagramType} diagrams`, {
+          code: "edge/arrow",
+          hint: "use -> for sync or ~> for async",
+        }),
+      );
+      return value;
+    }
+    const edge: Record<string, string> = {
+      from: parsed.from,
+      to: parsed.to,
+      style: parsed.arrow === "~>" ? "async" : "sync",
+    };
+    if (parsed.label !== undefined) edge.label = parsed.label;
+    return edge;
+  }, edgeObject);
+}
+
 // ---------------------------------------------------------------------------
 // zod issues → trazo issues
 
