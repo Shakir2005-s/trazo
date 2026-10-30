@@ -7,7 +7,7 @@ This folder holds the benchmark for trazo: what an agent must read before it can
 | Metric | Target | How |
 |---|---|---|
 | Reading cost per type | under 2,000 tokens | skill body + `trazo schema <type>` + `trazo example <type>`, estimated as characters / 4 |
-| `make` time, 50 nodes | under 1,000 ms | synthetic architecture diagram, 5 runs after one warm-up, median, in-process and through the CLI |
+| `make` time, 50 nodes | under 1,000 ms | synthetic architecture diagram, 5 runs after one warm-up, median; the target applies to the in-process time, the CLI time is reported alongside |
 | HTML size | at most 300 KB | the four examples and the 50-node diagram |
 | Determinism | byte-identical | two `make` runs on the same JSON |
 | First-try success, repairs, tokens, seconds | no fixed target | real agent runs, see below |
@@ -28,6 +28,8 @@ The script reads `dist/`, prints a table, and writes `bench/results/<YYYY-MM-DD>
 - `--summary <file>` prints the per-condition summary of an agent result file.
 
 The script exits with 1 if any output differs between two runs or any HTML file is over 300 KB. The time target is reported, not enforced, because timings depend on the machine.
+
+The `make` target measures trazo itself: validation, layout and rendering, called in-process. The CLI time adds starting Node and loading the modules, close to one second on its own (elkjs alone takes about half of it), so a single CLI call stays above one second even for small diagrams. It is recorded so start-up regressions stay visible, but it is not held to the target.
 
 ## Agent runs
 

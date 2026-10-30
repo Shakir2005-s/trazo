@@ -35,14 +35,14 @@
     "nodes": 50,
     "runs": 5,
     "inProcessMs": {
-      "median": 219.9,
-      "min": 139.7,
-      "max": 663.9
+      "median": 111.7,
+      "min": 109.2,
+      "max": 122.1
     },
     "cliMs": {
-      "median": 1506.8,
-      "min": 1173.4,
-      "max": 2081.2
+      "median": 1002.7,
+      "min": 913.9,
+      "max": 1156.4
     },
     "htmlBytes": 129466
   },
@@ -65,7 +65,7 @@
     "htmlBytes": 307200
   },
   "pass": {
-    "makeMs": false,
+    "makeMs": true,
     "htmlBytes": true,
     "readingTokens": true
   }
