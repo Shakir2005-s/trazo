@@ -49,6 +49,21 @@ export const TABLE_CSS = `
 .t-end-dot { fill: var(--t-bg, #ffffff); }
 `;
 
+/** Appended only to scenes with lifelines (sequence). */
+export const SEQUENCE_CSS = `
+.t-lifeline { stroke: var(--t-group-stroke, #cbd2d9); stroke-width: 1; stroke-dasharray: 4 4; }
+.t-frag { fill: none; stroke: var(--t-node-stroke, #9aa5b1); stroke-width: 1; }
+.t-frag-tab { fill: var(--t-bg, #ffffff); stroke: var(--t-node-stroke, #9aa5b1); stroke-width: 1; }
+.t-frag-divider { stroke: var(--t-node-stroke, #9aa5b1); stroke-width: 1; stroke-dasharray: 5 4; }
+.t-frag-tag { fill: var(--t-text, #1f2933); }
+.t-frag-guard { fill: var(--t-muted, #52606d); }
+.t-note { fill: var(--t-note-fill, var(--t-group-fill, #f5f7fa)); }
+.t-note-fold { fill: none; stroke: var(--t-node-stroke, #9aa5b1); stroke-width: 1.25; stroke-linejoin: round; }
+.t-edge-reply { stroke-dasharray: 5 4; }
+.t-seq .t-edge-async { stroke-dasharray: none; }
+.t-arrow-open { fill: none; stroke: var(--t-edge, #2f6fdb); stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+`;
+
 const LIGHT = `--t-bg: #f4f5f7; --t-surface: #ffffff; --t-text: #1f2933; --t-muted: #52606d; --t-border: #d8dde3;
   --t-group-fill: #eceff3; --t-group-stroke: #c3cbd4; --t-node-fill: #ffffff; --t-node-stroke: #9aa5b1;
   --t-edge: #2f6fdb; --t-accent: #2f6fdb; --t-icon: #52606d; --t-icon-data: #2b7a6f; --t-icon-edge: #96602b; --t-table-head: #e4e8ee;`;

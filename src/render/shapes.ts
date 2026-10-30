@@ -6,6 +6,7 @@ import type { Box, NodeShape, SceneGroup } from "../scene.js";
 const CORNER = 8;
 const END_INSET = 3;
 const SUBPROCESS_INSET = 8;
+const NOTE_FOLD = 10;
 
 export const num = (n: number) => String(Math.round(n * 100) / 100);
 
@@ -34,6 +35,11 @@ export function shapeMarkup(shape: NodeShape, b: Box): string {
     }
     case "table":
       return rect(b, "t-table");
+    case "note": {
+      const r = b.x + b.w;
+      const pts = [`${num(b.x)},${num(b.y)}`, `${num(r - NOTE_FOLD)},${num(b.y)}`, `${num(r)},${num(b.y + NOTE_FOLD)}`, `${num(r)},${num(b.y + b.h)}`, `${num(b.x)},${num(b.y + b.h)}`];
+      return `<polygon class="${cls} t-note" points="${pts.join(" ")}"/><path class="t-note-fold" d="M${num(r - NOTE_FOLD)} ${num(b.y)}V${num(b.y + NOTE_FOLD)}H${num(r)}"/>`;
+    }
     case "subprocess":
       return (
         rect(b, cls) +

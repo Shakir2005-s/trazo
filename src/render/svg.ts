@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2026 Heidenber Palacio Garzón
 
-import type { Box, EdgeEnd, Scene, SceneEdge, SceneGroup, SceneNode, SceneRow, TextBlock } from "../scene.js";
+import type { Box, EdgeEnd, Scene, SceneLifeline, SceneEdge, SceneGroup, SceneNode, SceneRow, TextBlock } from "../scene.js";
 import { lineHeight } from "../text/measure.js";
 import { ICONS } from "./generated/icons.js";
 import { laneMarkup, num, rect, shapeMarkup } from "./shapes.js";
-import { SHAPE_CSS, SVG_CSS, TABLE_CSS } from "./theme.js";
+import { SEQUENCE_CSS, SHAPE_CSS, SVG_CSS, TABLE_CSS } from "./theme.js";
 
 const ICON_SIZE = 20;
 const ICON_PAD = 12;
@@ -29,17 +29,45 @@ function text(block: TextBlock, cls: string): string {
 }
 
 function group(g: SceneGroup): string {
-  if (g.variant === "lane") return "";
+  if (g.variant !== "group") return "";
   return `<g class="t-group" data-id="${escapeXml(g.id)}">${rect(g, "t-group-box")}${text(g.label, "t-group-title")}</g>`;
 }
+
+const bracket = (b: TextBlock): TextBlock => {
+  const lines = [...b.lines];
+  if (lines.length > 0) {
+    lines[0] = `[${lines[0]}`;
+    lines[lines.length - 1] += "]";
+  }
+  return { ...b, lines };
+};
+
+function fragment(g: SceneGroup): string {
+  if (g.variant !== "fragment") return "";
+  const t = g.tab ?? { x: g.x, y: g.y, w: 0, h: 0 };
+  const cut = 6;
+  const tab = `<path class="t-frag-tab" d="M${num(t.x)} ${num(t.y)}H${num(t.x + t.w)}V${num(t.y + t.h - cut)}L${num(t.x + t.w - cut)} ${num(t.y + t.h)}H${num(t.x)}z"/>`;
+  const tag = g.tag === undefined ? "" : text({ lines: [g.tag], x: t.x + 8, y: t.y + t.h / 2 + 4, size: 11, weight: 600, anchor: "start" }, "t-frag-tag");
+  const guard = g.guard ? text(bracket(g.guard), "t-frag-guard") : "";
+  const dividers = (g.dividers ?? [])
+    .map((d) => `<line class="t-frag-divider" x1="${num(g.x)}" y1="${num(d.y)}" x2="${num(g.x + g.w)}" y2="${num(d.y)}"/>${text(bracket(d.guard), "t-frag-guard")}`)
+    .join("");
+  return `<g class="t-fragment" data-id="${escapeXml(g.id)}">${rect(g, "t-frag", 4)}${dividers}${tab}${tag}${guard}</g>`;
+}
+
+const lifeline = (l: SceneLifeline) =>
+  `<line class="t-lifeline" data-id="${escapeXml(l.id)}" x1="${num(l.x)}" y1="${num(l.y1)}" x2="${num(l.x)}" y2="${num(l.y2)}"/>`;
+
+// Inside a sequence scene these use the open arrowhead.
+const OPEN_STYLES = ["async", "reply"];
 
 // Set to false to drop the background-colored stroke under erd edges.
 const EDGE_HALO = true;
 
-function edge(e: SceneEdge): string {
+function edge(e: SceneEdge, seq: boolean): string {
   const d = e.points.map((p, i) => `${i === 0 ? "M" : "L"}${num(p.x)} ${num(p.y)}`).join(" ");
   const attrs = `class="t-edge t-edge-${e.style}" data-from="${escapeXml(e.from)}" data-to="${escapeXml(e.to)}" d="${d}"`;
-  if (!e.ends) return `<path ${attrs} marker-end="url(#t-arrowhead)"/>`;
+  if (!e.ends) return `<path ${attrs} marker-end="url(#${seq && OPEN_STYLES.includes(e.style) ? "t-arrowhead-open" : "t-arrowhead"})"/>`;
   const halo = EDGE_HALO ? `<path class="t-edge-halo" d="${d}"/>` : "";
   return `${halo}<path ${attrs} marker-start="url(#t-end-${e.ends.from})" marker-end="url(#t-end-${e.ends.to})"/>`;
 }
@@ -109,17 +137,25 @@ export function renderSvg(scene: Scene): string {
   const desc = scene.description ? `<desc id="t-desc">${escapeXml(scene.description)}</desc>` : "";
   const labelled = scene.description ? "t-title t-desc" : "t-title";
   const ends = scene.edges.some((e) => e.ends);
-  const arrow = ends && scene.edges.every((e) => e.ends) ? "" : `<marker id="t-arrowhead" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" markerUnits="userSpaceOnUse" orient="auto"><path class="t-arrow" d="M0 1L10 5L0 9z"/></marker>`;
-  const css = (needsShapeCss(scene) ? SVG_CSS + SHAPE_CSS : SVG_CSS) + (needsTableCss(scene) ? TABLE_CSS : "");
+  const seq = scene.lifelines !== undefined;
+  const filled = (e: SceneEdge) => !e.ends && !(seq && OPEN_STYLES.includes(e.style));
+  const open =
+    seq && scene.edges.some((e) => OPEN_STYLES.includes(e.style))
+      ? `<marker id="t-arrowhead-open" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" markerUnits="userSpaceOnUse" orient="auto"><path class="t-arrow-open" d="M1 1L9 5L1 9"/></marker>`
+      : "";
+  const arrow = (seq ? !scene.edges.some(filled) : ends && scene.edges.every((e) => e.ends)) ? "" : `<marker id="t-arrowhead" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" markerUnits="userSpaceOnUse" orient="auto"><path class="t-arrow" d="M0 1L10 5L0 9z"/></marker>`;
+  const css = (needsShapeCss(scene) ? SVG_CSS + SHAPE_CSS : SVG_CSS) + (needsTableCss(scene) ? TABLE_CSS : "") + (seq ? SEQUENCE_CSS : "");
   const parts = [
-    `<svg xmlns="http://www.w3.org/2000/svg" class="diagram" viewBox="0 0 ${num(scene.width)} ${num(scene.height)}" role="img" aria-labelledby="${labelled}">`,
+    `<svg xmlns="http://www.w3.org/2000/svg" class="${seq ? "diagram t-seq" : "diagram"}" viewBox="0 0 ${num(scene.width)} ${num(scene.height)}" role="img" aria-labelledby="${labelled}">`,
     `<title id="t-title">${escapeXml(scene.title)}</title>`,
     desc,
-    `<defs>${arrow}${ends ? endMarkers() : ""}</defs>`,
+    `<defs>${arrow}${open}${ends ? endMarkers() : ""}</defs>`,
     `<style>${css}</style>`,
+    ...(scene.lifelines ?? []).map(lifeline),
     ...lanes(scene.groups),
     ...scene.groups.map(group),
-    ...scene.edges.map(edge),
+    ...scene.groups.map(fragment),
+    ...scene.edges.map((e) => edge(e, seq)),
     ...scene.edges.map(edgeLabel),
     ...scene.nodes.map(node),
     "</svg>",
