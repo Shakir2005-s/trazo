@@ -38,7 +38,8 @@
     "prepublishOnly": "npm run gen:check && npm run build && npm test",
     "test:watch": "vitest",
     "gen": "node scripts/gen-metrics.mjs && node scripts/gen-icons.mjs && node scripts/gen-font.mjs && node scripts/gen-notices.mjs && node scripts/gen-skill.mjs",
-    "gen:check": "node scripts/gen-metrics.mjs --check && node scripts/gen-icons.mjs --check && node scripts/gen-font.mjs --check && node scripts/gen-notices.mjs --check && node scripts/gen-skill.mjs --check"
+    "gen:check": "node scripts/gen-metrics.mjs --check && node scripts/gen-icons.mjs --check && node scripts/gen-font.mjs --check && node scripts/gen-notices.mjs --check && node scripts/gen-skill.mjs --check",
+    "bench": "node scripts/bench.mjs"
   },
   "keywords": [
     "diagram",
