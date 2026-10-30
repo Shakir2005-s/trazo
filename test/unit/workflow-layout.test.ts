@@ -479,3 +479,16 @@ describe("assertStepsInLanes", () => {
     expect(() => assertStepsInLanes(lanes, bands, boxes)).toThrow('step "a" left its lane "one"');
   });
 });
+
+describe("layoutWorkflow parent", () => {
+  it("sets the lane of each step", async () => {
+    const scene = await layoutWorkflow(refund());
+    const parents = Object.fromEntries(scene.nodes.map((n) => [n.id, n.parent]));
+    expect(parents).toMatchObject({ start: "customer", review: "support", ledger: "finance", end: "customer" });
+  });
+
+  it("leaves parent unset without lanes", async () => {
+    const scene = await layoutWorkflow(plain());
+    expect(scene.nodes.every((n) => !("parent" in n))).toBe(true);
+  });
+});

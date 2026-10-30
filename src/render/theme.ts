@@ -72,6 +72,9 @@ const DARK = `--t-bg: #14171c; --t-surface: #1b1f26; --t-text: #e6e9ed; --t-mute
   --t-group-fill: #1a1e25; --t-group-stroke: #343c48; --t-node-fill: #20252d; --t-node-stroke: #4a5361;
   --t-edge: #6ea2f5; --t-accent: #6ea2f5; --t-icon: #9aa5b1; --t-icon-data: #5fc2b2; --t-icon-edge: #d49a5f; --t-table-head: #2a303a;`;
 
+/** Theme custom properties that an exported SVG needs to look the same outside the page. */
+export const THEME_VARS: readonly string[] = [...LIGHT.matchAll(/--t-[a-z-]+(?=:)/g)].map((m) => m[0]);
+
 export function pageCss(font400: string, font600: string): string {
   return `
 /* Inter is embedded under the SIL Open Font License 1.1, Copyright 2016 The Inter Project Authors. */
@@ -81,21 +84,27 @@ export function pageCss(font400: string, font600: string): string {
 [data-theme="dark"] { ${DARK} }
 * { box-sizing: border-box; }
 html, body { margin: 0; }
-body { ${TEXT_RESET} background: var(--t-bg); color: var(--t-text); min-height: 100vh; display: flex; flex-direction: column; }
+body { ${TEXT_RESET} background: var(--t-bg); color: var(--t-text); height: 100vh; display: flex; flex-direction: column; }
 header { display: flex; align-items: flex-start; gap: 16px; padding: 16px 24px 12px; border-bottom: 1px solid var(--t-border); background: var(--t-surface); }
 .heading { flex: 1; min-width: 0; }
 h1 { margin: 0; font-size: 18px; font-weight: 600; line-height: 1.3; }
 .desc { margin: 4px 0 0; font-size: 13px; line-height: 1.4; color: var(--t-muted); max-width: 80ch; }
-.actions { display: flex; gap: 8px; }
+.actions { display: flex; gap: 12px; }
+.group { display: flex; gap: 8px; }
 button { display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; padding: 0; border: 1px solid var(--t-border); border-radius: 8px; background: var(--t-surface); color: var(--t-muted); cursor: pointer; }
 button:hover { color: var(--t-text); border-color: var(--t-muted); }
 button:focus-visible { outline: 2px solid var(--t-accent); outline-offset: 2px; }
 button svg { width: 18px; height: 18px; }
 [data-theme="dark"] .i-moon, :root:not([data-theme="dark"]) .i-sun { display: none; }
 .is-fullscreen .i-maximize, :root:not(.is-fullscreen) .i-minimize { display: none; }
-main { flex: 1; overflow: auto; padding: 24px; }
-.stage { margin: 0 auto; }
-.stage svg.diagram { display: block; width: 100%; height: auto; max-height: calc(100vh - 140px); }
-.is-fullscreen .stage { max-width: none !important; }
+main { flex: 1; min-height: 0; overflow: hidden; padding: 16px 24px 24px; }
+.stage { height: 100%; touch-action: none; cursor: grab; border-radius: 8px; }
+.stage.is-grabbing { cursor: grabbing; }
+.stage:focus-visible { outline: 2px solid var(--t-accent); outline-offset: 2px; }
+.stage svg.diagram { display: block; width: 100%; height: 100%; }
+.diagram :is(.t-node, .t-edge, .t-edge-halo, .t-edge-label, .t-lifeline) { transition: opacity 120ms; }
+.t-dim :is(.t-node, .t-edge, .t-edge-halo, .t-edge-label, .t-lifeline):not(.t-near) { opacity: 0.25; }
+.tip { position: fixed; z-index: 10; max-width: 320px; padding: 6px 10px; border: 1px solid var(--t-border); border-radius: 6px; background: var(--t-surface); color: var(--t-text); font-size: 12px; line-height: 1.4; white-space: pre-line; pointer-events: none; visibility: hidden; }
+.tip.on { visibility: visible; }
 `;
 }

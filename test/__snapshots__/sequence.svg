@@ -47,19 +47,19 @@
 <line class="t-lifeline" data-id="events" x1="872.5" y1="64" x2="872.5" y2="728"/>
 <g class="t-fragment" data-id="#f0"><rect class="t-frag" x="217" y="196" width="672" height="392" rx="4"/><line class="t-frag-divider" x1="217" y1="480" x2="889" y2="480"/><text class="t-text t-frag-guard" x="225" y="495" font-size="11" font-weight="400"><tspan x="225" dy="0">[missing items]</tspan></text><path class="t-frag-tab" d="M217 196H247V208L241 214H217z"/><text class="t-text t-frag-tag" x="225" y="209" font-size="11" font-weight="600"><tspan x="225" dy="0">alt</tspan></text><text class="t-text t-frag-guard" x="255" y="209" font-size="11" font-weight="400"><tspan x="255" dy="0">[all items in stock]</tspan></text></g>
 <g class="t-fragment" data-id="#f1"><rect class="t-frag" x="362" y="294" width="351" height="114" rx="4"/><path class="t-frag-tab" d="M362 294H402V306L396 312H362z"/><text class="t-text t-frag-tag" x="370" y="307" font-size="11" font-weight="600"><tspan x="370" dy="0">loop</tspan></text><text class="t-text t-frag-guard" x="410" y="307" font-size="11" font-weight="400"><tspan x="410" dy="0">[until settled, max 3]</tspan></text></g>
-<path class="t-edge t-edge-sync" data-from="shopper" data-to="web" d="M84 118 L233 118" marker-end="url(#t-arrowhead)"/>
-<path class="t-edge t-edge-sync" data-from="web" data-to="orders" d="M233 154 L378 154" marker-end="url(#t-arrowhead)"/>
-<path class="t-edge t-edge-sync" data-from="orders" data-to="stock" d="M378 190 L530 190" marker-end="url(#t-arrowhead)"/>
-<path class="t-edge t-edge-reply" data-from="stock" data-to="orders" d="M530 252 L378 252" marker-end="url(#t-arrowhead-open)"/>
-<path class="t-edge t-edge-sync" data-from="orders" data-to="psp" d="M378 288 L697 288" marker-end="url(#t-arrowhead)"/>
-<path class="t-edge t-edge-reply" data-from="psp" data-to="orders" d="M697 350 L378 350" marker-end="url(#t-arrowhead-open)"/>
-<path class="t-edge t-edge-sync" data-from="orders" data-to="orders" d="M378 364 L406 364 L406 388 L378 388" marker-end="url(#t-arrowhead)"/>
-<path class="t-edge t-edge-reply" data-from="psp" data-to="orders" d="M697 438 L378 438" marker-end="url(#t-arrowhead-open)"/>
-<path class="t-edge t-edge-async" data-from="orders" data-to="events" d="M378 474 L872.5 474" marker-end="url(#t-arrowhead-open)"/>
-<path class="t-edge t-edge-reply" data-from="stock" data-to="orders" d="M530 534 L378 534" marker-end="url(#t-arrowhead-open)"/>
-<path class="t-edge t-edge-reply" data-from="orders" data-to="web" d="M378 570 L233 570" marker-end="url(#t-arrowhead-open)"/>
-<path class="t-edge t-edge-reply" data-from="orders" data-to="web" d="M378 674 L233 674" marker-end="url(#t-arrowhead-open)"/>
-<path class="t-edge t-edge-reply" data-from="web" data-to="shopper" d="M233 710 L84 710" marker-end="url(#t-arrowhead-open)"/>
+<path class="t-edge t-edge-sync" data-from="shopper" data-to="web" d="M84 118 L233 118" marker-end="url(#t-arrowhead)" data-edge="#m0"/>
+<path class="t-edge t-edge-sync" data-from="web" data-to="orders" d="M233 154 L378 154" marker-end="url(#t-arrowhead)" data-edge="#m1"/>
+<path class="t-edge t-edge-sync" data-from="orders" data-to="stock" d="M378 190 L530 190" marker-end="url(#t-arrowhead)" data-edge="#m2"/>
+<path class="t-edge t-edge-reply" data-from="stock" data-to="orders" d="M530 252 L378 252" marker-end="url(#t-arrowhead-open)" data-edge="#m3"/>
+<path class="t-edge t-edge-sync" data-from="orders" data-to="psp" d="M378 288 L697 288" marker-end="url(#t-arrowhead)" data-edge="#m4"/>
+<path class="t-edge t-edge-reply" data-from="psp" data-to="orders" d="M697 350 L378 350" marker-end="url(#t-arrowhead-open)" data-edge="#m5"/>
+<path class="t-edge t-edge-sync" data-from="orders" data-to="orders" d="M378 364 L406 364 L406 388 L378 388" marker-end="url(#t-arrowhead)" data-edge="#m6"/>
+<path class="t-edge t-edge-reply" data-from="psp" data-to="orders" d="M697 438 L378 438" marker-end="url(#t-arrowhead-open)" data-edge="#m7"/>
+<path class="t-edge t-edge-async" data-from="orders" data-to="events" d="M378 474 L872.5 474" marker-end="url(#t-arrowhead-open)" data-edge="#m8"/>
+<path class="t-edge t-edge-reply" data-from="stock" data-to="orders" d="M530 534 L378 534" marker-end="url(#t-arrowhead-open)" data-edge="#m9"/>
+<path class="t-edge t-edge-reply" data-from="orders" data-to="web" d="M378 570 L233 570" marker-end="url(#t-arrowhead-open)" data-edge="#m10"/>
+<path class="t-edge t-edge-reply" data-from="orders" data-to="web" d="M378 674 L233 674" marker-end="url(#t-arrowhead-open)" data-edge="#m11"/>
+<path class="t-edge t-edge-reply" data-from="web" data-to="shopper" d="M233 710 L84 710" marker-end="url(#t-arrowhead-open)" data-edge="#m12"/>
 <g class="t-edge-label" data-edge="#m0"><rect class="t-label-bg" x="119" y="94" width="79" height="21" rx="3"/><text class="t-text t-label" x="158.5" y="109" font-size="13" font-weight="400" text-anchor="middle"><tspan x="158.5" dy="0">Place order</tspan></text></g>
 <g class="t-edge-label" data-edge="#m1"><rect class="t-label-bg" x="259.5" y="130" width="92" height="21" rx="3"/><text class="t-text t-label" x="305.5" y="145" font-size="13" font-weight="400" text-anchor="middle"><tspan x="305.5" dy="0">POST /orders</tspan></text></g>
 <g class="t-edge-label" data-edge="#m2"><rect class="t-label-bg" x="406" y="166" width="96" height="21" rx="3"/><text class="t-text t-label" x="454" y="181" font-size="13" font-weight="400" text-anchor="middle"><tspan x="454" dy="0">Reserve items</tspan></text></g>

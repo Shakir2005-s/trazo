@@ -66,10 +66,11 @@ const EDGE_HALO = true;
 
 function edge(e: SceneEdge, seq: boolean): string {
   const d = e.points.map((p, i) => `${i === 0 ? "M" : "L"}${num(p.x)} ${num(p.y)}`).join(" ");
+  const id = `data-edge="${escapeXml(e.id)}"`;
   const attrs = `class="t-edge t-edge-${e.style}" data-from="${escapeXml(e.from)}" data-to="${escapeXml(e.to)}" d="${d}"`;
-  if (!e.ends) return `<path ${attrs} marker-end="url(#${seq && OPEN_STYLES.includes(e.style) ? "t-arrowhead-open" : "t-arrowhead"})"/>`;
-  const halo = EDGE_HALO ? `<path class="t-edge-halo" d="${d}"/>` : "";
-  return `${halo}<path ${attrs} marker-start="url(#t-end-${e.ends.from})" marker-end="url(#t-end-${e.ends.to})"/>`;
+  if (!e.ends) return `<path ${attrs} marker-end="url(#${seq && OPEN_STYLES.includes(e.style) ? "t-arrowhead-open" : "t-arrowhead"})" ${id}/>`;
+  const halo = EDGE_HALO ? `<path class="t-edge-halo" d="${d}" ${id}/>` : "";
+  return `${halo}<path ${attrs} marker-start="url(#t-end-${e.ends.from})" marker-end="url(#t-end-${e.ends.to})" ${id}/>`;
 }
 
 // Drawn for the end of the line (x = 20); auto-start-reverse mirrors it at the start.
@@ -113,7 +114,7 @@ function tableBody(n: SceneNode): string {
   const right = n.x + n.w;
   const band = `<path class="t-table-head" d="M${num(n.x)} ${num(n.y + head)}V${num(n.y + r)}Q${num(n.x)} ${num(n.y)} ${num(n.x + r)} ${num(n.y)}H${num(right - r)}Q${num(right)} ${num(n.y)} ${num(right)} ${num(n.y + r)}V${num(n.y + head)}z"/>`;
   const rows = (n.rows ?? []).map((row: SceneRow) => {
-    const tip = row.note ? `<title>${escapeXml(row.note)}</title>` : "";
+    const tip = row.note ? `<desc>${escapeXml(row.note)}</desc>` : "";
     const sep = `<line class="t-row" x1="${num(n.x)}" y1="${num(row.y)}" x2="${num(right)}" y2="${num(row.y)}"/>`;
     const name = row.key ? { ...row.name, weight: 600 as const } : row.name;
     const marks = row.marks ? text(row.marks, "t-col-marks") : "";
@@ -124,8 +125,8 @@ function tableBody(n: SceneNode): string {
 
 function node(n: SceneNode): string {
   const tip = [n.note, n.source].filter((s): s is string => s !== undefined && s !== "").join("\n");
-  const title = tip ? `<title>${escapeXml(tip)}</title>` : "";
-  return `<g class="${n.shape === "box" ? "t-node" : `t-node t-shape-${n.shape}`}" data-id="${escapeXml(n.id)}" data-kind="${escapeXml(n.kind)}" tabindex="0">${title}${shapeMarkup(n.shape, n)}${n.shape === "table" ? tableBody(n) : icon(n)}${text(n.label, "t-node-label")}</g>`;
+  const desc = tip ? `<desc>${escapeXml(tip)}</desc>` : "";
+  return `<g class="${n.shape === "box" ? "t-node" : `t-node t-shape-${n.shape}`}" data-id="${escapeXml(n.id)}" data-kind="${escapeXml(n.kind)}" tabindex="0">${desc}${shapeMarkup(n.shape, n)}${n.shape === "table" ? tableBody(n) : icon(n)}${text(n.label, "t-node-label")}</g>`;
 }
 
 const needsShapeCss = (scene: Scene) =>

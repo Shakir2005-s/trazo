@@ -47,6 +47,12 @@ describe("renderSvg", () => {
     expect(svg.indexOf('class="t-edge ')).toBeLessThan(svg.indexOf('class="t-node"'));
   });
 
+  it("tags every edge path with the edge id", () => {
+    const svg = renderSvg(scene);
+    for (const e of scene.edges) expect(svg).toContain(`data-edge="${e.id}"`);
+    expect(count(svg, /<path class="t-edge [^>]*data-edge="/g)).toBe(scene.edges.length);
+  });
+
   it("emits one edge path per edge with the matching style class", () => {
     const svg = renderSvg(scene);
     expect(count(svg, /<path class="t-edge /g)).toBe(scene.edges.length);
@@ -81,7 +87,8 @@ describe("renderSvg", () => {
   it("puts note and source in the node tooltip", () => {
     const svg = renderSvg(scene);
     const api = svg.slice(svg.indexOf('data-id="api" data-kind'));
-    const tip = /<title>([^<]*)<\/title>/.exec(api)![1]!;
+    const tip = /<desc>([^<]*)<\/desc>/.exec(api)![1]!;
+    expect(svg.match(/<title/g)).toHaveLength(1);
     expect(tip).toContain("Handles checkout");
     expect(tip).toContain("src/api.ts:12");
   });
@@ -132,7 +139,6 @@ describe("renderHtml", () => {
     const html = renderHtml(scene);
     expect(html).toContain('id="fullscreen" aria-label="Enter full screen"');
     expect(html).toContain("requestFullscreen");
-    expect(html).not.toContain('id="fit"');
   });
 
   it("labels the theme button with the theme it switches to", () => {

@@ -5,7 +5,7 @@ import { readPackageFile, packageInfo, emit } from "./lib.mjs";
 
 const NAMES = [
   "monitor", "user", "network", "server", "zap", "database", "layers", "inbox", "hard-drive", "globe",
-  "sun", "moon", "maximize", "minimize", "clock",
+  "sun", "moon", "maximize", "minimize", "clock", "zoom-in", "zoom-out", "focus", "file-code", "file-image",
 ];
 
 // Names that Lucide lists as derived from Feather in its LICENSE file.
