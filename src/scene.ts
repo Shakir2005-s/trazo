@@ -23,7 +23,20 @@ export interface TextBlock {
   anchor: "start" | "middle";
 }
 
-export type NodeShape = "box" | "pill" | "end" | "diamond" | "subprocess";
+export type NodeShape = "box" | "pill" | "end" | "diamond" | "subprocess" | "table";
+
+export type EdgeEnd = "one" | "zero-or-one" | "many" | "zero-or-many";
+
+export interface SceneRow {
+  /** Absolute top of the row, same space as the node. */
+  y: number;
+  h: number;
+  name: TextBlock;
+  type: TextBlock;
+  marks?: TextBlock;
+  note?: string;
+  key: boolean;
+}
 
 export interface SceneNode extends Box {
   id: string;
@@ -34,6 +47,10 @@ export interface SceneNode extends Box {
   label: TextBlock;
   note?: string;
   source?: string;
+  /** Table nodes only. */
+  rows?: SceneRow[];
+  /** Table header height. */
+  header?: number;
 }
 
 export interface SceneGroup extends Box {
@@ -52,6 +69,8 @@ export interface SceneEdge {
   points: Point[];
   style: "sync" | "async" | "data";
   label?: { box: Box; text: TextBlock };
+  /** Crow's foot symbols; an edge with ends has no arrowhead. */
+  ends?: { from: EdgeEnd; to: EdgeEnd };
 }
 
 export interface Scene {

@@ -32,6 +32,8 @@ export function shapeMarkup(shape: NodeShape, b: Box): string {
       const pts = [`${num(cx)},${num(b.y)}`, `${num(b.x + b.w)},${num(cy)}`, `${num(cx)},${num(b.y + b.h)}`, `${num(b.x)},${num(cy)}`];
       return `<polygon class="${cls}" points="${pts.join(" ")}"/>`;
     }
+    case "table":
+      return rect(b, "t-table");
     case "subprocess":
       return (
         rect(b, cls) +

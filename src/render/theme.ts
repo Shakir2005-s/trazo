@@ -37,13 +37,25 @@ export const SHAPE_CSS = `
 .t-lane-title { fill: var(--t-muted, #52606d); }
 `;
 
+/** Appended only when a scene has table nodes or edges with crow's foot ends. */
+export const TABLE_CSS = `
+.t-table { fill: var(--t-node-fill, #ffffff); stroke: var(--t-node-stroke, #9aa5b1); stroke-width: 1.25; }
+.t-table-head { fill: var(--t-table-head, #eceff3); stroke: none; }
+.t-row { stroke: var(--t-group-stroke, #cbd2d9); stroke-width: 1; }
+.t-col-type { fill: var(--t-muted, #52606d); }
+.t-col-marks { fill: var(--t-muted, #52606d); }
+.t-edge-halo { fill: none; stroke: var(--t-bg, #ffffff); stroke-width: 5; stroke-linejoin: round; }
+.t-end { fill: none; stroke: var(--t-edge, #2f6fdb); stroke-width: 1.5; stroke-linecap: round; }
+.t-end-dot { fill: var(--t-bg, #ffffff); }
+`;
+
 const LIGHT = `--t-bg: #f4f5f7; --t-surface: #ffffff; --t-text: #1f2933; --t-muted: #52606d; --t-border: #d8dde3;
   --t-group-fill: #eceff3; --t-group-stroke: #c3cbd4; --t-node-fill: #ffffff; --t-node-stroke: #9aa5b1;
-  --t-edge: #2f6fdb; --t-accent: #2f6fdb; --t-icon: #52606d; --t-icon-data: #2b7a6f; --t-icon-edge: #96602b;`;
+  --t-edge: #2f6fdb; --t-accent: #2f6fdb; --t-icon: #52606d; --t-icon-data: #2b7a6f; --t-icon-edge: #96602b; --t-table-head: #e4e8ee;`;
 
 const DARK = `--t-bg: #14171c; --t-surface: #1b1f26; --t-text: #e6e9ed; --t-muted: #9aa5b1; --t-border: #2c333d;
   --t-group-fill: #1a1e25; --t-group-stroke: #343c48; --t-node-fill: #20252d; --t-node-stroke: #4a5361;
-  --t-edge: #6ea2f5; --t-accent: #6ea2f5; --t-icon: #9aa5b1; --t-icon-data: #5fc2b2; --t-icon-edge: #d49a5f;`;
+  --t-edge: #6ea2f5; --t-accent: #6ea2f5; --t-icon: #9aa5b1; --t-icon-data: #5fc2b2; --t-icon-edge: #d49a5f; --t-table-head: #2a303a;`;
 
 export function pageCss(font400: string, font600: string): string {
   return `

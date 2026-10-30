@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2026 Heidenber Palacio Garzón
 
-import type { Box, Scene, SceneEdge, SceneGroup, SceneNode, TextBlock } from "../scene.js";
+import type { Box, EdgeEnd, Scene, SceneEdge, SceneGroup, SceneNode, SceneRow, TextBlock } from "../scene.js";
 import { lineHeight } from "../text/measure.js";
 import { ICONS } from "./generated/icons.js";
 import { laneMarkup, num, rect, shapeMarkup } from "./shapes.js";
-import { SHAPE_CSS, SVG_CSS } from "./theme.js";
+import { SHAPE_CSS, SVG_CSS, TABLE_CSS } from "./theme.js";
 
 const ICON_SIZE = 20;
 const ICON_PAD = 12;
@@ -33,10 +33,32 @@ function group(g: SceneGroup): string {
   return `<g class="t-group" data-id="${escapeXml(g.id)}">${rect(g, "t-group-box")}${text(g.label, "t-group-title")}</g>`;
 }
 
+// Set to false to drop the background-colored stroke under erd edges.
+const EDGE_HALO = true;
+
 function edge(e: SceneEdge): string {
   const d = e.points.map((p, i) => `${i === 0 ? "M" : "L"}${num(p.x)} ${num(p.y)}`).join(" ");
-  return `<path class="t-edge t-edge-${e.style}" data-from="${escapeXml(e.from)}" data-to="${escapeXml(e.to)}" d="${d}" marker-end="url(#t-arrowhead)"/>`;
+  const attrs = `class="t-edge t-edge-${e.style}" data-from="${escapeXml(e.from)}" data-to="${escapeXml(e.to)}" d="${d}"`;
+  if (!e.ends) return `<path ${attrs} marker-end="url(#t-arrowhead)"/>`;
+  const halo = EDGE_HALO ? `<path class="t-edge-halo" d="${d}"/>` : "";
+  return `${halo}<path ${attrs} marker-start="url(#t-end-${e.ends.from})" marker-end="url(#t-end-${e.ends.to})"/>`;
 }
+
+// Drawn for the end of the line (x = 20); auto-start-reverse mirrors it at the start.
+const END_MARKERS: Record<EdgeEnd, string> = {
+  one: `<path class="t-end" d="M14 1V11"/>`,
+  "zero-or-one": `<circle class="t-end t-end-dot" cx="6" cy="6" r="3.5"/><path class="t-end" d="M14 1V11"/>`,
+  many: `<path class="t-end" d="M20 1L10 6L20 11M10 6H20"/>`,
+  "zero-or-many": `<circle class="t-end t-end-dot" cx="5" cy="6" r="3.5"/><path class="t-end" d="M20 1L10 6L20 11M10 6H20"/>`,
+};
+
+const endMarkers = () =>
+  (Object.keys(END_MARKERS) as EdgeEnd[])
+    .map(
+      (k) =>
+        `<marker id="t-end-${k}" viewBox="0 0 20 12" refX="20" refY="6" markerWidth="20" markerHeight="12" markerUnits="userSpaceOnUse" orient="auto-start-reverse">${END_MARKERS[k]}</marker>`,
+    )
+    .join("");
 
 function edgeLabel(e: SceneEdge): string {
   if (!e.label) return "";
@@ -57,24 +79,44 @@ function lanes(groups: SceneGroup[]): string[] {
     .map((g) => laneMarkup({ ...g, id: escapeXml(g.id) }, i++ % 2 === 1, text(g.label, "t-lane-title")));
 }
 
+function tableBody(n: SceneNode): string {
+  const head = n.header ?? 0;
+  const r = 8;
+  const right = n.x + n.w;
+  const band = `<path class="t-table-head" d="M${num(n.x)} ${num(n.y + head)}V${num(n.y + r)}Q${num(n.x)} ${num(n.y)} ${num(n.x + r)} ${num(n.y)}H${num(right - r)}Q${num(right)} ${num(n.y)} ${num(right)} ${num(n.y + r)}V${num(n.y + head)}z"/>`;
+  const rows = (n.rows ?? []).map((row: SceneRow) => {
+    const tip = row.note ? `<title>${escapeXml(row.note)}</title>` : "";
+    const sep = `<line class="t-row" x1="${num(n.x)}" y1="${num(row.y)}" x2="${num(right)}" y2="${num(row.y)}"/>`;
+    const name = row.key ? { ...row.name, weight: 600 as const } : row.name;
+    const marks = row.marks ? text(row.marks, "t-col-marks") : "";
+    return `<g>${tip}${sep}${text(name, "t-col-name")}${text(row.type, "t-col-type")}${marks}</g>`;
+  });
+  return band + rows.join("");
+}
+
 function node(n: SceneNode): string {
   const tip = [n.note, n.source].filter((s): s is string => s !== undefined && s !== "").join("\n");
   const title = tip ? `<title>${escapeXml(tip)}</title>` : "";
-  return `<g class="${n.shape === "box" ? "t-node" : `t-node t-shape-${n.shape}`}" data-id="${escapeXml(n.id)}" data-kind="${escapeXml(n.kind)}" tabindex="0">${title}${shapeMarkup(n.shape, n)}${icon(n)}${text(n.label, "t-node-label")}</g>`;
+  return `<g class="${n.shape === "box" ? "t-node" : `t-node t-shape-${n.shape}`}" data-id="${escapeXml(n.id)}" data-kind="${escapeXml(n.kind)}" tabindex="0">${title}${shapeMarkup(n.shape, n)}${n.shape === "table" ? tableBody(n) : icon(n)}${text(n.label, "t-node-label")}</g>`;
 }
 
 const needsShapeCss = (scene: Scene) =>
   scene.nodes.some((n) => n.shape !== "box") || scene.groups.some((g) => g.variant === "lane");
 
+const needsTableCss = (scene: Scene) => scene.nodes.some((n) => n.shape === "table") || scene.edges.some((e) => e.ends);
+
 export function renderSvg(scene: Scene): string {
   const desc = scene.description ? `<desc id="t-desc">${escapeXml(scene.description)}</desc>` : "";
   const labelled = scene.description ? "t-title t-desc" : "t-title";
+  const ends = scene.edges.some((e) => e.ends);
+  const arrow = ends && scene.edges.every((e) => e.ends) ? "" : `<marker id="t-arrowhead" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" markerUnits="userSpaceOnUse" orient="auto"><path class="t-arrow" d="M0 1L10 5L0 9z"/></marker>`;
+  const css = (needsShapeCss(scene) ? SVG_CSS + SHAPE_CSS : SVG_CSS) + (needsTableCss(scene) ? TABLE_CSS : "");
   const parts = [
     `<svg xmlns="http://www.w3.org/2000/svg" class="diagram" viewBox="0 0 ${num(scene.width)} ${num(scene.height)}" role="img" aria-labelledby="${labelled}">`,
     `<title id="t-title">${escapeXml(scene.title)}</title>`,
     desc,
-    `<defs><marker id="t-arrowhead" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" markerUnits="userSpaceOnUse" orient="auto"><path class="t-arrow" d="M0 1L10 5L0 9z"/></marker></defs>`,
-    `<style>${needsShapeCss(scene) ? SVG_CSS + SHAPE_CSS : SVG_CSS}</style>`,
+    `<defs>${arrow}${ends ? endMarkers() : ""}</defs>`,
+    `<style>${css}</style>`,
     ...lanes(scene.groups),
     ...scene.groups.map(group),
     ...scene.edges.map(edge),
