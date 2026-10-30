@@ -38,15 +38,27 @@ export function renderHtml(scene: Scene): string {
     <h1>${title}</h1>${desc}
   </div>
   <div class="actions">
-    ${button("fullscreen", "Enter full screen", ["maximize", "minimize"])}
-    ${button("theme", scene.theme === "dark" ? "Switch to light theme" : "Switch to dark theme", ["sun", "moon"])}
+    <div class="group">
+      ${button("zoom-out", "Zoom out", ["zoom-out"])}
+      ${button("zoom-in", "Zoom in", ["zoom-in"])}
+      ${button("fit", "Fit to screen", ["focus"])}
+    </div>
+    <div class="group">
+      ${button("save-svg", "Download SVG", ["file-code"])}
+      ${button("save-png", "Download PNG", ["file-image"])}
+    </div>
+    <div class="group">
+      ${button("fullscreen", "Enter full screen", ["maximize", "minimize"])}
+      ${button("theme", scene.theme === "dark" ? "Switch to light theme" : "Switch to dark theme", ["sun", "moon"])}
+    </div>
   </div>
 </header>
 <main>
-  <div class="stage" style="max-width: ${scene.width}px">
+  <div class="stage" tabindex="0" aria-label="Diagram, use arrow keys to pan and plus or minus to zoom">
 ${renderSvg(scene)}
   </div>
 </main>
+<div class="tip" id="tip" role="tooltip"></div>
 <script>${VIEWER_SCRIPT}</script>
 </body>
 </html>

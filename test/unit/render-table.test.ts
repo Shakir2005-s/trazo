@@ -78,10 +78,11 @@ describe("table render", () => {
     expect(renderSvg(scene([]))).toContain(">text?</tspan>");
   });
 
-  it("puts row and table notes in titles", () => {
+  it("puts row and table notes in desc elements", () => {
     const svg = renderSvg(scene([]));
-    expect(svg).toContain("<title>Login address</title>");
-    expect(svg).toContain("<title>Customer orders</title>");
+    expect(svg).toContain("<desc>Login address</desc>");
+    expect(svg).toContain("<desc>Customer orders</desc>");
+    expect(svg.match(/<title/g)).toHaveLength(1);
   });
 
   it("uses the end marker that matches each side of the edge", () => {
@@ -98,6 +99,8 @@ describe("table render", () => {
     const svg = renderSvg(scene([edge({ from: "many", to: "zero-or-one" })]));
     expect(svg).not.toContain("t-arrowhead");
     expect(svg).toContain('class="t-edge-halo"');
+    expect(svg).toMatch(/<path class="t-edge-halo" d="[^"]*" data-edge="e1"\/>/);
+    expect(svg).toMatch(/<path class="t-edge [^>]*data-edge="e1"/);
   });
 
   it("keeps non-erd output free of table and marker rules", () => {
