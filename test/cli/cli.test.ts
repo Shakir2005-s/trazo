@@ -6,6 +6,7 @@ import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { REFERENCE } from "../../src/cli/reference.js";
 
 const BIN = resolve("dist/cli/main.js");
 const USAGE_TAIL = 'run "trazo --help" for usage\n';
@@ -377,5 +378,64 @@ describe("sequence diagrams", () => {
       stderr: 'error  messages[0]: unknown participant "pgg" \u2192 did you mean "pg"?\n',
     });
     expect(existsSync(join(dir, "q.html"))).toBe(false);
+  });
+});
+
+const TYPES = ["architecture", "workflow", "erd", "sequence"] as const;
+
+describe("schema", () => {
+  it.each(TYPES)("prints the reference for %s", (type) => {
+    expect(run(["schema", type])).toEqual({ code: 0, stdout: REFERENCE[type], stderr: "" });
+  });
+
+  it.each([
+    [["schema"], "missing <type>"],
+    [["schema", "erd", "x"], 'unexpected argument "x"'],
+    [["schema", "erd", "--out", "a"], 'option "--out" only applies to make'],
+    [["schema", "erd", "--theme", "dark"], 'option "--theme" only applies to make'],
+    [["schema", "erd", "--json"], 'option "--json" only applies to make and check'],
+    [["schema", "erdd"], 'unknown type "erdd" (did you mean "erd"?)'],
+    [["schema", "foo"], 'unknown type "foo" (use one of: architecture, workflow, erd, sequence)'],
+  ])("rejects %j", (args, message) => {
+    expect(run(args)).toEqual({ code: 2, stdout: "", stderr: usageError(message) });
+  });
+});
+
+describe("example", () => {
+  it.each(TYPES)("prints examples/%s.json byte for byte", (type) => {
+    const expected = readFileSync(resolve(`examples/${type}.json`), "utf8");
+    expect(run(["example", type])).toEqual({ code: 0, stdout: expected, stderr: "" });
+  });
+
+  it.each([
+    [["example"], "missing <type>"],
+    [["example", "erd", "x"], 'unexpected argument "x"'],
+    [["example", "erd", "--out", "a"], 'option "--out" only applies to make'],
+    [["example", "erd", "--json"], 'option "--json" only applies to make and check'],
+    [["example", "foo"], 'unknown type "foo" (use one of: architecture, workflow, erd, sequence)'],
+  ])("rejects %j", (args, message) => {
+    expect(run(args)).toEqual({ code: 2, stdout: "", stderr: usageError(message) });
+  });
+
+  it("pipes into make", () => {
+    const example = run(["example", "erd"]).stdout;
+    const r = run(["make", "-", "-o", "-"], example);
+    expect(r.code).toBe(0);
+    expect(r.stdout.startsWith("<!doctype html>")).toBe(true);
+  });
+
+  it("lists the new commands in help and still suggests for typos", () => {
+    const help = run(["--help"]).stdout;
+    expect(help).toContain("  trazo schema <type>\n");
+    expect(help).toContain("  trazo example <type>\n");
+    expect(run(["schem"])).toEqual({ code: 2, stdout: "", stderr: usageError('unknown command "schem" (did you mean "schema"?)') });
+    expect(run(["mkae", "x"]).stderr).toBe(usageError('unknown command "mkae" (did you mean "make"?)'));
+  });
+
+  it("keeps check behavior unchanged", () => {
+    write("w.json", withWarning);
+    expect(run(["check", "w.json", "--json"]).stdout.startsWith('{"ok":true')).toBe(true);
+    expect(run(["check", "w.json", "--out", "x"])).toEqual({ code: 2, stdout: "", stderr: usageError('option "--out" only applies to make') });
+    expect(run(["check"])).toEqual({ code: 2, stdout: "", stderr: usageError("missing <input>") });
   });
 });
