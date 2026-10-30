@@ -36,6 +36,8 @@ export interface LayoutOptions {
   interactive?: boolean;
   /** Gap between layers; defaults to LAYER_SPACING. */
   layerSpacing?: number;
+  /** Minimum horizontal run between a box and the first bend of an edge in the gap next to it. */
+  edgeNodeSpacing?: number;
 }
 
 export interface LayoutEdge {
@@ -147,6 +149,10 @@ export async function layoutElk(
       "elk.padding": `[top=${ROOT_PADDING},left=${ROOT_PADDING},bottom=${ROOT_PADDING},right=${ROOT_PADDING}]`,
     },
   };
+
+  if (options.edgeNodeSpacing !== undefined) {
+    root.layoutOptions!["elk.layered.spacing.edgeNodeBetweenLayers"] = String(options.edgeNodeSpacing);
+  }
 
   if (options.interactive) {
     // Layering and ordering follow the preset coordinates instead of the graph

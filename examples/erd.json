@@ -1,0 +1,60 @@
+{
+  "type": "erd",
+  "title": "Online Store",
+  "description": "Customers, their orders and how each order is paid.",
+  "tables": [
+    {
+      "id": "customers",
+      "note": "One row per account, guests included.",
+      "columns": [
+        "id uuid pk",
+        "email text unique",
+        "full_name text",
+        "default_address_id uuid fk addresses.id null",
+        "created_at timestamp with time zone"
+      ]
+    },
+    {
+      "id": "addresses",
+      "columns": ["id uuid pk", "customer_id uuid fk customers.id", "line1 text", "city text", "postal_code text null"]
+    },
+    {
+      "id": "orders",
+      "columns": [
+        "id uuid pk",
+        "customer_id uuid fk customers.id",
+        "shipping_address_id uuid fk addresses.id",
+        { "name": "status", "type": "text", "note": "pending, paid, shipped or cancelled." },
+        "placed_at timestamp with time zone"
+      ]
+    },
+    {
+      "id": "order_items",
+      "columns": [
+        "id uuid pk",
+        "order_id uuid fk orders.id",
+        "product_id uuid fk products.id",
+        "quantity int",
+        "unit_price numeric(10, 2)"
+      ]
+    },
+    {
+      "id": "products",
+      "columns": ["id uuid pk", "sku text unique", "name text", "category_id int fk categories.id", "price numeric(10, 2)"]
+    },
+    {
+      "id": "categories",
+      "columns": ["id int pk", "parent_id int fk categories.id null", "name text"]
+    },
+    {
+      "id": "payments",
+      "columns": [
+        "id uuid pk",
+        "order_id uuid fk orders.id unique",
+        "amount numeric(10, 2)",
+        "provider_ref text null",
+        "paid_at timestamp with time zone null"
+      ]
+    }
+  ]
+}

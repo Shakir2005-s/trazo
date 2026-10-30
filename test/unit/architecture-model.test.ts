@@ -3,6 +3,7 @@
 
 import { describe, expect, it } from "vitest";
 import { validateDiagram } from "../../src/model/index.js";
+import type { Architecture } from "../../src/model/architecture.js";
 import type { Issue } from "../../src/validate/issues.js";
 
 const base = {
@@ -55,7 +56,7 @@ describe("architecture: valid input", () => {
       edges: ["web -> api: HTTPS", "api ~> queue: order.created", "api->db:SQL"],
     });
     expect(issues).toEqual([]);
-    expect(diagram?.edges).toEqual([
+    expect((diagram as Architecture | undefined)?.edges).toEqual([
       { from: "web", to: "api", label: "HTTPS", style: "sync" },
       { from: "api", to: "queue", label: "order.created", style: "async" },
       { from: "api", to: "db", label: "SQL", style: "sync" },
@@ -79,7 +80,7 @@ describe("architecture: valid input", () => {
       edges: ["api-gw->auth-svc: verify"],
     });
     expect(issues).toEqual([]);
-    expect(diagram?.edges[0]).toEqual({ from: "api-gw", to: "auth-svc", label: "verify", style: "sync" });
+    expect((diagram as Architecture | undefined)?.edges[0]).toEqual({ from: "api-gw", to: "auth-svc", label: "verify", style: "sync" });
   });
 
   it("accepts nested groups and edges that touch a group", () => {
@@ -111,7 +112,7 @@ describe("architecture: document level", () => {
       code: "schema/required",
       path: "type",
       message: "missing",
-      hint: "use one of: architecture, workflow",
+      hint: "use one of: architecture, workflow, erd",
     });
   });
 

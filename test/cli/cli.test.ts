@@ -316,3 +316,37 @@ describe("workflow diagrams", () => {
     expect(existsSync(join(dir, "f.html"))).toBe(false);
   });
 });
+
+describe("erd diagrams", () => {
+  const schema = {
+    type: "erd",
+    title: "Tiny schema",
+    tables: [
+      { id: "users", columns: ["id uuid pk"] },
+      { id: "orders", columns: ["id uuid pk", "user_id uuid fk users.id"] },
+    ],
+  };
+
+  it("makes html for an erd", () => {
+    write("s.json", schema);
+    const r = run(["make", "s.json"]);
+    expect(r).toEqual({ code: 0, stdout: `${join(dir, "s.html")}\n`, stderr: "" });
+    const html = readFileSync(join(dir, "s.html"), "utf8");
+    expect(html).toContain("t-shape-table");
+    expect(html).toContain("url(#t-end-zero-or-many)");
+  });
+
+  it("rejects an fk to an unknown column with a suggestion", () => {
+    write("s.json", {
+      ...schema,
+      tables: [schema.tables[0], { id: "orders", columns: ["id uuid pk", "user_id uuid fk users.idd"] }],
+    });
+    const r = run(["make", "s.json"]);
+    expect(r).toEqual({
+      code: 1,
+      stdout: "",
+      stderr: 'error  tables[1].columns[1]: unknown column "users.idd" → did you mean "users.id"?\n',
+    });
+    expect(existsSync(join(dir, "s.html"))).toBe(false);
+  });
+});
