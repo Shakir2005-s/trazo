@@ -84,6 +84,7 @@ export async function layoutArchitecture(d: Architecture): Promise<Scene> {
   );
 
   const boxOf = (id: string): Box => layout.boxes.get(id)!;
+  const parentOf = new Map(d.groups.flatMap((g) => g.children.map((c) => [c, g.id] as const)));
 
   const nodes: SceneNode[] = d.nodes.map((n) => {
     const box = boxOf(n.id);
@@ -100,6 +101,8 @@ export async function layoutArchitecture(d: Architecture): Promise<Scene> {
     const out: SceneNode = { id: n.id, kind: n.kind, icon: ICONS[n.kind], shape: "box", ...box, label };
     if (n.note !== undefined) out.note = n.note;
     if (n.source !== undefined) out.source = n.source;
+    const parent = parentOf.get(n.id);
+    if (parent !== undefined) out.parent = parent;
     return out;
   });
 

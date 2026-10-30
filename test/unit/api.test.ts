@@ -1,8 +1,14 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2026 Heidenber Palacio Garzón
 
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { check, make } from "../../src/index.js";
+import * as layout from "../../src/layout/index.js";
+
+vi.mock("../../src/layout/index.js", async (original) => {
+  const actual = await original<typeof import("../../src/layout/index.js")>();
+  return { ...actual, layoutDiagram: vi.fn(actual.layoutDiagram) };
+});
 
 const valid = {
   type: "architecture",
@@ -69,5 +75,24 @@ describe("make", () => {
     expect(result.ok).toBe(true);
     expect(result.html).toBeDefined();
     expect(result.issues.map((i) => i.code)).toEqual(["edge/duplicate"]);
+  });
+
+  it("appends geometry warnings after validation warnings", async () => {
+    const actual = await vi.importActual<typeof import("../../src/layout/index.js")>("../../src/layout/index.js");
+    vi.mocked(layout.layoutDiagram).mockImplementationOnce(async (diagram) => {
+      const scene = await actual.layoutDiagram(diagram);
+      const [a, b] = scene.nodes;
+      return { ...scene, nodes: [a!, { ...b!, x: a!.x, y: a!.y }] };
+    });
+    const result = await make({ ...valid, edges: ["a -> b", "a -> b"] });
+    expect(result.ok).toBe(true);
+    expect(result.html).toBeDefined();
+    expect(result.issues.map((i) => i.code)).toEqual(["edge/duplicate", "geometry/node-overlap"]);
+  });
+
+  it("check does not run the layout", () => {
+    vi.mocked(layout.layoutDiagram).mockClear();
+    check({ ...valid, edges: ["a -> b", "a -> b"] });
+    expect(layout.layoutDiagram).not.toHaveBeenCalled();
   });
 });

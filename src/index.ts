@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2026 Heidenber Palacio Garzón
 
+import { checkGeometry } from "./check/geometry.js";
 import { layoutDiagram } from "./layout/index.js";
 import { validateDiagram, type Diagram } from "./model/index.js";
 import { parseJson } from "./parse.js";
@@ -45,5 +46,5 @@ export async function make(input: string | unknown, options: MakeOptions = {}): 
   if (hasErrors(issues) || diagram === undefined) return { ok: false, issues };
   const scene = await layoutDiagram(diagram);
   const html = renderHtml(options.theme === undefined ? scene : { ...scene, theme: options.theme });
-  return { ok: true, html, issues };
+  return { ok: true, html, issues: [...issues, ...checkGeometry(scene)] };
 }

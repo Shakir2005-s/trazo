@@ -140,6 +140,8 @@ export async function layoutWorkflow(w: Workflow): Promise<Scene> {
     if (size.icon !== undefined) node.icon = size.icon;
     if (s.note !== undefined) node.note = s.note;
     if (s.source !== undefined) node.source = s.source;
+    const lane = laneOf.get(s.id);
+    if (lane !== undefined) node.parent = lane;
     return node;
   });
   const shapeOf = new Map(nodes.map((n) => [n.id, n]));

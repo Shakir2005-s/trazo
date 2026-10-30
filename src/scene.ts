@@ -47,6 +47,8 @@ export interface SceneNode extends Box {
   label: TextBlock;
   note?: string;
   source?: string;
+  /** Id of the group or lane that directly contains the node. */
+  parent?: string;
   /** Table nodes only. */
   rows?: SceneRow[];
   /** Table header height. */

@@ -168,3 +168,22 @@ describe("layoutArchitecture", () => {
     for (const v of values) expect(Number.isInteger(v * 2), String(v)).toBe(true);
   });
 });
+
+describe("layoutArchitecture parent", () => {
+  it("sets the direct group and leaves ungrouped nodes without one", async () => {
+    const nested = diagram({
+      nodes: [{ id: "web" }, { id: "api" }, { id: "db" }],
+      groups: [
+        { id: "outer", label: "Outer", children: ["inner", "db"] },
+        { id: "inner", label: "Inner", children: ["api"] },
+      ],
+      edges: ["web -> api", "api -> db"],
+    });
+    const scene = await layoutArchitecture(nested);
+    const parent = (id: string) => scene.nodes.find((n) => n.id === id)!.parent;
+    expect(parent("api")).toBe("inner");
+    expect(parent("db")).toBe("outer");
+    expect(parent("web")).toBeUndefined();
+    expect("parent" in scene.nodes.find((n) => n.id === "web")!).toBe(false);
+  });
+});
