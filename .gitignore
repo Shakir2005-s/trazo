@@ -42,3 +42,6 @@ desktop.ini
 .codegraph/
 .playwright-mcp/
 odd/
+
+# Local maintainer notes
+/PUBLISHING.md
