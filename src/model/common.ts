@@ -68,7 +68,7 @@ export function edgeSchema<const S extends readonly [string, ...string[]]>(
       ctx.issues.push(
         customIssue(value, `cannot read ${JSON.stringify(value)}`, {
           code: "edge/syntax",
-          hint: 'write "from -> to: label" (-> sync, ~> async)',
+          hint: `write "from -> to: label" (-> sync, ~> async${arrows.includes("-->") ? ", --> reply" : ""})`,
         }),
       );
       return value;
@@ -85,7 +85,7 @@ export function edgeSchema<const S extends readonly [string, ...string[]]>(
     const edge: Record<string, string> = {
       from: parsed.from,
       to: parsed.to,
-      style: parsed.arrow === "~>" ? "async" : "sync",
+      style: parsed.arrow === "~>" ? "async" : parsed.arrow === "-->" ? "reply" : "sync",
     };
     if (parsed.label !== undefined) edge.label = parsed.label;
     return edge;
@@ -97,24 +97,25 @@ export function edgeSchema<const S extends readonly [string, ...string[]]>(
 
 type ZodIssue = z.core.$ZodIssue;
 
-export function fromZod(error: z.ZodError, schema: z.ZodType): Issue[] {
+/** `base` prefixes every path, for schemas applied to a part of the document. */
+export function fromZod(error: z.ZodError, schema: z.ZodType, base: readonly PropertyKey[] = []): Issue[] {
   const issues: Issue[] = [];
   for (const issue of error.issues) {
     if (issue.code === "unrecognized_keys") {
       const allowed = keysAt(schema, issue.path);
       for (const key of issue.keys) {
         const hint = didYouMean(key, allowed) ?? `allowed: ${allowed.join(", ")}`;
-        issues.push(error_("schema/unknown-field", [...issue.path, key], "unknown field", hint));
+        issues.push(error_("schema/unknown-field", [...base, ...issue.path, key], "unknown field", hint));
       }
       continue;
     }
-    issues.push(convert(issue));
+    issues.push(convert(issue, base));
   }
   return issues;
 }
 
-function convert(issue: ZodIssue): Issue {
-  const path = issue.path;
+function convert(issue: ZodIssue, base: readonly PropertyKey[]): Issue {
+  const path = [...base, ...issue.path];
   const input = (issue as { input?: unknown }).input;
   switch (issue.code) {
     case "invalid_type":

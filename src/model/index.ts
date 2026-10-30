@@ -5,11 +5,12 @@ import { didYouMean, type Issue } from "../validate/issues.js";
 import { architectureSchema, buildArchitecture, type Architecture } from "./architecture.js";
 import { describe, error_, fromZod } from "./common.js";
 import { buildErd, erdSchema, type Erd } from "./erd.js";
+import { buildSequence, sequenceSchema, type Sequence } from "./sequence.js";
 import { buildWorkflow, workflowSchema, type Workflow } from "./workflow.js";
 
-export type Diagram = Architecture | Workflow | Erd;
+export type Diagram = Architecture | Workflow | Erd | Sequence;
 
-export const DIAGRAM_TYPES = ["architecture", "workflow", "erd"] as const;
+export const DIAGRAM_TYPES = ["architecture", "workflow", "erd", "sequence"] as const;
 
 export interface ValidationResult {
   diagram?: Diagram;
@@ -30,6 +31,11 @@ export function validateDiagram(raw: unknown): ValidationResult {
     return { issues: [error_("schema/enum", "type", `unknown value ${JSON.stringify(type)}`, hint)] };
   }
 
+  if (type === "sequence") {
+    const parsed = sequenceSchema.safeParse(raw, { reportInput: true });
+    if (!parsed.success) return { issues: fromZod(parsed.error, sequenceSchema) };
+    return buildSequence(parsed.data);
+  }
   if (type === "erd") {
     const parsed = erdSchema.safeParse(raw, { reportInput: true });
     if (!parsed.success) return { issues: fromZod(parsed.error, erdSchema) };

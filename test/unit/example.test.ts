@@ -76,3 +76,26 @@ describe("examples/erd.json", () => {
     expect(Buffer.byteLength(first.html!)).toBeLessThan(300 * 1024);
   });
 });
+
+const sequenceText = readFileSync(new URL("../../examples/sequence.json", import.meta.url), "utf8");
+
+describe("examples/sequence.json", () => {
+  it("validates with no issues", () => {
+    const { issues } = validateDiagram(JSON.parse(sequenceText));
+    expect(issues).toEqual([]);
+  });
+
+  it("renders the expected SVG", async () => {
+    const { diagram } = validateDiagram(JSON.parse(sequenceText));
+    const svg = renderSvg(await layoutDiagram(diagram!));
+    await expect(svg).toMatchFileSnapshot("../__snapshots__/sequence.svg");
+  });
+
+  it("makes byte-identical html twice and stays small", async () => {
+    const first = await make(sequenceText);
+    const second = await make(sequenceText);
+    expect(first.ok).toBe(true);
+    expect(first.html).toBe(second.html);
+    expect(Buffer.byteLength(first.html!)).toBeLessThan(300 * 1024);
+  });
+});

@@ -1,0 +1,44 @@
+{
+  "type": "sequence",
+  "title": "Checkout",
+  "description": "How a cart becomes a paid order.",
+  "participants": [
+    { "id": "shopper", "label": "Shopper", "kind": "actor" },
+    { "id": "web", "label": "Storefront" },
+    { "id": "orders", "label": "Orders API" },
+    { "id": "stock", "label": "Inventory", "kind": "database" },
+    { "id": "psp", "label": "Payment provider", "kind": "external" },
+    { "id": "events", "label": "Order events", "kind": "queue" }
+  ],
+  "messages": [
+    "shopper -> web: Place order",
+    "web -> orders: POST /orders",
+    "orders -> stock: Reserve items",
+    {
+      "alt": [
+        {
+          "when": "all items in stock",
+          "messages": [
+            "stock --> orders: Reservation id",
+            "orders -> psp: Charge card",
+            {
+              "loop": {
+                "when": "until settled, max 3",
+                "messages": ["psp --> orders: Pending", "orders -> orders: Wait with backoff"]
+              }
+            },
+            "psp --> orders: Captured",
+            "orders ~> events: order.paid"
+          ]
+        },
+        {
+          "when": "missing items",
+          "messages": ["stock --> orders: Out of stock", "orders --> web: 409 Conflict"]
+        }
+      ]
+    },
+    { "note": "Reservations expire after 15 minutes.", "over": ["orders", "stock"] },
+    "orders --> web: 201 Created",
+    "web --> shopper: Order confirmation"
+  ]
+}

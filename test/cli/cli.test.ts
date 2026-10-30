@@ -350,3 +350,32 @@ describe("erd diagrams", () => {
     expect(existsSync(join(dir, "s.html"))).toBe(false);
   });
 });
+
+describe("sequence diagrams", () => {
+  const talk = {
+    type: "sequence",
+    title: "Tiny talk",
+    participants: [{ id: "api" }, { id: "pg", kind: "database" }],
+    messages: ["api -> pg: SELECT", "pg --> api: rows"],
+  };
+
+  it("makes html for a sequence", () => {
+    write("q.json", talk);
+    const r = run(["make", "q.json"]);
+    expect(r).toEqual({ code: 0, stdout: `${join(dir, "q.html")}\n`, stderr: "" });
+    const html = readFileSync(join(dir, "q.html"), "utf8");
+    expect(html).toContain("t-lifeline");
+    expect(html).toContain("url(#t-arrowhead-open)");
+  });
+
+  it("rejects a message to an unknown participant with a suggestion", () => {
+    write("q.json", { ...talk, messages: ["api -> pgg: SELECT"] });
+    const r = run(["make", "q.json"]);
+    expect(r).toEqual({
+      code: 1,
+      stdout: "",
+      stderr: 'error  messages[0]: unknown participant "pgg" \u2192 did you mean "pg"?\n',
+    });
+    expect(existsSync(join(dir, "q.html"))).toBe(false);
+  });
+});
