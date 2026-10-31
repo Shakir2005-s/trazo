@@ -33,20 +33,29 @@ export function validateDiagram(raw: unknown): ValidationResult {
 
   if (type === "sequence") {
     const parsed = sequenceSchema.safeParse(raw, { reportInput: true });
-    if (!parsed.success) return { issues: fromZod(parsed.error, sequenceSchema) };
+    if (!parsed.success) return { issues: withStartHint(fromZod(parsed.error, sequenceSchema), type) };
     return buildSequence(parsed.data);
   }
   if (type === "erd") {
     const parsed = erdSchema.safeParse(raw, { reportInput: true });
-    if (!parsed.success) return { issues: fromZod(parsed.error, erdSchema) };
+    if (!parsed.success) return { issues: withStartHint(fromZod(parsed.error, erdSchema), type) };
     return buildErd(parsed.data);
   }
   if (type === "workflow") {
     const parsed = workflowSchema.safeParse(raw, { reportInput: true });
-    if (!parsed.success) return { issues: fromZod(parsed.error, workflowSchema) };
+    if (!parsed.success) return { issues: withStartHint(fromZod(parsed.error, workflowSchema), type) };
     return buildWorkflow(parsed.data);
   }
   const parsed = architectureSchema.safeParse(raw, { reportInput: true });
-  if (!parsed.success) return { issues: fromZod(parsed.error, architectureSchema) };
+  if (!parsed.success) return { issues: withStartHint(fromZod(parsed.error, architectureSchema), type) };
   return buildArchitecture(parsed.data);
+}
+
+function withStartHint(issues: Issue[], type: string): Issue[] {
+  for (const issue of issues) {
+    if (issue.code === "schema/required" && issue.hint === undefined && !/[.[]/.test(issue.path)) {
+      issue.hint = `run "trazo example ${type}" for a starting point`;
+    }
+  }
+  return issues;
 }
