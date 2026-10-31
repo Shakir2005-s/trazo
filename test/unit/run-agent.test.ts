@@ -82,6 +82,29 @@ describe("parseStream", () => {
     expect(stats.firstTryOk).toBe(true);
   });
 
+  it("counts a mixed call that the sandbox allowed, and a failed one as a failure", () => {
+    const ok = [
+      bash("a", "trazo make wf.json -o diagram.html && rm wf.json && ls diagram.html"),
+      res("a", "rm in 'C:/s/wf.json' needs approval.", true),
+      bash("b", "trazo make wf.json -o diagram.html && ls diagram.html"),
+      res("b", "C:/s/diagram.html\ndiagram.html"),
+      result(),
+    ].join("\n");
+    const okStats = parseStream(ok);
+    expect(okStats.failedCommands).toBe(0);
+    expect(okStats.firstTryOk).toBe(true);
+    expect(okStats.lastMakeInput).toBe("wf.json");
+
+    const bad = [
+      bash("a", "trazo make wf.json -o diagram.html && ls diagram.html"),
+      res("a", "Exit code 1\nerror  steps[0]: ...", true),
+      result(),
+    ].join("\n");
+    const badStats = parseStream(bad);
+    expect(badStats.failedCommands).toBe(1);
+    expect(badStats.firstTryOk).toBe(false);
+  });
+
   it("counts a clean first-try run", () => {
     const text = [
       line({ type: "system", subtype: "init" }),

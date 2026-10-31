@@ -108,7 +108,7 @@ The runner saves the runs as `bench/results/<YYYY-MM-DD>-agent-<agent>.json`:
 
 - `failedCommands`: number of `check` or `make` calls that exited with a non-zero code.
 - `repairs`: number of edits to the JSON after the first failure.
-- `firstTryOk`: the first `make` exited with 0. A chained call such as `trazo check x && trazo make x` counts as that `make`.
+- `firstTryOk`: the first `make` exited with 0. A chained call such as `trazo check x && trazo make x` counts as that `make`. A call the sandbox refused (an error without `Exit code N`) is not counted, because trazo never ran.
 - `finalOk`: `diagram.html` exists and `trazo check` passes on the final JSON.
 - `cacheCreationTokens` and `cacheReadTokens` are reported separately from `inputTokens` and are 0 if the agent does not report them. With prompt caching `inputTokens` is only the uncached part, a few dozen tokens; the summary also gives the median total input (uncached + cache creation + cache read), which is what a run actually read.
 
@@ -116,11 +116,18 @@ Run `node scripts/bench.mjs --summary <file>` to get, per condition, the number 
 
 ## Results
 
-No agent numbers exist yet. This table is filled only with measured runs, each row naming the agent, the model and the date.
+This table is filled only with measured runs, each row naming the agent, the model and the date.
 
 | Agent | Model | Date | Condition | Runs | First-try rate | Final success | Median repairs | Median total input tokens | Median output tokens | Median seconds |
 |---|---|---|---|---|---|---|---|---|---|---|
-| none yet | | | | | | | | | | |
+| Claude Code 2.1.308 | claude-sonnet-5-5 | 2026-10-31 | skill | 24 | 100% | 100% | 0 | 106,483 | 1,658 | 22.1 |
+| Claude Code 2.1.308 | claude-sonnet-5-5 | 2026-10-31 | no-skill | 24 | 100% | 100% | 0 | 105,205 | 1,693 | 22.7 |
+
+Raw runs: `bench/results/2026-10-31-agent-claude-code.json`.
+
+What this says: with this model, `trazo --help`, `trazo schema` and `trazo example` are enough to get a valid diagram on the first `make`, with or without the skill. No run failed a `trazo` command. The skill did not make runs cheaper or faster; the two conditions are within about 1% on tokens and seconds. Its value is that the agent knows trazo exists and when to reach for it, which these tasks do not measure, because the prompt already names the command.
+
+Two no-skill runs were first recorded with `firstTryOk: false`: the agent chained `trazo make` with an `rm` that the sandbox refused, then ran `make` again and it passed. The parser was fixed to skip refused calls only, and every run was recomputed from its `stream.jsonl`; only those two values changed.
 
 Deterministic results are in `bench/results/*-deterministic.json`.
 

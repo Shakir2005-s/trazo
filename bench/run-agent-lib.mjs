@@ -112,13 +112,10 @@ export function agentEnv(baseEnv, binDir, platform) {
 
 // Agents often chain `trazo check x && trazo make x`; each segment is read on its own.
 const segments = (cmd) => cmd.split(/&&|\|\||;|\n/).map((s) => s.trim());
-// Only calls made purely of trazo commands count: the sandbox denies anything else, so a
-// mixed call (a heredoc followed by `trazo make`, say) never reached trazo at all.
-const trazoVerbs = (cmd) => {
-  const parts = segments(cmd).filter(Boolean);
-  if (!parts.every((s) => /^trazo\b/.test(s))) return [];
-  return parts.map((s) => /^trazo\s+(check|make)\b/.exec(s)?.[1]).filter(Boolean);
-};
+const trazoVerbs = (cmd) => segments(cmd).map((s) => /^trazo\s+(check|make)\b/.exec(s)?.[1]).filter(Boolean);
+// A command that ran and failed reports "Exit code N". An error without it is the sandbox
+// refusing the whole call (a heredoc or an `rm` next to trazo), so trazo never ran.
+const denied = (block) => block.is_error === true && !/^Exit code \d/.test(resultText(block.content));
 
 function resultText(content) {
   if (typeof content === "string") return content;
@@ -187,7 +184,7 @@ export function parseStream(text) {
         const cmd = use?.input?.command;
         if (use?.name !== "Bash" || typeof cmd !== "string") continue;
         const verbs = trazoVerbs(cmd);
-        if (verbs.length === 0) continue;
+        if (verbs.length === 0 || denied(b)) continue;
         const failed = b.is_error === true || /^Exit code [1-9]/.test(resultText(b.content));
         if (failed) {
           stats.failedCommands++;
