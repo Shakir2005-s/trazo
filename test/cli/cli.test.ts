@@ -241,6 +241,24 @@ describe("usage errors", () => {
     expect(r.stderr).toBe(usageError('unknown option "--bogus"'));
   });
 
+  it("suggests the closest long option", () => {
+    expect(run(["make", "d.json", "--output", "x.html"])).toEqual({
+      code: 2,
+      stdout: "",
+      stderr: usageError('unknown option "--output" (did you mean "--out"?)'),
+    });
+  });
+
+  it("suggests make when the first argument looks like a file", () => {
+    for (const name of ["x.json", "X.JSON", "dir/x", "dir\\x"]) {
+      expect(run([name])).toEqual({
+        code: 2,
+        stdout: "",
+        stderr: usageError(`unknown command "${name}" (did you mean "trazo make ${name}"?)`),
+      });
+    }
+  });
+
   it("reports a bad theme", () => {
     write("d.json", valid);
     expect(run(["make", "d.json", "--theme", "blue"])).toEqual({

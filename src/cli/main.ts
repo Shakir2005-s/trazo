@@ -40,8 +40,19 @@ function parseCommandLine(argv: string[]): { options: Options; positionals: stri
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     const unknown = /Unknown option '([^']+)'/.exec(message);
-    throw new UsageError(unknown ? `unknown option "${unknown[1]}"` : message.replace(/\. To specify.*$/, ""));
+    if (unknown) {
+      const guess = suggestOption(unknown[1]!);
+      throw new UsageError(`unknown option "${unknown[1]}"${guess ? ` (did you mean "${guess}"?)` : ""}`);
+    }
+    throw new UsageError(message.replace(/\. To specify.*$/, ""));
   }
+}
+
+const LONG_OPTIONS = ["--out", "--theme", "--json", "--help", "--version"];
+
+function suggestOption(given: string): string | undefined {
+  if (!given.startsWith("--") || given.length < 4) return undefined;
+  return LONG_OPTIONS.find((o) => given.startsWith(o) || o.startsWith(given)) ?? suggest(given, LONG_OPTIONS);
 }
 
 function report(issues: Issue[], json: boolean, extra: Record<string, unknown> = {}): { out: string; err: string } {
@@ -83,6 +94,9 @@ async function execute(argv: string[]): Promise<{ code: number; out: string; err
   const [command, input, ...rest] = positionals;
   if (command === undefined) throw new UsageError("missing command");
   if (!COMMANDS.includes(command)) {
+    if (command.toLowerCase().endsWith(".json") || command.includes("/") || command.includes("\\")) {
+      throw new UsageError(`unknown command "${command}" (did you mean "trazo make ${command}"?)`);
+    }
     const guess = suggest(command, COMMANDS);
     throw new UsageError(`unknown command "${command}"${guess ? ` (did you mean "${guess}"?)` : ""}`);
   }

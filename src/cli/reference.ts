@@ -150,7 +150,7 @@ element: one of these in messages
   "a ~> b: label"                 async
   "a --> b: label"                reply
   {from, to, label?, style?}      style: sync | async | reply
-  {note, over}                    note over 1 or 2 participant ids
+  {note, over}                    over: an id or a list of 1 or 2 ids
   {opt: {when, messages}}         runs only if when holds
   {loop: {when, messages}}        repeats while when holds
   {alt: [{when, messages}, ...]}  one branch per case, at least 2

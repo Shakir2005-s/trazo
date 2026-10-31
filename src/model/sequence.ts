@@ -194,9 +194,15 @@ class Walker {
   }
 
   private note(raw: unknown, path: Path): SeqNote | undefined {
-    const parsed = noteSchema.safeParse(raw, { reportInput: true });
+    const single = typeof raw === "object" && raw !== null && typeof (raw as { over?: unknown }).over === "string";
+    const input = single ? { ...(raw as object), over: [(raw as { over: string }).over] } : raw;
+    const parsed = noteSchema.safeParse(input, { reportInput: true });
     if (!parsed.success) {
-      this.issues.push(...fromZod(parsed.error, noteSchema, path));
+      const written = formatPath([...path, "over"]);
+      for (const issue of fromZod(parsed.error, noteSchema, path)) {
+        if (single && issue.path === `${written}[0]`) issue.path = written;
+        this.issues.push(issue);
+      }
       return undefined;
     }
     const { note, over } = parsed.data;
@@ -209,7 +215,7 @@ class Walker {
       ok = false;
     }
     over.forEach((id, i) => {
-      if (this.ids.unknown(id, formatPath([...path, "over", i]))) ok = false;
+      if (this.ids.unknown(id, formatPath(single ? [...path, "over"] : [...path, "over", i]))) ok = false;
     });
     if (!ok) return undefined;
     over.forEach((id) => this.used.add(id));

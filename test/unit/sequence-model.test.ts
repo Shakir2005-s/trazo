@@ -109,6 +109,7 @@ describe("sequence model: structure", () => {
       code: "schema/required",
       path: "participants",
       message: "missing",
+      hint: 'run "trazo example sequence" for a starting point',
     });
     expect(only(seq(["a -> b"], []))).toMatchObject({ code: "schema/empty", path: "participants" });
     expect(only(seq([]))).toMatchObject({ code: "schema/empty", path: "messages" });
@@ -247,6 +248,19 @@ describe("sequence model: notes", () => {
       path: "messages[0].over[1]",
       message: 'unknown participant "pgg"',
       hint: 'did you mean "pg"?',
+    });
+  });
+
+  it("accepts a single id string for over", () => {
+    const result = validateDiagram(seq(["client -> api", "api -> pg", { note: "x", over: "api" }]));
+    expect(result.issues).toEqual([]);
+    expect((result.diagram as Sequence).items[2]).toEqual({ type: "note", text: "x", over: ["api"] });
+  });
+
+  it("points an unknown id in the string form of over at over", () => {
+    expect(only(seq([{ note: "x", over: "pgg" }]))).toMatchObject({
+      code: "ref/unknown-participant",
+      path: "messages[0].over",
     });
   });
 

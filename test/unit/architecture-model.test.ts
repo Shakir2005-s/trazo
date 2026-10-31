@@ -167,6 +167,7 @@ describe("architecture: schema", () => {
       code: "schema/required",
       path: "title",
       message: "missing",
+      hint: 'run "trazo example architecture" for a starting point',
     });
   });
 
