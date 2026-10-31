@@ -18,6 +18,8 @@ export interface AgentRun {
   run: number;
   inputTokens: number;
   outputTokens: number;
+  cacheCreationTokens?: number;
+  cacheReadTokens?: number;
   failedCommands: number;
   repairs: number;
   firstTryOk: boolean;
@@ -28,8 +30,10 @@ export interface AgentRun {
 export interface ConditionSummary {
   runs: number;
   firstTryRate: number;
+  finalRate: number;
   medianRepairs: number;
   medianInputTokens: number;
+  medianTotalInputTokens: number;
   medianOutputTokens: number;
   medianSeconds: number;
 }

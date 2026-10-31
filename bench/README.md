@@ -12,7 +12,7 @@ This folder holds the benchmark for trazo: what an agent must read before it can
 | Determinism | byte-identical | two `make` runs on the same JSON |
 | First-try success, repairs, tokens, seconds | no fixed target | real agent runs, see below |
 
-The first four are deterministic and run from this repository. The last row needs an agent and is recorded by hand.
+The first four are deterministic and run from this repository. The last row needs an agent and is recorded by the agent runner.
 
 ## Run the deterministic part
 
@@ -38,14 +38,45 @@ The `make` target measures trazo itself: validation, layout and rendering, calle
 - `skill`: the trazo skill is installed.
 - `no-skill`: no skill; the agent only has `trazo --help`.
 
-For every run:
+Runs are driven by `bench/run-agent.mjs`, which uses the Claude Code CLI in headless mode. A real run spends model quota, so it is never part of `npm test` or CI.
 
-1. Start a new session so nothing carries over.
-2. Give the agent the task `prompt` from `tasks.json`, unchanged.
-3. Note the input and output tokens and the wall-clock seconds reported by the agent harness.
-4. Count failed commands, repairs and whether the first `make` worked.
+Pilot (one task, skill condition, one run):
 
-Save the runs as `bench/results/<YYYY-MM-DD>-agent-<agent>.json`:
+```sh
+npm run build
+node bench/run-agent.mjs --model claude-sonnet-5-5 --task arch-shop --condition skill --runs 1
+```
+
+Preview the exact command lines without running anything by adding `--dry-run`. Full set (8 tasks x 2 conditions x 3 runs = 48 runs):
+
+```sh
+node bench/run-agent.mjs --model claude-sonnet-5-5
+```
+
+Options:
+
+- `--model <id>` is required.
+- `--task <id>` can be repeated; the default is every task in `tasks.json`.
+- `--condition skill|no-skill|both` (default `both`) and `--runs N` (default 3).
+- `--out <file>` (default `bench/results/<YYYY-MM-DD>-agent-claude-code.json`).
+- `--agent-cmd <path>` replaces the `claude` command; a `.mjs` or `.js` path is run with Node. Tests use it to inject a fake agent.
+- `--timeout <seconds>` per run (default 600). A run that times out is recorded with a note.
+- `--resume` skips runs already in the output file. Each run is written to the file as soon as it ends, so an interrupted session keeps its results.
+- `--sandbox-root <dir>` moves the sandboxes (default `tmp/bench-runs`).
+
+What is isolated, for every run:
+
+- A new sandbox directory `tmp/bench-runs/<task>-<condition>-<n>/` is the working directory. It is deleted and recreated if it already exists.
+- The agent is started with `--setting-sources project`, so user and local settings and skills are not loaded, and with `--strict-mcp-config`, so no MCP server is available.
+- `CLAUDE_CODE_DISABLE_CLAUDE_MDS=1` and `CLAUDE_CODE_DISABLE_AUTO_MEMORY=1` are set, because `--setting-sources` does not stop the user's own `~/.claude/CLAUDE.md` or auto memory from loading. `--bare` would also skip them, but it only accepts an API key, not a signed-in account.
+- The only tools are `Read`, `Write`, `Edit` and `Bash(trazo:*)`: Bash can run `trazo` and nothing else.
+- `trazo` is a small shim on `PATH` that runs `dist/cli/main.js` from this checkout.
+- Condition `skill`: `skill/SKILL.md` is copied to `.claude/skills/trazo/SKILL.md` in the sandbox. Condition `no-skill`: nothing is added; the prompt only says that `trazo` exists and that `trazo --help` explains it.
+- The prompt is the task text from `tasks.json` plus one fixed sentence asking for `diagram.html` in the current directory. It is the same for both conditions.
+
+Each sandbox keeps `stream.jsonl` (the raw agent output, for audit) and `stderr.log`. The runner fills the record itself: tokens from the final `result` message, failed commands and repairs from the tool calls, `seconds` from the wall clock, and `finalOk` by running `trazo check` on the final JSON after the agent ends.
+
+The runner saves the runs as `bench/results/<YYYY-MM-DD>-agent-<agent>.json`:
 
 ```json
 {
@@ -62,6 +93,8 @@ Save the runs as `bench/results/<YYYY-MM-DD>-agent-<agent>.json`:
       "run": 1,
       "inputTokens": 0,
       "outputTokens": 0,
+      "cacheCreationTokens": 0,
+      "cacheReadTokens": 0,
       "failedCommands": 0,
       "repairs": 0,
       "firstTryOk": true,
@@ -75,18 +108,19 @@ Save the runs as `bench/results/<YYYY-MM-DD>-agent-<agent>.json`:
 
 - `failedCommands`: number of `check` or `make` calls that exited with a non-zero code.
 - `repairs`: number of edits to the JSON after the first failure.
-- `firstTryOk`: the first `make` exited with 0.
-- `finalOk`: an HTML file was produced.
+- `firstTryOk`: the first `make` exited with 0. A chained call such as `trazo check x && trazo make x` counts as that `make`.
+- `finalOk`: `diagram.html` exists and `trazo check` passes on the final JSON.
+- `cacheCreationTokens` and `cacheReadTokens` are reported separately from `inputTokens` and are 0 if the agent does not report them. With prompt caching `inputTokens` is only the uncached part, a few dozen tokens; the summary also gives the median total input (uncached + cache creation + cache read), which is what a run actually read.
 
-Run `node scripts/bench.mjs --summary <file>` to get, per condition, the number of runs, the first-try rate and the medians of repairs, input tokens, output tokens and seconds.
+Run `node scripts/bench.mjs --summary <file>` to get, per condition, the number of runs, the first-try and final success rates, and the medians of repairs, uncached and total input tokens, output tokens and seconds.
 
 ## Results
 
 No agent numbers exist yet. This table is filled only with measured runs, each row naming the agent, the model and the date.
 
-| Agent | Model | Date | Condition | Runs | First-try rate | Median repairs | Median input tokens | Median output tokens | Median seconds |
-|---|---|---|---|---|---|---|---|---|---|
-| none yet | | | | | | | | | |
+| Agent | Model | Date | Condition | Runs | First-try rate | Final success | Median repairs | Median total input tokens | Median output tokens | Median seconds |
+|---|---|---|---|---|---|---|---|---|---|---|
+| none yet | | | | | | | | | | |
 
 Deterministic results are in `bench/results/*-deterministic.json`.
 

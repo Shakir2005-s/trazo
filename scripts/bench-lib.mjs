@@ -56,8 +56,11 @@ export function summarize(runs) {
     out[condition] = {
       runs: list.length,
       firstTryRate: list.filter((r) => r.firstTryOk).length / list.length,
+      finalRate: list.filter((r) => r.finalOk).length / list.length,
       medianRepairs: median(list.map((r) => r.repairs)),
       medianInputTokens: median(list.map((r) => r.inputTokens)),
+      // Uncached input is tiny with prompt caching; the total is what the run actually read.
+      medianTotalInputTokens: median(list.map((r) => r.inputTokens + (r.cacheCreationTokens ?? 0) + (r.cacheReadTokens ?? 0))),
       medianOutputTokens: median(list.map((r) => r.outputTokens)),
       medianSeconds: median(list.map((r) => r.seconds)),
     };
