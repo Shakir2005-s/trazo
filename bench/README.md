@@ -123,9 +123,21 @@ This table is filled only with measured runs, each row naming the agent, the mod
 | Claude Code 2.1.308 | claude-sonnet-5-5 | 2026-10-31 | skill | 24 | 100% | 100% | 0 | 106,483 | 1,658 | 22.1 |
 | Claude Code 2.1.308 | claude-sonnet-5-5 | 2026-10-31 | no-skill | 24 | 100% | 100% | 0 | 105,205 | 1,693 | 22.7 |
 
-Raw runs: `bench/results/2026-10-31-agent-claude-code.json`.
+| Claude Code 2.1.308 | claude-haiku-4-5 | 2026-10-31 | skill | 24 | 71% | 88% | 0 | 158,490 | 2,461 | 30.3 |
+| Claude Code 2.1.308 | claude-haiku-4-5 | 2026-10-31 | no-skill | 24 | 71% | 92% | 0 | 139,241 | 1,988 | 25.8 |
+
+Raw runs: `bench/results/2026-10-31-agent-claude-code.json` (Sonnet) and `bench/results/2026-10-31-agent-claude-code-haiku-4-5.json` (Haiku).
 
 What this says: with this model, `trazo --help`, `trazo schema` and `trazo example` are enough to get a valid diagram on the first `make`, with or without the skill. No run failed a `trazo` command. The skill did not make runs cheaper or faster; the two conditions are within about 1% on tokens and seconds. Its value is that the agent knows trazo exists and when to reach for it, which these tasks do not measure, because the prompt already names the command.
+
+With Haiku 4.5 the numbers drop below the v1 target of 90% first-try success, again with no gain from the skill. Reading every failed run, the misses fall in four groups:
+
+- The agent never started (4 runs, all `seq-oauth`): it read the task as context and asked what to draw. The task prompts are short descriptions, not requests; Sonnet took them as requests, Haiku did not always.
+- `trazo <file>` without `make` (5 runs): the CLI answers `unknown command`, and the agent fixes it on the next call.
+- Guessed sequence fields (5 runs): `actors` and `interactions` instead of `participants` and `messages`, and `over` as a string instead of a list (2 runs). The error messages name the allowed fields, and every one of these runs recovered.
+- Workflow lanes (4 runs): a step left out of every lane or listed in two. The message says what to do and one edit fixed it.
+
+One skill run wrote its JSON inside the skill's own folder, which the sandbox refused, and ended without a diagram.
 
 Two no-skill runs were first recorded with `firstTryOk: false`: the agent chained `trazo make` with an `rm` that the sandbox refused, then ran `make` again and it passed. The parser was fixed to skip refused calls only, and every run was recomputed from its `stream.jsonl`; only those two values changed.
 
