@@ -2,15 +2,18 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2026 Heidenber Palacio Garzón
 
+import { readFileSync } from "node:fs";
 import { parse, resolve } from "node:path";
 import { parseArgs } from "node:util";
 import { check, make } from "../index.js";
+import { DIAGRAM_TYPES } from "../model/index.js";
 import { formatIssues, hasErrors, suggest, type Issue } from "../validate/issues.js";
 import { VERSION } from "../version.js";
+import { REFERENCE } from "./reference.js";
 import { readInput, writeAtomic } from "./io.js";
 import { USAGE, UsageError } from "./usage.js";
 
-const COMMANDS = ["make", "check"];
+const COMMANDS = ["make", "check", "schema", "example"];
 
 interface Options {
   out?: string | undefined;
@@ -48,6 +51,30 @@ function report(issues: Issue[], json: boolean, extra: Record<string, unknown> =
   return { out: ok ? (extra["output"] !== undefined ? `${extra["output"]}\n` : "ok\n") : "", err: text };
 }
 
+function describeType(
+  command: "schema" | "example",
+  options: Options,
+  args: string[],
+): { code: number; out: string; err: string } {
+  const [type, ...extra] = args;
+  if (type === undefined) throw new UsageError("missing <type>");
+  if (extra.length > 0) throw new UsageError(`unexpected argument "${extra[0]}"`);
+  if (options.out !== undefined) throw new UsageError('option "--out" only applies to make');
+  if (options.theme !== undefined) throw new UsageError('option "--theme" only applies to make');
+  if (options.json) throw new UsageError('option "--json" only applies to make and check');
+  const types: readonly string[] = DIAGRAM_TYPES;
+  if (!types.includes(type)) {
+    const guess = suggest(type, types);
+    throw new UsageError(
+      `unknown type "${type}" ${guess ? `(did you mean "${guess}"?)` : `(use one of: ${types.join(", ")})`}`,
+    );
+  }
+  const out = command === "schema"
+    ? REFERENCE[type as keyof typeof REFERENCE]
+    : readFileSync(new URL(`../../examples/${type}.json`, import.meta.url), "utf8");
+  return { code: 0, out, err: "" };
+}
+
 async function execute(argv: string[]): Promise<{ code: number; out: string; err: string }> {
   const { options, positionals } = parseCommandLine(argv);
   if (options.help) return { code: 0, out: USAGE, err: "" };
@@ -59,6 +86,7 @@ async function execute(argv: string[]): Promise<{ code: number; out: string; err
     const guess = suggest(command, COMMANDS);
     throw new UsageError(`unknown command "${command}"${guess ? ` (did you mean "${guess}"?)` : ""}`);
   }
+  if (command === "schema" || command === "example") return describeType(command, options, positionals.slice(1));
   if (input === undefined) throw new UsageError("missing <input>");
   if (rest.length > 0) throw new UsageError(`unexpected argument "${rest[0]}"`);
   if (options.theme !== undefined && options.theme !== "light" && options.theme !== "dark") {
