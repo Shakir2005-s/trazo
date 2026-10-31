@@ -107,6 +107,7 @@ export function agentEnv(baseEnv, binDir, platform) {
   env[pathKey] = `${binDir}${platform === "win32" ? ";" : ":"}${env[pathKey] ?? ""}`;
   env.CLAUDE_CODE_DISABLE_CLAUDE_MDS = "1";
   env.CLAUDE_CODE_DISABLE_AUTO_MEMORY = "1";
+  env.CLAUDE_CODE_DISABLE_GIT_INSTRUCTIONS = "1";
   return env;
 }
 

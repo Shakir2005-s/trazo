@@ -69,6 +69,7 @@ What is isolated, for every run:
 - A new sandbox directory `tmp/bench-runs/<task>-<condition>-<n>/` is the working directory. It is deleted and recreated if it already exists.
 - The agent is started with `--setting-sources project`, so user and local settings and skills are not loaded, and with `--strict-mcp-config`, so no MCP server is available.
 - `CLAUDE_CODE_DISABLE_CLAUDE_MDS=1` and `CLAUDE_CODE_DISABLE_AUTO_MEMORY=1` are set, because `--setting-sources` does not stop the user's own `~/.claude/CLAUDE.md` or auto memory from loading. `--bare` would also skip them, but it only accepts an API key, not a signed-in account.
+- `CLAUDE_CODE_DISABLE_GIT_INSTRUCTIONS=1` is set, because the sandboxes sit inside this repository: without it the agent sees the trazo repo's git status and history in its system prompt.
 - The only tools are `Read`, `Write`, `Edit` and `Bash(trazo:*)`: Bash can run `trazo` and nothing else.
 - `trazo` is a small shim on `PATH` that runs `dist/cli/main.js` from this checkout.
 - Condition `skill`: `skill/SKILL.md` is copied to `.claude/skills/trazo/SKILL.md` in the sandbox. Condition `no-skill`: nothing is added; the prompt only says that `trazo` exists and that `trazo --help` explains it.
@@ -125,6 +126,8 @@ This table is filled only with measured runs, each row naming the agent, the mod
 
 | Claude Code 2.1.308 | claude-haiku-4-5 | 2026-10-31 | skill | 24 | 71% | 88% | 0 | 158,490 | 2,461 | 30.3 |
 | Claude Code 2.1.308 | claude-haiku-4-5 | 2026-10-31 | no-skill | 24 | 71% | 92% | 0 | 139,241 | 1,988 | 25.8 |
+
+The task prompts were reworded as requests ("Draw a sequence diagram of ...") after the Haiku 4.5 runs, so the recorded Sonnet and Haiku rows used the earlier wording.
 
 Raw runs: `bench/results/2026-10-31-agent-claude-code.json` (Sonnet) and `bench/results/2026-10-31-agent-claude-code-haiku-4-5.json` (Haiku).
 

@@ -245,7 +245,7 @@ describe("plan and command", () => {
     ]);
   });
 
-  it("isolates the agent from user CLAUDE.md and auto memory and puts the shim first on PATH", () => {
+  it("isolates the agent from user CLAUDE.md, auto memory and git context and puts the shim first on PATH", () => {
     const base = { Path: "C:\\bin", HOME: "/h" };
     const env = agentEnv(base, "C:\\shim", "win32");
     expect(env).toEqual({
@@ -253,6 +253,7 @@ describe("plan and command", () => {
       HOME: "/h",
       CLAUDE_CODE_DISABLE_CLAUDE_MDS: "1",
       CLAUDE_CODE_DISABLE_AUTO_MEMORY: "1",
+      CLAUDE_CODE_DISABLE_GIT_INSTRUCTIONS: "1",
     });
     expect(base).toEqual({ Path: "C:\\bin", HOME: "/h" });
     expect(agentEnv({}, "/shim", "linux").PATH).toBe("/shim:");
