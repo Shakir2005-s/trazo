@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "tasks": [
+    { "id": "arch-shop", "type": "architecture", "level": 1, "prompt": "An online shop: web app, API, database, job queue and an external payment gateway. About 10 nodes." },
+    { "id": "arch-monorepo", "type": "architecture", "level": 3, "prompt": "A monorepo with three nested groups (apps, services, data), about 20 nodes, and a `source` path on four of them." },
+    { "id": "wf-expenses", "type": "workflow", "level": 2, "prompt": "Expense approval with a manager and a finance lane, one decision and a rejection path." },
+    { "id": "wf-onboarding", "type": "workflow", "level": 3, "prompt": "Employee onboarding with a retry loop when a check fails and a wait step for documents." },
+    { "id": "erd-blog", "type": "erd", "level": 2, "prompt": "A blog: users, posts, comments, tags and post_tags; comments can reply to other comments (self-reference)." },
+    { "id": "erd-payments", "type": "erd", "level": 4, "prompt": "A payments schema with 8 tables, optional columns and several single-column foreign keys into the same table." },
+    { "id": "seq-oauth", "type": "sequence", "level": 2, "prompt": "Login with OAuth: browser, app, identity provider; an `alt` for denied consent." },
+    { "id": "seq-checkout-retry", "type": "sequence", "level": 4, "prompt": "Checkout where the app retries a payment call in a `loop`, with a note over the payment provider." }
+  ]
+}

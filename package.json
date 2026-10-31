@@ -8,6 +8,14 @@
   "engines": {
     "node": ">=20"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/heidenber/trazo.git"
+  },
+  "homepage": "https://github.com/heidenber/trazo#readme",
+  "bugs": {
+    "url": "https://github.com/heidenber/trazo/issues"
+  },
   "bin": {
     "trazo": "./dist/cli/main.js"
   },
@@ -17,6 +25,8 @@
   "files": [
     "dist",
     "examples",
+    "skill",
+    "README_ES.md",
     "LICENSE",
     "NOTICE",
     "THIRD_PARTY_NOTICES.md"
@@ -27,8 +37,9 @@
     "test": "vitest run",
     "prepublishOnly": "npm run gen:check && npm run build && npm test",
     "test:watch": "vitest",
-    "gen": "node scripts/gen-metrics.mjs && node scripts/gen-icons.mjs && node scripts/gen-font.mjs && node scripts/gen-notices.mjs",
-    "gen:check": "node scripts/gen-metrics.mjs --check && node scripts/gen-icons.mjs --check && node scripts/gen-font.mjs --check && node scripts/gen-notices.mjs --check"
+    "gen": "node scripts/gen-metrics.mjs && node scripts/gen-icons.mjs && node scripts/gen-font.mjs && node scripts/gen-notices.mjs && node scripts/gen-skill.mjs",
+    "gen:check": "node scripts/gen-metrics.mjs --check && node scripts/gen-icons.mjs --check && node scripts/gen-font.mjs --check && node scripts/gen-notices.mjs --check && node scripts/gen-skill.mjs --check",
+    "bench": "node scripts/bench.mjs"
   },
   "keywords": [
     "diagram",

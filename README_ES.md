@@ -1,0 +1,131 @@
+[English](README.md) | Español
+
+# trazo
+
+Escribís un diagrama como JSON semántico, sin coordenadas. trazo lo valida, lo acomoda y escribe un único archivo HTML autocontenido.
+
+![Diagrama entidad-relación generado por trazo, con tablas, columnas y claves foráneas](https://raw.githubusercontent.com/heidenber/trazo/main/docs/erd-light.png)
+
+## Demo
+
+`demo.json`:
+
+```json
+{
+  "type": "architecture",
+  "title": "Orders",
+  "nodes": [{ "id": "web", "kind": "client" }, { "id": "api" }, { "id": "db", "kind": "database" }],
+  "edges": ["web -> api: HTTPS", "api -> db: SQL"]
+}
+```
+
+```sh
+trazo make demo.json
+```
+
+Esto escribe `demo.html` junto al archivo de entrada e imprime su ruta. Abrilo en el navegador: podés mover y hacer zoom, pasar el mouse sobre un nodo (o enfocarlo con el teclado) para ver su nota y resaltar sus conexiones, y exportar a SVG o PNG. No necesita servidor ni hace pedidos de red.
+
+## Instalación
+
+trazo todavía no está publicado en npm. Hasta que lo esté, se instala desde el código fuente (Node 20 o superior):
+
+```sh
+git clone https://github.com/heidenber/trazo
+cd trazo
+npm ci
+npm run build
+npm i -g .
+```
+
+Una vez publicado, alcanzará con `npm i -g trazo`.
+
+## Comandos
+
+| Comando | Qué hace |
+|---|---|
+| `trazo make <input> [-o, --out <file>] [--theme light\|dark] [--json]` | Valida, acomoda y escribe un HTML autocontenido. |
+| `trazo check <input> [--json]` | Solo valida; no escribe nada. |
+| `trazo schema <type>` | Imprime la referencia compacta de campos de un tipo de diagrama. |
+| `trazo example <type>` | Imprime un diagrama de ejemplo completo, entrada válida para `make`. |
+
+`<input>` es un archivo JSON, o `-` para leer de stdin. `<type>` es `architecture`, `workflow`, `erd` o `sequence`. Con `-o -`, `make` escribe el HTML en stdout. `--json` imprime una línea JSON en lugar de texto plano.
+
+Códigos de salida: 0 correcto, 1 entrada inválida, 2 error de uso, 3 error interno.
+
+```sh
+trazo example erd | trazo make - -o erd.html
+```
+
+## Tipos de diagrama
+
+- `architecture`: servicios, almacenes, colas y personas, agrupados en cajas. `trazo example architecture`
+- `workflow`: pasos y decisiones, opcionalmente en carriles. `trazo example workflow`
+- `erd`: tablas, columnas y claves foráneas, con terminaciones de pata de gallo. `trazo example erd`
+- `sequence`: mensajes entre participantes, con notas y fragmentos `alt`, `opt` y `loop`. `trazo example sequence`
+
+`trazo schema <type>` imprime los campos de cada tipo en unas 40 líneas.
+
+## Skill para agentes
+
+`skill/` trae una skill corta que le indica al agente que parta de `trazo example`, valide el JSON y corrija los errores a partir de los mensajes. `skill/SKILL.md` es para Claude Code y Pi; `skill/AGENTS.md` es el mismo texto para Codex. trazo no instala nada por su cuenta: copiá los archivos después de instalar el paquete de forma global. Son las ubicaciones documentadas de cada agente; comprobalas contra la versión que uses.
+
+Bash:
+
+```bash
+SK="$(npm root -g)/trazo/skill"
+mkdir -p ~/.claude/skills/trazo && cp "$SK/SKILL.md" ~/.claude/skills/trazo/        # Claude Code
+mkdir -p ~/.pi/agent/skills/trazo && cp "$SK/SKILL.md" ~/.pi/agent/skills/trazo/    # Pi
+mkdir -p ~/.codex && cat "$SK/AGENTS.md" >> ~/.codex/AGENTS.md                      # Codex
+```
+
+PowerShell:
+
+```powershell
+$sk = Join-Path (npm root -g) "trazo\skill"
+New-Item -ItemType Directory -Force "$HOME\.claude\skills\trazo" | Out-Null
+Copy-Item "$sk\SKILL.md" "$HOME\.claude\skills\trazo\"                              # Claude Code
+New-Item -ItemType Directory -Force "$HOME\.pi\agent\skills\trazo" | Out-Null
+Copy-Item "$sk\SKILL.md" "$HOME\.pi\agent\skills\trazo\"                            # Pi
+New-Item -ItemType Directory -Force "$HOME\.codex" | Out-Null
+Get-Content "$sk\AGENTS.md" | Add-Content "$HOME\.codex\AGENTS.md"                  # Codex
+```
+
+Si corrés el comando de Codex dos veces, el bloque queda duplicado. Para actualizarlo, borrá antes todo lo que hay entre `<!-- trazo:start -->` y `<!-- trazo:end -->` en `~/.codex/AGENTS.md`. En Claude Code y Pi, volvé a copiar el archivo.
+
+## Librería
+
+```js
+import { check, make } from "trazo";
+
+const result = check(jsonTextOrObject);
+// { ok: boolean, issues: Issue[] }
+
+const made = await make(jsonTextOrObject, { theme: "dark" });
+// { ok, issues, html?: string }  html solo viene cuando ok es true
+```
+
+Las dos aceptan texto JSON o un objeto ya parseado. `make` también devuelve en `issues` los avisos de geometría.
+
+## Rendimiento
+
+El costo de lectura, el tiempo de generación y el tamaño de la salida los mide un script de este repositorio. En [bench/README.md](bench/README.md) está qué se mide, cómo correrlo y los resultados registrados.
+
+## Desarrollo
+
+```sh
+npm test            # tests unitarios y de CLI
+npm run gen:check   # los archivos generados están al día
+npm run bench       # benchmark determinista (requiere npm run build)
+```
+
+## Licencia
+
+trazo se distribuye bajo la Apache License 2.0. Copyright 2026 Heidenber Palacio Garzón. Ver LICENSE y NOTICE.
+
+Material de terceros:
+- Íconos Lucide: ISC License. Íconos derivados de Feather: MIT License.
+- Tipografía Inter: SIL Open Font License 1.1.
+- elkjs: Eclipse Public License 2.0.
+- zod: MIT License.
+
+Versiones y textos completos: THIRD_PARTY_NOTICES.md.
