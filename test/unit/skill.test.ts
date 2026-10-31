@@ -41,6 +41,12 @@ describe("skill/SKILL.md", () => {
     }
   });
 
+  it("starts from the example file and keeps work in the current directory", () => {
+    expect(skill.body).toContain("`trazo example <type> > diagram.json`");
+    expect(skill.body).toContain("current directory");
+    expect(skill.body).toContain("`trazo make <file>`");
+  });
+
   it("only mentions real commands", () => {
     const found = [...skill.body.matchAll(/\btrazo ([a-z]+)/g)].map((m) => m[1]);
     expect(found.length).toBeGreaterThan(0);
