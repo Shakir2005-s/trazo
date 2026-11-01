@@ -127,9 +127,16 @@ This table is filled only with measured runs, each row naming the agent, the mod
 | Claude Code 2.1.308 | claude-haiku-4-5 | 2026-10-31 | skill | 24 | 71% | 88% | 0 | 158,490 | 2,461 | 30.3 |
 | Claude Code 2.1.308 | claude-haiku-4-5 | 2026-10-31 | no-skill | 24 | 71% | 92% | 0 | 139,241 | 1,988 | 25.8 |
 
-The task prompts were reworded as requests ("Draw a sequence diagram of ...") after the Haiku 4.5 runs, so the recorded Sonnet and Haiku rows used the earlier wording.
+The task prompts were reworded as requests ("Draw a sequence diagram of ...") after the Haiku 4.5 runs, so the four rows above used the earlier wording. The rows below were run after that change and after the CLI and schema hints (milestone H7):
 
-Raw runs: `bench/results/2026-10-31-agent-claude-code.json` (Sonnet) and `bench/results/2026-10-31-agent-claude-code-haiku-4-5.json` (Haiku).
+| Agent | Model | Date | Condition | Runs | First-try rate | Final success | Median repairs | Median total input tokens | Median output tokens | Median seconds |
+|---|---|---|---|---|---|---|---|---|---|---|
+| Claude Code 2.1.308 | claude-sonnet-5-5 | 2026-10-31 | skill | 24 | 100% | 100% | 0 | 114,992 | 1,381 | 20.5 |
+| Claude Code 2.1.308 | claude-sonnet-5-5 | 2026-10-31 | no-skill | 24 | 100% | 100% | 0 | 123,700 | 1,669 | 22.3 |
+| Claude Code 2.1.308 | claude-haiku-4-5 | 2026-10-31 | skill | 24 | 96% | 100% | 0 | 152,209 | 2,551 | 30.4 |
+| Claude Code 2.1.308 | claude-haiku-4-5 | 2026-10-31 | no-skill | 24 | 92% | 100% | 0 | 127,893 | 1,997 | 24.9 |
+
+Raw runs: `bench/results/2026-10-31-agent-claude-code.json` (Sonnet) and `bench/results/2026-10-31-agent-claude-code-haiku-4-5.json` (Haiku) for the first rows; `bench/results/2026-10-31-agent-claude-code-sonnet-5-5-rerun.json` and `bench/results/2026-10-31-agent-claude-code-haiku-4-5-rerun.json` for the rerun.
 
 What this says: with this model, `trazo --help`, `trazo schema` and `trazo example` are enough to get a valid diagram on the first `make`, with or without the skill. No run failed a `trazo` command. The skill did not make runs cheaper or faster; the two conditions are within about 1% on tokens and seconds. Its value is that the agent knows trazo exists and when to reach for it, which these tasks do not measure, because the prompt already names the command.
 
@@ -142,12 +149,15 @@ With Haiku 4.5 the numbers drop below the v1 target of 90% first-try success, ag
 
 One skill run wrote its JSON inside the skill's own folder, which the sandbox refused, and ended without a diagram.
 
+After H7 (request-worded prompts, `trazo <file>` and `--output` hints, a hint for a missing top-level field, `over` accepted as a string), Haiku 4.5 reaches 96% first-try success with the skill and 92% without, and every run ends with a valid diagram. Three runs missed the first `make` (`arch-monorepo` skill, `wf-expenses` no-skill, `seq-oauth` no-skill); each failed one command and recovered with one edit. Their `stream.jsonl` files are gone: the Sonnet rerun used the same sandbox directories right after, so the cause of these three misses was not recorded. Sonnet 5.5 stays at 100%. The skill still makes runs neither cheaper nor more successful on these tasks.
+
 Two no-skill runs were first recorded with `firstTryOk: false`: the agent chained `trazo make` with an `rm` that the sandbox refused, then ran `make` again and it passed. The parser was fixed to skip refused calls only, and every run was recomputed from its `stream.jsonl`; only those two values changed.
 
 Deterministic results are in `bench/results/*-deterministic.json`.
 
 ## Limits
 
+- Sandboxes are named by task, condition and run, not by model, so a second model run in the default `--sandbox-root` replaces the first model's `stream.jsonl` files. Pass a separate `--sandbox-root` per model to keep both.
 - Agents are not deterministic. Three runs per task and condition show a trend, not a guarantee.
 - Timings depend on the machine, the Node version and background load. Compare numbers from the same machine only.
 - Token counts in the deterministic part are estimates (characters / 4), not a real tokenizer.
