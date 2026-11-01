@@ -16,7 +16,7 @@ export const LABEL_PAD = 4;
 /** Gap from a self-call's loop to its label box. */
 export const LOOP_LABEL_GAP = 8;
 /** Free space a label box keeps from the lifelines around it, on each side. */
-const LABEL_AIR = 12;
+export const LABEL_AIR = 12;
 
 const HEAD_SIZE = 13;
 const HEAD_WRAP = 140;

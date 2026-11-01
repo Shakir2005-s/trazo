@@ -3,6 +3,7 @@
 
 import { describe, expect, it } from "vitest";
 import { layoutDiagram } from "../../src/layout/index.js";
+import { LABEL_AIR } from "../../src/layout/sequence-columns.js";
 import { validateDiagram } from "../../src/model/index.js";
 import type { Box, Scene, SceneEdge, SceneNode } from "../../src/scene.js";
 import { textWidth } from "../../src/text/measure.js";
@@ -120,7 +121,7 @@ describe("layoutSequence", () => {
       messages: ["a -> a: validate the whole request body before saving it", "a -> b: go"],
     });
     const box = edge(s, "validate").label!.box;
-    expect(box.x + box.w + 8).toBeLessThanOrEqual(lifeX(s, "b"));
+    expect(box.x + box.w + LABEL_AIR).toBeLessThanOrEqual(lifeX(s, "b"));
   });
 
   it("keeps message labels apart from each other, headers and notes", async () => {

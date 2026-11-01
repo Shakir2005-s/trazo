@@ -4,7 +4,7 @@
 import { z } from "zod";
 import { didYouMean, formatPath, type Issue } from "../validate/issues.js";
 import { IdRegistry } from "../validate/refs.js";
-import { edgeSchema, error_, fromZod, idSchema, textSchema, themeSchema, warning } from "./common.js";
+import { customIssue, describe, edgeSchema, error_, fromZod, idSchema, textSchema, themeSchema, warning } from "./common.js";
 
 export const PARTICIPANT_KINDS = ["actor", "service", "database", "queue", "external"] as const;
 
@@ -81,7 +81,13 @@ type Parsed = z.output<typeof sequenceSchema>;
 
 const messageSchema = edgeSchema("sequence", ["->", "~>", "-->"], ["sync", "async", "reply"]);
 /** `over` takes one id or a list of ids; a single id is read as a list of one. */
-const overSchema = z.preprocess((v) => (typeof v === "string" ? [v] : v), z.array(idSchema).min(1));
+const overSchema = z.preprocess((v, ctx) => {
+  if (typeof v === "string") return [v];
+  if (v !== undefined && !Array.isArray(v)) {
+    ctx.issues.push(customIssue(v, `expected an id or a list of ids, got ${describe(v)}`, { code: "schema/type" }));
+  }
+  return v;
+}, z.array(idSchema).min(1));
 const noteSchema = z.strictObject({ note: textSchema, over: overSchema });
 const branchSchema = z.strictObject({ when: textSchema, messages: z.array(z.unknown()).min(1) });
 
@@ -203,9 +209,6 @@ class Walker {
       const written = formatPath([...path, "over"]);
       for (const issue of fromZod(parsed.error, noteSchema, path)) {
         if (single && issue.path === `${written}[0]`) issue.path = written;
-        if (issue.code === "schema/type" && issue.path === written) {
-          issue.message = issue.message.replace(/^expected array/, "expected an id or a list of ids");
-        }
         this.issues.push(issue);
       }
       return undefined;
