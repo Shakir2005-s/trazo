@@ -114,6 +114,15 @@ describe("layoutSequence", () => {
     expect(e.label!.box.x).toBeGreaterThan(e.points[1]!.x);
   });
 
+  it("keeps a self-call label clear of the next lifeline", async () => {
+    const s = await layout({
+      participants: [{ id: "a" }, { id: "b" }],
+      messages: ["a -> a: validate the whole request body before saving it", "a -> b: go"],
+    });
+    const box = edge(s, "validate").label!.box;
+    expect(box.x + box.w + 8).toBeLessThanOrEqual(lifeX(s, "b"));
+  });
+
   it("keeps message labels apart from each other, headers and notes", async () => {
     const s = await layout(checkout());
     const boxes = labelBoxes(s);

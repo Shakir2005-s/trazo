@@ -6,7 +6,9 @@ import type { Box, Scene, SceneEdge, SceneGroup, SceneNode, TextBlock } from "..
 import { firstBaseline, lineHeight, textWidth, wrapText } from "../text/measure.js";
 import {
   ICON_BY_KIND,
+  LABEL_PAD,
   LABEL_SIZE,
+  LOOP_LABEL_GAP,
   NOTE_SIZE,
   NOTE_WIDTH,
   SELF_LOOP,
@@ -21,7 +23,6 @@ import { ICON_TEXT_LEFT } from "./shapes.js";
 const MARGIN = 24;
 const MSG_ROW = 36;
 const SELF_ROW = 40;
-const LABEL_PAD = 4;
 const LINE_ABOVE = 6;
 const LABEL_LIFT = 3;
 const LOOP_INSET = 8;
@@ -97,7 +98,7 @@ function build(seq: Sequence, heads: Headers, base: number[], dx: number): { sce
       ];
       hi = x;
       if (lines.length > 0) {
-        const box = { x: x + 8, y: half(y + (h - boxH) / 2), w: boxW, h: boxH };
+        const box = { x: x + LOOP_LABEL_GAP, y: half(y + (h - boxH) / 2), w: boxW, h: boxH };
         edge.label = { box, text: block(lines, box.x + LABEL_PAD, box.y + LABEL_PAD / 2, LABEL_SIZE, 400, "start") };
         hi = box.x + box.w;
       }

@@ -264,6 +264,19 @@ describe("sequence model: notes", () => {
     });
   });
 
+  it("names both accepted forms when over has the wrong type", () => {
+    expect(only(seq([{ note: "x", over: 5 }]))).toEqual({
+      severity: "error",
+      code: "schema/type",
+      path: "messages[0].over",
+      message: "expected an id or a list of ids, got number",
+    });
+  });
+
+  it("points an invalid id in the string form of over at over", () => {
+    expect(only(seq([{ note: "x", over: "Bad Id!" }]))).toMatchObject({ code: "schema/id", path: "messages[0].over" });
+  });
+
   it("requires a non-empty over", () => {
     expect(only(seq([{ note: "x", over: [] }]))).toMatchObject({ code: "schema/empty", path: "messages[0].over" });
   });

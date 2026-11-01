@@ -11,6 +11,12 @@ export const NOTE_SIZE = 12;
 export const NOTE_WIDTH = 180;
 export const SELF_LOOP = 28;
 export const HEAD_GAP = 24;
+/** Padding between a message label and its background box, on each side. */
+export const LABEL_PAD = 4;
+/** Gap from a self-call's loop to its label box. */
+export const LOOP_LABEL_GAP = 8;
+/** Free space a label box keeps from the lifelines around it, on each side. */
+const LABEL_AIR = 12;
 
 const HEAD_SIZE = 13;
 const HEAD_WRAP = 140;
@@ -81,9 +87,11 @@ export function solveColumns(seq: Sequence, widths: number[]): number[] {
       } else if (item.type === "message") {
         const a = at.get(item.from)!;
         const b = at.get(item.to)!;
-        const width = sizeLabel(item.label).width;
-        if (a === b) rules.push({ lo: a, hi: a + 1, need: SELF_LOOP + width + 16 });
-        else rules.push({ lo: Math.min(a, b), hi: Math.max(a, b), need: width + 32 });
+        const box = sizeLabel(item.label).width + 2 * LABEL_PAD;
+        // A self-call label sits right of its loop and must clear the next lifeline;
+        // a span label is centred between its two lifelines.
+        if (a === b) rules.push({ lo: a, hi: a + 1, need: SELF_LOOP + LOOP_LABEL_GAP + box + LABEL_AIR });
+        else rules.push({ lo: Math.min(a, b), hi: Math.max(a, b), need: box + 2 * LABEL_AIR });
       } else if (item.over.length === 1) {
         const i = at.get(item.over[0]!)!;
         rules.push({ lo: i - 1, hi: i, need: NOTE_REACH }, { lo: i, hi: i + 1, need: NOTE_REACH });
