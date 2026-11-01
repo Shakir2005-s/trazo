@@ -58,14 +58,13 @@ function scene(edges: SceneEdge[], extra: Partial<Scene> = {}): Scene {
 
 const fragment = (): Scene["groups"][number] => ({
   id: "#f0",
-  label: block("", 0, 0),
+  label: block("alt", 48, 103, 11),
   depth: 0,
   variant: "fragment",
   x: 40,
   y: 90,
   w: 300,
   h: 120,
-  tag: "alt",
   tab: { x: 40, y: 90, w: 40, h: 18 },
   guard: block("paid", 88, 103, 11),
   dividers: [{ y: 150, guard: block("declined", 48, 166, 11) }],

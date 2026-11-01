@@ -62,9 +62,7 @@ export interface SceneGroup extends Box {
   variant: "group" | "lane" | "fragment";
   /** Width of the label column at the left of a lane band. */
   header?: number;
-  /** Fragment operator (alt, opt, loop). */
-  tag?: string;
-  /** Fragment tab box; the renderer does not measure text. */
+  /** Fragment tab box; `label` holds the operator (alt, opt, loop). The renderer does not measure text. */
   tab?: Box;
   /** Guard of the first branch. */
   guard?: TextBlock;

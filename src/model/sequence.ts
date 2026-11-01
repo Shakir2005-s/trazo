@@ -80,7 +80,9 @@ export const sequenceSchema = z.strictObject({
 type Parsed = z.output<typeof sequenceSchema>;
 
 const messageSchema = edgeSchema("sequence", ["->", "~>", "-->"], ["sync", "async", "reply"]);
-const noteSchema = z.strictObject({ note: textSchema, over: z.array(idSchema).min(1) });
+/** `over` takes one id or a list of ids; a single id is read as a list of one. */
+const overSchema = z.preprocess((v) => (typeof v === "string" ? [v] : v), z.array(idSchema).min(1));
+const noteSchema = z.strictObject({ note: textSchema, over: overSchema });
 const branchSchema = z.strictObject({ when: textSchema, messages: z.array(z.unknown()).min(1) });
 
 const FRAGMENT_OPS = ["alt", "opt", "loop"] as const;
@@ -186,21 +188,24 @@ class Walker {
           "sequence/long-label",
           formatPath(short ? path : [...path, "label"]),
           `label is ${label.length} characters`,
-          "keep message labels under 80; move detail to a note",
+          `keep message labels under ${LONG_LABEL}; move detail to a note`,
         ),
       );
     }
     return out;
   }
 
-  private note(raw: unknown, path: Path): SeqNote | undefined {
-    const single = typeof raw === "object" && raw !== null && typeof (raw as { over?: unknown }).over === "string";
-    const input = single ? { ...(raw as object), over: [(raw as { over: string }).over] } : raw;
-    const parsed = noteSchema.safeParse(input, { reportInput: true });
+  private note(raw: object, path: Path): SeqNote | undefined {
+    // The string form has no list index to point at, so its issues report at `over`.
+    const single = typeof (raw as { over?: unknown }).over === "string";
+    const parsed = noteSchema.safeParse(raw, { reportInput: true });
     if (!parsed.success) {
       const written = formatPath([...path, "over"]);
       for (const issue of fromZod(parsed.error, noteSchema, path)) {
         if (single && issue.path === `${written}[0]`) issue.path = written;
+        if (issue.code === "schema/type" && issue.path === written) {
+          issue.message = issue.message.replace(/^expected array/, "expected an id or a list of ids");
+        }
         this.issues.push(issue);
       }
       return undefined;
