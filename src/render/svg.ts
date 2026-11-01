@@ -47,7 +47,7 @@ function fragment(g: SceneGroup): string {
   const t = g.tab ?? { x: g.x, y: g.y, w: 0, h: 0 };
   const cut = 6;
   const tab = `<path class="t-frag-tab" d="M${num(t.x)} ${num(t.y)}H${num(t.x + t.w)}V${num(t.y + t.h - cut)}L${num(t.x + t.w - cut)} ${num(t.y + t.h)}H${num(t.x)}z"/>`;
-  const tag = g.tag === undefined ? "" : text({ lines: [g.tag], x: t.x + 8, y: t.y + t.h / 2 + 4, size: 11, weight: 600, anchor: "start" }, "t-frag-tag");
+  const tag = text(g.label, "t-frag-tag");
   const guard = g.guard ? text(bracket(g.guard), "t-frag-guard") : "";
   const dividers = (g.dividers ?? [])
     .map((d) => `<line class="t-frag-divider" x1="${num(g.x)}" y1="${num(d.y)}" x2="${num(g.x + g.w)}" y2="${num(d.y)}"/>${text(bracket(d.guard), "t-frag-guard")}`)
@@ -139,12 +139,16 @@ export function renderSvg(scene: Scene): string {
   const labelled = scene.description ? "t-title t-desc" : "t-title";
   const ends = scene.edges.some((e) => e.ends);
   const seq = scene.lifelines !== undefined;
-  const filled = (e: SceneEdge) => !e.ends && !(seq && OPEN_STYLES.includes(e.style));
-  const open =
-    seq && scene.edges.some((e) => OPEN_STYLES.includes(e.style))
-      ? `<marker id="t-arrowhead-open" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" markerUnits="userSpaceOnUse" orient="auto"><path class="t-arrow-open" d="M1 1L9 5L1 9"/></marker>`
-      : "";
-  const arrow = (seq ? !scene.edges.some(filled) : ends && scene.edges.every((e) => e.ends)) ? "" : `<marker id="t-arrowhead" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" markerUnits="userSpaceOnUse" orient="auto"><path class="t-arrow" d="M0 1L10 5L0 9z"/></marker>`;
+  // Sequence async and reply messages use the open head; ERD edges with crow's-foot ends use none.
+  const isOpen = (e: SceneEdge) => seq && OPEN_STYLES.includes(e.style);
+  const needsOpen = scene.edges.some(isOpen);
+  const needsFilled = scene.edges.some((e) => !e.ends && !isOpen(e));
+  const open = needsOpen
+    ? `<marker id="t-arrowhead-open" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" markerUnits="userSpaceOnUse" orient="auto"><path class="t-arrow-open" d="M1 1L9 5L1 9"/></marker>`
+    : "";
+  // Outside sequences the filled head is dropped only when every edge has its own ends.
+  const dropFilled = !needsFilled && (seq || ends);
+  const arrow = dropFilled ? "" : `<marker id="t-arrowhead" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" markerUnits="userSpaceOnUse" orient="auto"><path class="t-arrow" d="M0 1L10 5L0 9z"/></marker>`;
   const css = (needsShapeCss(scene) ? SVG_CSS + SHAPE_CSS : SVG_CSS) + (needsTableCss(scene) ? TABLE_CSS : "") + (seq ? SEQUENCE_CSS : "");
   const parts = [
     `<svg xmlns="http://www.w3.org/2000/svg" class="${seq ? "diagram t-seq" : "diagram"}" viewBox="0 0 ${num(scene.width)} ${num(scene.height)}" role="img" aria-labelledby="${labelled}">`,

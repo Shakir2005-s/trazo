@@ -51,11 +51,11 @@ export function validateDiagram(raw: unknown): ValidationResult {
   return buildArchitecture(parsed.data);
 }
 
+/** A missing top-level field points at the example; nested paths keep their own hints. */
 function withStartHint(issues: Issue[], type: string): Issue[] {
-  for (const issue of issues) {
-    if (issue.code === "schema/required" && issue.hint === undefined && !/[.[]/.test(issue.path)) {
-      issue.hint = `run "trazo example ${type}" for a starting point`;
-    }
-  }
-  return issues;
+  return issues.map((issue) =>
+    issue.code === "schema/required" && issue.hint === undefined && !/[.[]/.test(issue.path)
+      ? { ...issue, hint: `run "trazo example ${type}" for a starting point` }
+      : issue,
+  );
 }

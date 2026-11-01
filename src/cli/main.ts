@@ -4,7 +4,7 @@
 
 import { readFileSync } from "node:fs";
 import { parse, resolve } from "node:path";
-import { parseArgs } from "node:util";
+import { parseArgs, type ParseArgsConfig } from "node:util";
 import { check, make } from "../index.js";
 import { DIAGRAM_TYPES } from "../model/index.js";
 import { formatIssues, hasErrors, suggest, type Issue } from "../validate/issues.js";
@@ -23,19 +23,19 @@ interface Options {
   version?: boolean | undefined;
 }
 
+const OPTIONS = {
+  out: { type: "string", short: "o" },
+  theme: { type: "string" },
+  json: { type: "boolean" },
+  help: { type: "boolean", short: "h" },
+  version: { type: "boolean", short: "v" },
+} as const satisfies NonNullable<ParseArgsConfig["options"]>;
+
+const LONG_OPTIONS = Object.keys(OPTIONS).map((name) => `--${name}`);
+
 function parseCommandLine(argv: string[]): { options: Options; positionals: string[] } {
   try {
-    const { values, positionals } = parseArgs({
-      args: argv,
-      allowPositionals: true,
-      options: {
-        out: { type: "string", short: "o" },
-        theme: { type: "string" },
-        json: { type: "boolean" },
-        help: { type: "boolean", short: "h" },
-        version: { type: "boolean", short: "v" },
-      },
-    });
+    const { values, positionals } = parseArgs({ args: argv, allowPositionals: true, options: OPTIONS });
     return { options: values, positionals };
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
@@ -47,8 +47,6 @@ function parseCommandLine(argv: string[]): { options: Options; positionals: stri
     throw new UsageError(message.replace(/\. To specify.*$/, ""));
   }
 }
-
-const LONG_OPTIONS = ["--out", "--theme", "--json", "--help", "--version"];
 
 function suggestOption(given: string): string | undefined {
   if (!given.startsWith("--") || given.length < 4) return undefined;

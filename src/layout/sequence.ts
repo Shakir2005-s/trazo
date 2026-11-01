@@ -136,8 +136,9 @@ function build(seq: Sequence, heads: Headers, base: number[], dx: number): { sce
 
   function fragment(f: SeqFragment, y: number, depth: number, ext: Extent): number {
     const tag = f.op;
-    const group: SceneGroup = { id: `#f${counts.f++}`, x: 0, y, w: 0, h: 0, label: block([tag], 0, y, FRAG_SIZE, 600, "start"), depth, variant: "fragment", tag };
-    groups.push(group);
+    // Taken before the walk so outer fragments keep lower ids and draw under inner ones.
+    const id = `#f${counts.f++}`;
+    const at = groups.length;
 
     const mine: Extent = { lo: Infinity, hi: -Infinity };
     const splits: { y: number; when: string }[] = [];
@@ -154,14 +155,23 @@ function build(seq: Sequence, heads: Headers, base: number[], dx: number): { sce
     const guardW = (when: string) => textWidth(`[${when}]`, FRAG_SIZE, 400);
     const tabW = Math.ceil(textWidth(tag, FRAG_SIZE, 600)) + 2 * TAB_PAD;
     const needed = Math.max(tabW + TAB_PAD + guardW(f.branches[0]!.when) + TAB_PAD, ...splits.map((s) => guardW(s.when) + 2 * TAB_PAD));
-    Object.assign(group, { x: mine.lo, w: Math.ceil(Math.max(mine.hi - mine.lo, needed)), h: cursor - y });
-
-    const tab: Box = { x: group.x, y, w: tabW, h: FRAG_TAB_H };
+    const x = mine.lo;
+    const tab: Box = { x, y, w: tabW, h: FRAG_TAB_H };
     const textTop = (top: number) => top + (FRAG_TAB_H - lineHeight(FRAG_SIZE)) / 2;
-    group.tab = tab;
-    group.label = block([tag], tab.x + TAB_PAD, textTop(y), FRAG_SIZE, 600, "start");
-    group.guard = block([f.branches[0]!.when], tab.x + tabW + TAB_PAD, textTop(y), FRAG_SIZE, 400, "start");
-    group.dividers = splits.map((s) => ({ y: s.y, guard: block([s.when], group.x + TAB_PAD, s.y + 4, FRAG_SIZE, 400, "start") }));
+    const group: SceneGroup = {
+      id,
+      x,
+      y,
+      w: Math.ceil(Math.max(mine.hi - mine.lo, needed)),
+      h: cursor - y,
+      label: block([tag], tab.x + TAB_PAD, textTop(y), FRAG_SIZE, 600, "start"),
+      depth,
+      variant: "fragment",
+      tab,
+      guard: block([f.branches[0]!.when], tab.x + tabW + TAB_PAD, textTop(y), FRAG_SIZE, 400, "start"),
+      dividers: splits.map((s) => ({ y: s.y, guard: block([s.when], x + TAB_PAD, s.y + 4, FRAG_SIZE, 400, "start") })),
+    };
+    groups.splice(at, 0, group);
 
     grow(ext, group.x - FRAG_NEST_PAD, group.x + group.w + FRAG_NEST_PAD);
     grow(seen, group.x, group.x + group.w);

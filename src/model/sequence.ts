@@ -186,7 +186,7 @@ class Walker {
           "sequence/long-label",
           formatPath(short ? path : [...path, "label"]),
           `label is ${label.length} characters`,
-          "keep message labels under 80; move detail to a note",
+          `keep message labels under ${LONG_LABEL}; move detail to a note`,
         ),
       );
     }

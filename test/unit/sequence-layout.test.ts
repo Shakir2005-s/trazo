@@ -54,7 +54,7 @@ const inside = (inner: Box, outer: Box, pad = 0) =>
 const text = (e: SceneEdge) => e.label?.text.lines.join(" ");
 const edge = (s: Scene, label: string) => s.edges.find((e) => text(e) === label || text(e)?.startsWith(label))!;
 const node = (s: Scene, id: string) => s.nodes.find((n) => n.id === id)!;
-const frag = (s: Scene, tag: string) => s.groups.find((g) => g.tag === tag)!;
+const frag = (s: Scene, tag: string) => s.groups.find((g) => g.variant === "fragment" && g.label.lines[0] === tag)!;
 const lifeX = (s: Scene, id: string) => s.lifelines!.find((l) => l.id === id)!.x;
 const centre = (n: Box) => n.x + n.w / 2;
 const labelBoxes = (s: Scene) => s.edges.flatMap((e) => (e.label ? [e.label.box] : []));
