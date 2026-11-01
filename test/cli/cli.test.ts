@@ -2,7 +2,7 @@
 // Copyright 2026 Heidenber Palacio Garzón
 
 import { spawnSync } from "node:child_process";
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
@@ -96,6 +96,15 @@ describe("make", () => {
     expect(r.code).toBe(0);
     expect(r.stderr).toBe("");
     expect(r.stdout.startsWith("<!doctype html>")).toBe(true);
+    expect(readdirSync(dir)).toEqual([]);
+  });
+
+  it("reports an output that cannot be written and leaves no temp file", () => {
+    write("d.json", valid);
+    write("blocker", "i am a file");
+    const r = run(["make", "d.json", "-o", "blocker/x.html"]);
+    expect(r).toEqual({ code: 2, stdout: "", stderr: usageError('cannot write "blocker/x.html"') });
+    expect(readdirSync(dir).filter((f) => f.includes(".tmp-"))).toEqual([]);
   });
 
   it("reads stdin and honours -o", () => {

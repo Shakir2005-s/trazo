@@ -134,7 +134,11 @@ async function execute(argv: string[]): Promise<{ code: number; out: string; err
     const warnings = result.issues.length > 0 ? `${formatIssues(result.issues)}\n` : "";
     return { code: 0, out: result.html, err: warnings };
   }
-  writeAtomic(target, result.html);
+  try {
+    writeAtomic(target, result.html);
+  } catch {
+    throw new UsageError(`cannot write "${options.out ?? target}"`);
+  }
   const { out, err } = report(result.issues, json, { output: target });
   return { code: 0, out, err };
 }
