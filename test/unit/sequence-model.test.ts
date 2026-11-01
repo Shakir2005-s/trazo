@@ -273,6 +273,28 @@ describe("sequence model: notes", () => {
     });
   });
 
+  it.each([
+    [null, "null"],
+    [true, "boolean"],
+    [{ id: "api" }, "object"],
+  ])("names both accepted forms once when over is %j", (over, got) => {
+    expect(only(seq([{ note: "x", over }]))).toEqual({
+      severity: "error",
+      code: "schema/type",
+      path: "messages[0].over",
+      message: `expected an id or a list of ids, got ${got}`,
+    });
+  });
+
+  it("reports a missing over as missing, not as a wrong type", () => {
+    expect(only(seq([{ note: "x" }]))).toEqual({
+      severity: "error",
+      code: "schema/required",
+      path: "messages[0].over",
+      message: "missing",
+    });
+  });
+
   it("points an invalid id in the string form of over at over", () => {
     expect(only(seq([{ note: "x", over: "Bad Id!" }]))).toMatchObject({ code: "schema/id", path: "messages[0].over" });
   });

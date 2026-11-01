@@ -80,7 +80,13 @@ export const sequenceSchema = z.strictObject({
 type Parsed = z.output<typeof sequenceSchema>;
 
 const messageSchema = edgeSchema("sequence", ["->", "~>", "-->"], ["sync", "async", "reply"]);
-/** `over` takes one id or a list of ids; a single id is read as a list of one. */
+/**
+ * `over` takes one id or a list of ids; a single id is read as a list of one.
+ * Any other present value is reported here, naming both forms. A missing `over`
+ * passes through so the array schema reports it as required, not as a wrong
+ * type. An issue pushed here stops the pipe, so the array schema adds no second
+ * type error.
+ */
 const overSchema = z.preprocess((v, ctx) => {
   if (typeof v === "string") return [v];
   if (v !== undefined && !Array.isArray(v)) {
