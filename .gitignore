@@ -6,6 +6,7 @@ dist/
 coverage/
 *.tsbuildinfo
 .vitest/
+*.tgz
 
 # Generated diagrams and local scratch
 out/
