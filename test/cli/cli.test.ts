@@ -103,7 +103,10 @@ describe("make", () => {
     write("d.json", valid);
     write("blocker", "i am a file");
     const r = run(["make", "d.json", "-o", "blocker/x.html"]);
-    expect(r).toEqual({ code: 2, stdout: "", stderr: usageError('cannot write "blocker/x.html"') });
+    // mkdir under a regular file fails with EEXIST on Windows and ENOTDIR elsewhere
+    const cause = /\((E[A-Z]+)\)/.exec(r.stderr)?.[1];
+    expect(["EEXIST", "ENOTDIR"]).toContain(cause);
+    expect(r).toEqual({ code: 2, stdout: "", stderr: usageError(`cannot write "blocker/x.html" (${cause})`) });
     expect(readdirSync(dir).filter((f) => f.includes(".tmp-"))).toEqual([]);
   });
 

@@ -10,7 +10,7 @@ import { DIAGRAM_TYPES } from "../model/index.js";
 import { formatIssues, hasErrors, suggest, type Issue } from "../validate/issues.js";
 import { VERSION } from "../version.js";
 import { REFERENCE } from "./reference.js";
-import { readInput, writeAtomic } from "./io.js";
+import { readInput, writeAtomic, writeError } from "./io.js";
 import { USAGE, UsageError } from "./usage.js";
 
 const COMMANDS = ["make", "check", "schema", "example"];
@@ -136,8 +136,8 @@ async function execute(argv: string[]): Promise<{ code: number; out: string; err
   }
   try {
     writeAtomic(target, result.html);
-  } catch {
-    throw new UsageError(`cannot write "${options.out ?? target}"`);
+  } catch (err) {
+    throw writeError(err, options.out ?? target);
   }
   const { out, err } = report(result.issues, json, { output: target });
   return { code: 0, out, err };

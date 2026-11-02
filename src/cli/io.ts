@@ -13,6 +13,20 @@ export function readInput(input: string): string {
   }
 }
 
+/**
+ * A failed write of `shown`: a system error from the OS (it carries both a code
+ * such as EACCES and the failing syscall) becomes a usage error naming the path
+ * and the cause; anything else, including Node's own ERR_* programming errors,
+ * is a defect and passes through unchanged, so it stays an internal error.
+ */
+export function writeError(err: unknown, shown: string): Error {
+  const { code, syscall } = (err ?? {}) as { code?: unknown; syscall?: unknown };
+  if (err instanceof Error && typeof code === "string" && typeof syscall === "string") {
+    return new UsageError(`cannot write "${shown}" (${code})`);
+  }
+  return err instanceof Error ? err : new Error(String(err));
+}
+
 /** Temp file in the target directory so the rename never crosses a device. */
 export function writeAtomic(path: string, content: string): void {
   mkdirSync(dirname(path), { recursive: true });
