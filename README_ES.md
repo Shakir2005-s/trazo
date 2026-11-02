@@ -2,6 +2,8 @@
 
 # trazo
 
+El agente dice qué hay en el sistema; trazo decide dónde va cada cosa.
+
 Escribís un diagrama como JSON semántico, sin coordenadas. trazo lo valida, lo acomoda y escribe un único archivo HTML autocontenido.
 
 ![Diagrama entidad-relación generado por trazo, con tablas, columnas y claves foráneas](https://raw.githubusercontent.com/heidenber/trazo/main/docs/erd-light.png)
@@ -24,6 +26,26 @@ trazo make demo.json
 ```
 
 Esto escribe `demo.html` junto al archivo de entrada e imprime su ruta. Abrilo en el navegador: podés mover y hacer zoom, pasar el mouse sobre un nodo (o enfocarlo con el teclado) para ver su nota y resaltar sus conexiones, y exportar a SVG o PNG. No necesita servidor ni hace pedidos de red.
+
+## Cuándo usarlo
+
+trazo hace una sola cosa: un agente (o vos) describe el diagrama, y el código lo acomoda.
+
+- La entrada no tiene coordenadas, tamaños ni estilos, así que hay poco para leer y poco para errarle. `trazo schema` más `trazo example` de un tipo son unos 700 tokens, unos 1.000 con la skill.
+- Los errores nombran la ruta exacta dentro del JSON y traen una pista, así que un agente puede corregir su entrada a partir del mensaje. En las corridas de agentes registradas, Claude Sonnet 5.5 obtuvo un diagrama válido en el primer `make` en todas las corridas y Claude Haiku 4.5 en el 92 a 96%; todas terminaron con un diagrama válido.
+- El mismo JSON siempre da el mismo HTML, byte por byte, sin navegador y sin red.
+- Las claves foráneas del ERD apuntan a columnas, no solo a tablas.
+
+Números y método: [bench/README.md](bench/README.md).
+
+Lo que no hace:
+
+- Solo cuatro tipos: arquitectura, workflow, ERD y secuencia. Mermaid, PlantUML y D2 cubren muchos más.
+- No se renderiza dentro de Markdown. GitHub, GitLab y muchos editores muestran bloques de Mermaid directamente; con trazo abrís el HTML o exportás SVG o PNG desde ahí.
+- No se edita en la salida: cambiás el JSON y volvés a correr `make`.
+- No importa Mermaid, no trae íconos de nube ni de marcas, no genera páginas explicativas ni revisa el resultado en un navegador.
+
+Las skills de diagramas para agentes más grandes hacen más de esto. trazo lo cambia por menos para leer y un layout que no depende del modelo.
 
 ## Instalación
 
