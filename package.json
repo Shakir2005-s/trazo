@@ -6,7 +6,7 @@
   "author": "Heidenber Palacio Garzón",
   "type": "module",
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
   },
   "repository": {
     "type": "git",

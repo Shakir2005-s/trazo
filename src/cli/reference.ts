@@ -41,7 +41,7 @@ rules
   ids are unique across nodes and groups
   a node or group sits in one group only
   a group cannot contain itself, directly or not
-  edges need existing node ids
+  edges need existing node or group ids
   no coordinates, sizes or colors
   more than 60 nodes warns: split the diagram by area
   texts must not be empty

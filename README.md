@@ -27,7 +27,7 @@ This writes `demo.html` next to the input and prints its path. Open it in a brow
 
 ## Install
 
-trazo is not published on npm yet. Until it is, install it from source (Node 20 or newer):
+trazo is not published on npm yet. Until it is, install it from source (Node 22 or later):
 
 ```sh
 git clone https://github.com/heidenber/trazo
@@ -48,7 +48,7 @@ Once published, `npm i -g trazo` will be enough.
 | `trazo schema <type>` | Print the compact field reference for a diagram type. |
 | `trazo example <type>` | Print a complete example diagram, valid input for `make`. |
 
-`<input>` is a JSON file, or `-` to read stdin. `<type>` is `architecture`, `workflow`, `erd` or `sequence`. With `-o -`, `make` writes the HTML to stdout. `--json` prints one JSON line instead of plain text.
+`<input>` is a JSON file, or `-` to read stdin. `<type>` is `architecture`, `workflow`, `erd` or `sequence`. Without `-o`, `make` writes `<input>` with a `.html` extension; with `-o -`, or when `<input>` is `-` and there is no `-o`, it writes the HTML to stdout. `--json` prints one JSON line instead of plain text and covers results (`make`, `check`); usage errors (exit 2) are always plain text on stderr.
 
 Exit codes: 0 ok, 1 invalid input, 2 usage error, 3 internal error.
 
@@ -105,6 +105,8 @@ const made = await make(jsonTextOrObject, { theme: "dark" });
 ```
 
 Both accept JSON text or an already parsed object. `make` also returns geometry warnings in `issues`.
+
+The stable part of an `Issue` is `severity`, `code`, `path` and `hint`. The `message` text may change between versions, so do not match on it.
 
 ## Performance
 

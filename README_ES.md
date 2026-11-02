@@ -27,7 +27,7 @@ Esto escribe `demo.html` junto al archivo de entrada e imprime su ruta. Abrilo e
 
 ## Instalación
 
-trazo todavía no está publicado en npm. Hasta que lo esté, se instala desde el código fuente (Node 20 o superior):
+trazo todavía no está publicado en npm. Hasta que lo esté, se instala desde el código fuente (Node 22 o superior):
 
 ```sh
 git clone https://github.com/heidenber/trazo
@@ -48,7 +48,7 @@ Una vez publicado, alcanzará con `npm i -g trazo`.
 | `trazo schema <type>` | Imprime la referencia compacta de campos de un tipo de diagrama. |
 | `trazo example <type>` | Imprime un diagrama de ejemplo completo, entrada válida para `make`. |
 
-`<input>` es un archivo JSON, o `-` para leer de stdin. `<type>` es `architecture`, `workflow`, `erd` o `sequence`. Con `-o -`, `make` escribe el HTML en stdout. `--json` imprime una línea JSON en lugar de texto plano.
+`<input>` es un archivo JSON, o `-` para leer de stdin. `<type>` es `architecture`, `workflow`, `erd` o `sequence`. Sin `-o`, `make` escribe `<input>` con extensión `.html`; con `-o -`, o cuando `<input>` es `-` y no hay `-o`, escribe el HTML en stdout. `--json` imprime una línea JSON en lugar de texto plano y cubre los resultados (`make`, `check`); los errores de uso (salida 2) son siempre texto plano en stderr.
 
 Códigos de salida: 0 correcto, 1 entrada inválida, 2 error de uso, 3 error interno.
 
@@ -105,6 +105,8 @@ const made = await make(jsonTextOrObject, { theme: "dark" });
 ```
 
 Las dos aceptan texto JSON o un objeto ya parseado. `make` también devuelve en `issues` los avisos de geometría.
+
+La parte estable de un `Issue` es `severity`, `code`, `path` y `hint`. El texto de `message` puede cambiar entre versiones, así que no lo uses para comparar.
 
 ## Rendimiento
 

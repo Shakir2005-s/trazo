@@ -18,7 +18,7 @@ Commands:
   example  print a complete example diagram, valid input for make
 
 Options:
-  -o, --out <file>   output path (default: <input> with .html; "-" for stdout)
+  -o, --out <file>   output path (default: <input> with .html, or stdout when <input> is "-"; "-" forces stdout)
       --theme <t>    light or dark; overrides the diagram's theme
       --json         print one JSON line instead of plain text
   -h, --help         show this help
