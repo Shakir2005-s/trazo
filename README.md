@@ -31,7 +31,7 @@ This writes `demo.html` next to the input and prints its path. Open it in a brow
 
 trazo does one job: an agent (or you) describes the diagram, and code lays it out.
 
-- The input has no coordinates, sizes or styles, so there is little to read and little to get wrong. Before writing a diagram, an agent reads `trazo schema` and `trazo example` for its type: about 700 tokens, about 1,000 with the skill (estimated as characters / 4).
+- The input has no coordinates, sizes or styles, so there is little to read and little to get wrong. Before writing a diagram, an agent reads `trazo schema` and `trazo example` for its type: about 700 tokens, about 1,100 with the skill (estimated as characters / 4).
 - Errors name the exact path in the JSON and carry a hint, so an agent can fix its input from the message. In the recorded agent runs, Claude Sonnet 5.5 got a valid diagram on the first `make` in every run and Claude Haiku 4.5 in 92 to 96% of runs; every run ended with a valid diagram.
 - The same JSON always gives the same HTML, byte for byte, with no browser and no network.
 - ERD foreign keys point at columns, not only at tables.
@@ -89,7 +89,7 @@ trazo example erd | trazo make - -o erd.html
 
 ## Skill for agents
 
-`skill/` has a short skill that tells an agent to start from `trazo example`, check the JSON and fix errors from the messages. `skill/SKILL.md` is for Claude Code and Pi; `skill/AGENTS.md` is the same text for Codex. trazo does not install anything on its own: copy the files after installing the package globally. These are the documented locations for each agent; check them against your agent's version.
+`skill/` has a short skill that tells an agent to read the code before drawing and draw only what it found, cite each part in `source`, start from `trazo example`, check the JSON and fix errors from the messages. `skill/SKILL.md` is for Claude Code and Pi; `skill/AGENTS.md` is the same text for Codex. trazo does not install anything on its own: copy the files after installing the package globally. These are the documented locations for each agent; check them against your agent's version.
 
 Bash:
 

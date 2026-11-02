@@ -31,7 +31,7 @@ Esto escribe `demo.html` junto al archivo de entrada e imprime su ruta. Abrilo e
 
 trazo hace una sola cosa: un agente (o vos) describe el diagrama, y el código lo acomoda.
 
-- La entrada no tiene coordenadas, tamaños ni estilos, así que hay poco para leer y poco para errarle. Antes de escribir un diagrama, un agente lee `trazo schema` y `trazo example` de ese tipo: unos 700 tokens, unos 1.000 con la skill (estimado como caracteres / 4).
+- La entrada no tiene coordenadas, tamaños ni estilos, así que hay poco para leer y poco para errarle. Antes de escribir un diagrama, un agente lee `trazo schema` y `trazo example` de ese tipo: unos 700 tokens, unos 1.100 con la skill (estimado como caracteres / 4).
 - Los errores nombran la ruta exacta dentro del JSON y traen una pista, así que un agente puede corregir su entrada a partir del mensaje. En las corridas de agentes registradas, Claude Sonnet 5.5 obtuvo un diagrama válido en el primer `make` en todas las corridas y Claude Haiku 4.5 en el 92 a 96%; todas terminaron con un diagrama válido.
 - El mismo JSON siempre da el mismo HTML, byte por byte, sin navegador y sin red.
 - Las claves foráneas del ERD apuntan a columnas, no solo a tablas.
@@ -89,7 +89,7 @@ trazo example erd | trazo make - -o erd.html
 
 ## Skill para agentes
 
-`skill/` trae una skill corta que le indica al agente que parta de `trazo example`, valide el JSON y corrija los errores a partir de los mensajes. `skill/SKILL.md` es para Claude Code y Pi; `skill/AGENTS.md` es el mismo texto para Codex. trazo no instala nada por su cuenta: copiá los archivos después de instalar el paquete de forma global. Son las ubicaciones documentadas de cada agente; comprobalas contra la versión que uses.
+`skill/` trae una skill corta que le indica al agente que lea el código antes de dibujar y dibuje solo lo que encontró, cite cada parte en `source`, parta de `trazo example`, valide el JSON y corrija los errores a partir de los mensajes. `skill/SKILL.md` es para Claude Code y Pi; `skill/AGENTS.md` es el mismo texto para Codex. trazo no instala nada por su cuenta: copiá los archivos después de instalar el paquete de forma global. Son las ubicaciones documentadas de cada agente; comprobalas contra la versión que uses.
 
 Bash:
 

@@ -4,45 +4,45 @@
   "trazoVersion": "0.1.0",
   "node": "v24.12.0",
   "platform": "win32-x64",
-  "skillTokens": 300,
+  "skillTokens": 427,
   "reading": {
     "architecture": {
       "schemaTokens": 332,
       "exampleTokens": 389,
       "total": 721,
-      "totalWithSkill": 1021
+      "totalWithSkill": 1148
     },
     "workflow": {
       "schemaTokens": 321,
       "exampleTokens": 352,
       "total": 673,
-      "totalWithSkill": 973
+      "totalWithSkill": 1100
     },
     "erd": {
       "schemaTokens": 322,
       "exampleTokens": 418,
       "total": 740,
-      "totalWithSkill": 1040
+      "totalWithSkill": 1167
     },
     "sequence": {
       "schemaTokens": 329,
       "exampleTokens": 359,
       "total": 688,
-      "totalWithSkill": 988
+      "totalWithSkill": 1115
     }
   },
   "make50": {
     "nodes": 50,
     "runs": 5,
     "inProcessMs": {
-      "median": 103.5,
-      "min": 93.3,
-      "max": 110
+      "median": 106.6,
+      "min": 78.8,
+      "max": 112
     },
     "cliMs": {
-      "median": 726,
-      "min": 705.1,
-      "max": 747.9
+      "median": 725,
+      "min": 707.8,
+      "max": 744.8
     },
     "htmlBytes": 129466
   },
