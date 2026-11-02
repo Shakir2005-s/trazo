@@ -1,7 +1,7 @@
 {
   "name": "trazo",
   "version": "0.1.0",
-  "description": "Diagrams your agent gets right the first time: semantic JSON in, laid-out interactive HTML out.",
+  "description": "Semantic JSON in, laid-out interactive HTML out: diagrams for coding agents.",
   "license": "Apache-2.0",
   "author": "Heidenber Palacio Garzón",
   "type": "module",
