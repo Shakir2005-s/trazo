@@ -7,10 +7,18 @@ import { UsageError } from "../../src/cli/usage.js";
 
 describe("writeError", () => {
   it("turns a file system error into a usage error that names the path and the cause", () => {
-    const cause = Object.assign(new Error("EACCES: permission denied, open 'out.html.tmp-1'"), { code: "EACCES" });
+    const cause = Object.assign(new Error("EACCES: permission denied, open 'out.html.tmp-1'"), {
+      code: "EACCES",
+      syscall: "open",
+    });
     const err = writeError(cause, "out.html");
     expect(err).toBeInstanceOf(UsageError);
     expect(err.message).toBe('cannot write "out.html" (EACCES)');
+  });
+
+  it("keeps a Node programming error with a code but no syscall as an internal error", () => {
+    const bug = Object.assign(new TypeError('The "path" argument must be of type string'), { code: "ERR_INVALID_ARG_TYPE" });
+    expect(writeError(bug, "out.html")).toBe(bug);
   });
 
   it("passes any other error through unchanged, so it stays an internal error", () => {
