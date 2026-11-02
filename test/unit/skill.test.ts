@@ -47,6 +47,14 @@ describe("skill/SKILL.md", () => {
     expect(skill.body).toContain("`trazo make <file>`");
   });
 
+  it("tells the agent to draw only what it found in the code, with sources and one level of detail", () => {
+    expect(skill.body).toContain("read it first and draw only what you found");
+    expect(skill.body).toContain("`source`");
+    expect(skill.body).toContain("one level of detail");
+    expect(skill.body).toContain("ask the user");
+    expect(skill.body).toContain("docs/diagrams/");
+  });
+
   it("only mentions real commands", () => {
     const found = [...skill.body.matchAll(/\btrazo ([a-z]+)/g)].map((m) => m[1]);
     expect(found.length).toBeGreaterThan(0);

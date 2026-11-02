@@ -151,6 +151,14 @@ One skill run wrote its JSON inside the skill's own folder, which the sandbox re
 
 After H7 (request-worded prompts, `trazo <file>` and `--output` hints, a hint for a missing top-level field, `over` accepted as a string), Haiku 4.5 reaches 96% first-try success with the skill and 92% without, and every run ends with a valid diagram. Three runs missed the first `make` (`arch-monorepo` skill, `wf-expenses` no-skill, `seq-oauth` no-skill); each failed one command and recovered with one edit. Their `stream.jsonl` files are gone: the Sonnet rerun used the same sandbox directories right after, so the cause of these three misses was not recorded. Sonnet 5.5 stays at 100%. The skill still makes runs neither cheaper nor more successful on these tasks.
 
+On 2026-11-02 the skill gained a step about content (read the code first and draw only what you found, one level of detail, ask when the scope is unclear, `source` as `path:line`). Haiku 4.5 was rerun on the skill condition only, since the no-skill condition did not change:
+
+| Agent | Model | Date | Condition | Runs | First-try rate | Final success | Median repairs | Median total input tokens | Median output tokens | Median seconds |
+|---|---|---|---|---|---|---|---|---|---|---|
+| Claude Code 2.1.308 | claude-haiku-4-5 | 2026-11-02 | skill | 24 | 92% | 100% | 0 | 132,770 | 2,575 | 28.9 |
+
+Raw runs: `bench/results/2026-11-02-agent-claude-code-haiku-4-5-skill-content.json`. That is 22 of 24 against 23 of 24 before, a difference of one run, within the spread of three runs per task. No run asked a question instead of drawing. Both misses wrote the JSON without running `trazo example`: `arch-monorepo` never loaded the skill and used an edge arrow that does not exist (`<-~>`); `erd-blog` loaded it and guessed `kind`, `name` and `fields` instead of `type`, `id` and `columns`. Each recovered from the error messages. These tasks give the content in the prompt, so they check that the longer skill does not hurt the format; they do not measure whether diagrams of real code get better.
+
 Two no-skill runs were first recorded with `firstTryOk: false`: the agent chained `trazo make` with an `rm` that the sandbox refused, then ran `make` again and it passed. The parser was fixed to skip refused calls only, and every run was recomputed from its `stream.jsonl`; only those two values changed.
 
 Deterministic results are in `bench/results/*-deterministic.json`.
