@@ -1,0 +1,72 @@
+{
+  "kind": "deterministic",
+  "date": "2026-11-02",
+  "trazoVersion": "0.1.0",
+  "node": "v24.12.0",
+  "platform": "win32-x64",
+  "skillTokens": 300,
+  "reading": {
+    "architecture": {
+      "schemaTokens": 332,
+      "exampleTokens": 389,
+      "total": 721,
+      "totalWithSkill": 1021
+    },
+    "workflow": {
+      "schemaTokens": 321,
+      "exampleTokens": 352,
+      "total": 673,
+      "totalWithSkill": 973
+    },
+    "erd": {
+      "schemaTokens": 322,
+      "exampleTokens": 418,
+      "total": 740,
+      "totalWithSkill": 1040
+    },
+    "sequence": {
+      "schemaTokens": 329,
+      "exampleTokens": 359,
+      "total": 688,
+      "totalWithSkill": 988
+    }
+  },
+  "make50": {
+    "nodes": 50,
+    "runs": 5,
+    "inProcessMs": {
+      "median": 103.5,
+      "min": 93.3,
+      "max": 110
+    },
+    "cliMs": {
+      "median": 726,
+      "min": 705.1,
+      "max": 747.9
+    },
+    "htmlBytes": 129466
+  },
+  "htmlBytes": {
+    "architecture": 94157,
+    "workflow": 91648,
+    "erd": 103617,
+    "sequence": 95725,
+    "synthetic": 129466
+  },
+  "deterministic": {
+    "architecture": true,
+    "workflow": true,
+    "erd": true,
+    "sequence": true,
+    "synthetic": true
+  },
+  "thresholds": {
+    "makeMs": 1000,
+    "htmlBytes": 307200
+  },
+  "pass": {
+    "makeMs": true,
+    "htmlBytes": true,
+    "readingTokens": true
+  }
+}
