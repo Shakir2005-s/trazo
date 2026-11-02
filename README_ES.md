@@ -45,7 +45,7 @@ Lo que no hace:
 - No se edita en la salida: cambiás el JSON y volvés a correr `make`.
 - No importa Mermaid, no trae íconos de nube ni de marcas, no genera páginas explicativas ni revisa el resultado en un navegador.
 
-Las skills de diagramas para agentes más grandes, como Archify, hacen más de esto. trazo lo cambia por menos para leer y un layout que no depende del modelo.
+Las skills de diagramas para agentes más grandes hacen más de esto. trazo lo cambia por menos para leer y un layout que no depende del modelo.
 
 ## Instalación
 

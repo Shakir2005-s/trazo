@@ -45,7 +45,7 @@ What it does not do:
 - No editing in the output: change the JSON and run `make` again.
 - No Mermaid import, no cloud or brand icons, no explainer pages, no browser check of the result.
 
-Larger agent diagram skills, such as Archify, do more of the above. trazo trades that for less to read and a layout that does not depend on the model.
+Larger agent diagram skills do more of the above. trazo trades that for less to read and a layout that does not depend on the model.
 
 ## Install
 
