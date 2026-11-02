@@ -52,10 +52,10 @@ Las skills de diagramas para agentes más grandes hacen más de esto. trazo lo c
 Node 22 o superior:
 
 ```sh
-npm i -g trazo
+npm i -g @heidenber/trazo
 ```
 
-Esto instala el comando `trazo`. Para usar trazo como librería en un proyecto, corré `npm i trazo` en su lugar.
+Esto instala el comando `trazo`. Para usar trazo como librería en un proyecto, corré `npm i @heidenber/trazo` en su lugar.
 
 Para instalarlo desde el código fuente:
 
@@ -100,7 +100,7 @@ trazo example erd | trazo make - -o erd.html
 Bash:
 
 ```bash
-SK="$(npm root -g)/trazo/skill"
+SK="$(npm root -g)/@heidenber/trazo/skill"
 mkdir -p ~/.claude/skills/trazo && cp "$SK/SKILL.md" ~/.claude/skills/trazo/        # Claude Code
 mkdir -p ~/.pi/agent/skills/trazo && cp "$SK/SKILL.md" ~/.pi/agent/skills/trazo/    # Pi
 mkdir -p ~/.codex && cat "$SK/AGENTS.md" >> ~/.codex/AGENTS.md                      # Codex
@@ -123,7 +123,7 @@ Si corrés el comando de Codex dos veces, el bloque queda duplicado. Para actual
 ## Librería
 
 ```js
-import { check, make } from "trazo";
+import { check, make } from "@heidenber/trazo";
 
 const result = check(jsonTextOrObject);
 // { ok: boolean, issues: Issue[] }

@@ -52,10 +52,10 @@ Larger agent diagram skills do more of the above. trazo trades that for less to 
 Node 22 or later:
 
 ```sh
-npm i -g trazo
+npm i -g @heidenber/trazo
 ```
 
-This installs the `trazo` command. To use trazo as a library in a project, run `npm i trazo` instead.
+This installs the `trazo` command. To use trazo as a library in a project, run `npm i @heidenber/trazo` instead.
 
 To install from source:
 
@@ -100,7 +100,7 @@ trazo example erd | trazo make - -o erd.html
 Bash:
 
 ```bash
-SK="$(npm root -g)/trazo/skill"
+SK="$(npm root -g)/@heidenber/trazo/skill"
 mkdir -p ~/.claude/skills/trazo && cp "$SK/SKILL.md" ~/.claude/skills/trazo/        # Claude Code
 mkdir -p ~/.pi/agent/skills/trazo && cp "$SK/SKILL.md" ~/.pi/agent/skills/trazo/    # Pi
 mkdir -p ~/.codex && cat "$SK/AGENTS.md" >> ~/.codex/AGENTS.md                      # Codex
@@ -123,7 +123,7 @@ Running the Codex command twice appends the block twice. To update it, delete ev
 ## Library
 
 ```js
-import { check, make } from "trazo";
+import { check, make } from "@heidenber/trazo";
 
 const result = check(jsonTextOrObject);
 // { ok: boolean, issues: Issue[] }
