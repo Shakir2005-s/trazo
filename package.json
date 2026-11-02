@@ -1,5 +1,5 @@
 {
-  "name": "trazo",
+  "name": "@heidenber/trazo",
   "version": "0.1.0",
   "description": "Semantic JSON in, laid-out interactive HTML out: diagrams for coding agents.",
   "license": "Apache-2.0",
