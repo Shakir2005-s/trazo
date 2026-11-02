@@ -49,7 +49,15 @@ Larger agent diagram skills do more of the above. trazo trades that for less to 
 
 ## Install
 
-trazo is not published on npm yet. Until it is, install it from source (Node 22 or later):
+Node 22 or later:
+
+```sh
+npm i -g trazo
+```
+
+This installs the `trazo` command. To use trazo as a library in a project, run `npm i trazo` instead.
+
+To install from source:
 
 ```sh
 git clone https://github.com/heidenber/trazo
@@ -58,8 +66,6 @@ npm ci
 npm run build
 npm i -g .
 ```
-
-Once published, `npm i -g trazo` will be enough.
 
 ## Commands
 

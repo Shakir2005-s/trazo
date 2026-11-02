@@ -49,7 +49,15 @@ Las skills de diagramas para agentes más grandes hacen más de esto. trazo lo c
 
 ## Instalación
 
-trazo todavía no está publicado en npm. Hasta que lo esté, se instala desde el código fuente (Node 22 o superior):
+Node 22 o superior:
+
+```sh
+npm i -g trazo
+```
+
+Esto instala el comando `trazo`. Para usar trazo como librería en un proyecto, corré `npm i trazo` en su lugar.
+
+Para instalarlo desde el código fuente:
 
 ```sh
 git clone https://github.com/heidenber/trazo
@@ -58,8 +66,6 @@ npm ci
 npm run build
 npm i -g .
 ```
-
-Una vez publicado, alcanzará con `npm i -g trazo`.
 
 ## Comandos
 
