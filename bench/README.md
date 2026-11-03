@@ -123,6 +123,8 @@ Run `node scripts/bench.mjs --summary <file>` to get, per condition, the number 
 node bench/run-agent.mjs --agent opencode --model opencode/deepseek-v4.1-flash-free --task arch-shop --condition skill --runs 1 --out tmp/pilot.json
 ```
 
+**Which binary runs.** On Windows `opencode` is usually a `.cmd` shim, and `cmd.exe` cuts a command line at the first newline, which would drop everything after the first line of the prompt (including the instruction to save `diagram.html`). So the runner never passes a prompt through `cmd.exe`: it goes through the `where` results in order and takes the first that is an `.exe`, or a `.cmd`/`.bat` shim whose launch line is a quoted `%dp0%\...\opencode.exe` (the npm shim) that exists; a `.cmd` wrapper that does not reference an `.exe` is skipped. It spawns that `.exe` directly, prints `agent binary: <path>` at start and saves it as `agentBin` in the results file, so a run can be audited. If nothing qualifies it stops with an error; pass `--agent-cmd <path to opencode.exe>`. As a guard, a shell spawn with a newline in an argument throws instead of truncating it.
+
 What differs from the Claude Code runs:
 
 - **Sandbox outside the repository.** The default root is `<os temp dir>/trazo-bench-runs/<model>/`. OpenCode sees the git repository around its working directory (its snapshots hold the repo tree), so a sandbox inside this checkout would leak it. An explicit `--sandbox-root` still wins; keep it outside any repository.

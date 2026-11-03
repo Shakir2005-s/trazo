@@ -2,7 +2,9 @@
 // Copyright 2026 Heidenber Palacio Garzón
 
 // Agent benchmark runner. Needs the built dist/ (npm run build) and the CLI of the chosen agent
-// (Claude Code, or OpenCode with a free model).
+// (Claude Code, or OpenCode with a free model). On Windows the agent is resolved to its real .exe (a .cmd shim is
+// followed to the .exe it launches, wrappers are skipped) and spawned without a shell, so multi-line prompts arrive
+// intact; if none is found pass --agent-cmd <path to the .exe>. The resolved path is printed and saved as agentBin.
 //   node bench/run-agent.mjs --model <id> [--agent claude-code|opencode] [--task <id>]...
 //     [--condition skill|no-skill|both] [--runs N] [--out <file>] [--agent-cmd <path>]
 //     [--sandbox-root <dir>] [--timeout <s>] [--resume] [--dry-run]
@@ -18,7 +20,7 @@ import { summarize } from "../scripts/bench-lib.mjs";
 import { tmpdir } from "node:os";
 import {
   agentEnv, buildAgentArgs, buildPrompt, defaultSandboxRoot, formatCommandLine, opencodeConfig, opencodeEnv, opencodeRunEnv, parseArgs,
-  parseOpencodeStream, parseStream, planRuns, runName, shimFiles, skillSegments,
+  parseOpencodeStream, parseStream, planRuns, runName, shellCommandLine, shimExePath, shimFiles, skillSegments,
 } from "./run-agent-lib.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
@@ -45,18 +47,41 @@ const isOpencode = opts.agent === "opencode";
 const parseOutput = isOpencode ? parseOpencodeStream : parseStream;
 const plan = planRuns(opts.tasks, opts.conditions, opts.runs);
 
-/** Resolves the agent command to [file, ...prefixArgs, shell]. */
-function resolveAgent(cmd) {
-  if (/\.(mjs|cjs|js)$/.test(cmd)) return { file: process.execPath, prefix: [resolve(cmd)], shell: false };
-  if (process.platform === "win32" && !/[\\/]/.test(cmd) && !/\.\w+$/.test(cmd)) {
-    const found = spawnSync("where", [cmd], { encoding: "utf8" }).stdout?.split(/\r?\n/).filter(Boolean) ?? [];
-    const exe = found.find((f) => /\.exe$/i.test(f));
-    if (exe) return { file: exe, prefix: [], shell: false };
-    const bat = found.find((f) => /\.(cmd|bat)$/i.test(f));
-    if (bat) return { file: bat, prefix: [], shell: true };
+/** Real executable of a .cmd/.bat shim (see shimExePath), or null. */
+function exeBehindShim(shim) {
+  try {
+    const exe = shimExePath(readFileSync(shim, "utf8"), dirname(resolve(shim)));
+    return exe && existsSync(exe) ? exe : null;
+  } catch {
+    return null;
   }
-  return { file: cmd, prefix: [], shell: /\.(cmd|bat)$/i.test(cmd) };
 }
+
+/**
+ * Resolves the agent command to { file, prefix, shell }. A prompt never goes through cmd.exe: on Windows a
+ * .cmd/.bat is replaced by the .exe it launches, and a wrapper that does not reference one is skipped.
+ */
+function resolveAgentOnce(cmd) {
+  if (/\.(mjs|cjs|js)$/.test(cmd)) return { file: process.execPath, prefix: [resolve(cmd)], shell: false, bin: resolve(cmd) };
+  if (process.platform !== "win32") return { file: cmd, prefix: [], shell: false, bin: cmd };
+  const hint = `pass --agent-cmd <path to ${opts.agent === "opencode" ? "opencode" : "the agent"}.exe>`;
+  if (/[\\/]/.test(cmd) || /\.\w+$/.test(cmd)) {
+    if (/\.(cmd|bat)$/i.test(cmd)) {
+      const exe = exeBehindShim(cmd);
+      if (!exe) fail(`${cmd} does not launch an .exe directly; ${hint}`);
+      return { file: exe, prefix: [], shell: false, bin: exe };
+    }
+    return { file: cmd, prefix: [], shell: false, bin: cmd };
+  }
+  const found = spawnSync("where", [cmd], { encoding: "utf8" }).stdout?.split(/\r?\n/).map((f) => f.trim()).filter(Boolean) ?? [];
+  for (const f of found) {
+    const exe = /\.exe$/i.test(f) ? f : /\.(cmd|bat)$/i.test(f) ? exeBehindShim(f) : null;
+    if (exe) return { file: exe, prefix: [], shell: false, bin: exe };
+  }
+  return fail(`could not find an executable for "${cmd}" (wrappers and .cmd files that do not launch an .exe are skipped); ${hint}`);
+}
+let resolvedAgent;
+const resolveAgent = (cmd) => (resolvedAgent ??= resolveAgentOnce(cmd));
 
 if (opts.dryRun) {
   for (const p of plan) {
@@ -70,6 +95,8 @@ if (opts.dryRun) {
 }
 
 if (!existsSync(distCli)) fail("dist/ not found; run npm run build");
+const agentBin = resolveAgent(opts.agentCmd).bin;
+console.log(`agent binary: ${agentBin}`);
 const VERSION = JSON.parse(readFileSync(join(root, "package.json"), "utf8")).version ?? "unknown";
 
 // Output file: load the existing record or start a new one.
@@ -82,6 +109,7 @@ if (existsSync(outFile)) {
 } else {
   record = { kind: "agent", date: today, trazoVersion: VERSION, agent: opts.agent, model: opts.model, runsPerTask: opts.runs, runs: [] };
 }
+record.agentBin = agentBin;
 const save = () => {
   mkdirSync(dirname(outFile), { recursive: true });
   writeFileSync(outFile, `${JSON.stringify(record, null, 2)}\n`);
@@ -103,7 +131,7 @@ if (isOpencode) {
   const agent = resolveAgent(opts.agentCmd);
   const argv = [...agent.prefix, "--version"];
   const v = agent.shell
-    ? spawnSync(formatCommandLine(agent.file, argv), { cwd: sandboxRoot, env: opencodeRunEnv(baseEnv, sandboxRoot), shell: true, encoding: "utf8" })
+    ? spawnSync(shellCommandLine(agent.file, argv), { cwd: sandboxRoot, env: opencodeRunEnv(baseEnv, sandboxRoot), shell: true, encoding: "utf8" })
     : spawnSync(agent.file, argv, { cwd: sandboxRoot, env: opencodeRunEnv(baseEnv, sandboxRoot), encoding: "utf8" });
   const version = v.status === 0 ? v.stdout.trim() : "";
   if (!version) fail(`could not read the version from ${opts.agentCmd} --version`);
@@ -134,7 +162,7 @@ function runAgent(sandbox, args) {
     const argv = [...agent.prefix, ...args];
     const env = isOpencode ? opencodeRunEnv(baseEnv, sandbox) : baseEnv;
     const child = agent.shell
-      ? spawn(formatCommandLine(agent.file, argv), { cwd: sandbox, env, shell: true, stdio: ["ignore", "pipe", "pipe"] })
+      ? spawn(shellCommandLine(agent.file, argv), { cwd: sandbox, env, shell: true, stdio: ["ignore", "pipe", "pipe"] })
       : spawn(agent.file, argv, { cwd: sandbox, env, stdio: ["ignore", "pipe", "pipe"] });
     const timer = setTimeout(() => {
       timedOut = true;

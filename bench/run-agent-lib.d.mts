@@ -53,3 +53,5 @@ export function agentEnv(baseEnv: Record<string, string | undefined>, binDir: st
 export function shimFiles(nodePath: string, distCli: string, platform: string): { name: string; content: string; executable: boolean }[];
 export function formatCommandLine(cmd: string, args: string[]): string;
 export function opencodeRunEnv(env: Record<string, string | undefined>, sandbox: string): Record<string, string | undefined>;
+export function shellCommandLine(cmd: string, args: string[]): string;
+export function shimExePath(text: string, shimDir: string): string | null;

@@ -2,7 +2,7 @@
 // Copyright 2026 Heidenber Palacio Garzón
 
 import { spawnSync } from "node:child_process";
-import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { copyFileSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { afterAll, describe, expect, it } from "vitest";
@@ -20,6 +20,8 @@ import {
   parseStream,
   planRuns,
   runName,
+  shellCommandLine,
+  shimExePath,
   shimFiles,
   skillSegments,
 } from "../../bench/run-agent-lib.mjs";
@@ -475,6 +477,43 @@ describe("opencode adapter helpers", () => {
   });
 });
 
+describe("shimExePath", () => {
+  const npmShim = [
+    "@ECHO off",
+    "SETLOCAL",
+    'SET "dp0=%~dp0"',
+    'IF EXIST "%dp0%\\node.exe" (',
+    '  SET "_prog=%dp0%\\node.exe"',
+    ") ELSE (",
+    '  SET "_prog=node"',
+    ")",
+    'endLocal & goto #_undefined_# 2>NUL & title %COMSPEC% & "%dp0%\\node_modules\\@opencode\\cli\\bin\\opencode.exe"   %*',
+    "",
+  ].join("\r\n");
+  it("derives the real exe from an npm shim, relative to the shim folder", () => {
+    const dir = resolve("some", "npm");
+    expect(shimExePath(npmShim, dir)).toBe(resolve(dir, "node_modules", "@opencode", "cli", "bin", "opencode.exe"));
+  });
+  it("accepts the %~dp0 spelling", () => {
+    const dir = resolve("x");
+    expect(shimExePath('@"%~dp0\\bin\\tool.exe" %*', dir)).toBe(resolve(dir, "bin", "tool.exe"));
+  });
+  it("returns null for a wrapper that does not reference an exe", () => {
+    expect(shimExePath('@echo off\r\nnode "%~dp0\\wrapper.js" %*\r\n', resolve("w"))).toBeNull();
+    expect(shimExePath('@echo off\r\n"C:\\other\\opencode.exe" %*\r\n', resolve("w"))).toBeNull();
+  });
+});
+
+describe("shellCommandLine", () => {
+  it("quotes like formatCommandLine for plain arguments", () => {
+    expect(shellCommandLine("tool.cmd", ["run", "a b"])).toBe('tool.cmd run "a b"');
+  });
+  it("throws a clear error when an argument contains a newline", () => {
+    expect(() => shellCommandLine("tool.cmd", ["a\n\nb"])).toThrow(/newline/);
+    expect(() => shellCommandLine("tool.cmd", ["a\r\nb"])).toThrow(/newline/);
+  });
+});
+
 const script = join(root, "bench", "run-agent.mjs");
 const work = mkdtempSync(join(tmpdir(), "trazo-run-agent-"));
 afterAll(() => rmSync(work, { recursive: true, force: true }));
@@ -654,6 +693,43 @@ describe("run-agent.mjs", () => {
     },
     120000,
   );
+
+  it("delivers the full prompt (newlines and suffix) as the last argument and records the agent binary", () => {
+    const fake = join(work, "argv-agent.mjs");
+    const argvFile = join(work, "argv.json");
+    writeFileSync(
+      fake,
+      [
+        'import { writeFileSync } from "node:fs";',
+        'if (process.argv[2] === "--version") { console.log("opencode v1"); process.exit(0); }',
+        `writeFileSync(${JSON.stringify(argvFile)}, JSON.stringify(process.argv.slice(2)));`,
+        "",
+      ].join("\n"),
+    );
+    const out = join(work, "argv-out.json");
+    const r = run(["--agent", "opencode", "--model", "opencode/m1", "--task", "arch-shop", "--condition", "skill", "--runs", "1", "--agent-cmd", fake, "--out", out, "--sandbox-root", join(work, "sb-argv")]);
+    expect(r.status, r.stderr).toBe(0);
+    const argv = JSON.parse(readFileSync(argvFile, "utf8")) as string[];
+    const last = argv[argv.length - 1];
+    const taskPrompt = JSON.parse(readFileSync(join(root, "bench", "tasks.json"), "utf8")).tasks.find((t: { id: string }) => t.id === "arch-shop").prompt;
+    expect(last).toBe(buildPrompt(taskPrompt));
+    expect(last).toContain("\n\n");
+    expect(last).toContain("diagram.html");
+    expect(JSON.parse(readFileSync(out, "utf8")).agentBin).toBe(fake);
+    expect(r.stdout).toContain(fake);
+  });
+
+  it.runIf(process.platform === "win32")("resolves a .cmd shim to its exe, never through cmd.exe, and delivers the prompt", () => {
+    const dir = join(work, "shim");
+    const bin = join(dir, "node_modules", "pkg", "bin");
+    mkdirSync(bin, { recursive: true });
+    // A copy of node.exe stands in for the real binary; the shim's exe line is the npm one.
+    copyFileSync(process.execPath, join(bin, "agent.exe"));
+    const cmd = join(dir, "agent.cmd");
+    writeFileSync(cmd, '@ECHO off\r\nSET "dp0=%~dp0"\r\n"%dp0%\\node_modules\\pkg\\bin\\agent.exe"   %*\r\n');
+    const r = run(["--agent", "opencode", "--model", "opencode/m1", "--task", "arch-shop", "--runs", "1", "--agent-cmd", cmd, "--out", join(work, "shim-out.json"), "--sandbox-root", join(work, "sb-shim")]);
+    expect(r.stdout).toContain(`agent binary: ${join(bin, "agent.exe")}`);
+  });
 
   it("records a failed run when the agent produces nothing", () => {
     const fake = join(work, "silent.mjs");

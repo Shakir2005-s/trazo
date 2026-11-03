@@ -3,7 +3,7 @@
 
 // Pure helpers for bench/run-agent.mjs: no I/O, no clock, no randomness.
 
-import { join } from "node:path";
+import { join, resolve } from "node:path";
 
 export const PROMPT_SUFFIX =
   "\n\nThe `trazo` command is installed and turns a semantic JSON description into an HTML diagram; `trazo --help` explains it. Use the `trazo` command to build the diagram and save it as diagram.html in the current directory.";
@@ -173,6 +173,24 @@ export function opencodeRunEnv(env, sandbox) {
 export function formatCommandLine(cmd, args) {
   const quote = (s) => (/^[\w@%+=:,./\\()*-]+$/.test(s) ? s : `"${s.replace(/(["\\])/g, "\\$1")}"`);
   return [cmd, ...args].map(quote).join(" ");
+}
+
+/** Like formatCommandLine, for a shell spawn: cmd.exe cuts the line at the first newline, so refuse instead of truncating. */
+export function shellCommandLine(cmd, args) {
+  if ([cmd, ...args].some((a) => a.includes("\n") || a.includes("\r"))) {
+    throw new Error("refusing to pass an argument with a newline through a shell: cmd.exe would truncate the prompt; use the real executable (--agent-cmd <path to the .exe>)");
+  }
+  return formatCommandLine(cmd, args);
+}
+
+/**
+ * Real executable behind a Windows .cmd/.bat shim: the quoted path ending in .exe that starts with
+ * %dp0% or %~dp0 (npm shims), resolved against the shim's folder. null when the text has none (a wrapper).
+ */
+export function shimExePath(text, shimDir) {
+  const sep = "[\\\\/]";
+  const m = [...text.matchAll(new RegExp(`"%~?dp0%?${sep}*([^"%]*?\\.exe)"`, "gi"))].pop(); // the last one is the launch line
+  return m ? resolve(shimDir, ...m[1].split(new RegExp(`${sep}+`)).filter(Boolean)) : null;
 }
 
 export function shimFiles(nodePath, distCli, platform) {
