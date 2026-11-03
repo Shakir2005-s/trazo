@@ -2,6 +2,8 @@
 
 # trazo
 
+[![CI](https://github.com/heidenber/trazo/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/heidenber/trazo/actions/workflows/ci.yml) [![npm](https://img.shields.io/npm/v/@heidenber/trazo)](https://www.npmjs.com/package/@heidenber/trazo)
+
 El agente dice qué hay en el sistema; trazo decide dónde va cada cosa.
 
 Escribís un diagrama como JSON semántico, sin coordenadas. trazo lo valida, lo acomoda y escribe un único archivo HTML autocontenido.
