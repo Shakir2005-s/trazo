@@ -42,6 +42,7 @@ export function buildPrompt(taskPrompt: string): string;
 export function buildAgentArgs(prompt: string, model: string): string[];
 export function planRuns(taskIds: string[], conditions: string[], runs: number): RunPlan[];
 export function runName(plan: RunPlan): string;
+export function modelDir(model: string): string;
 export function parseStream(text: string): StreamStats;
 export function agentEnv(baseEnv: Record<string, string | undefined>, binDir: string, platform: string): Record<string, string | undefined>;
 export function shimFiles(nodePath: string, distCli: string, platform: string): { name: string; content: string; executable: boolean }[];

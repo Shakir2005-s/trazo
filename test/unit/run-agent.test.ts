@@ -10,6 +10,7 @@ import {
   agentEnv,
   buildAgentArgs,
   buildPrompt,
+  modelDir,
   parseArgs,
   parseStream,
   planRuns,
@@ -259,6 +260,13 @@ describe("plan and command", () => {
     expect(agentEnv({}, "/shim", "linux").PATH).toBe("/shim:");
   });
 
+  it("makes a model id safe as one directory name", () => {
+    expect(modelDir("claude-haiku-4-5")).toBe("claude-haiku-4-5");
+    expect(modelDir("opencode/deepseek-v4.1-flash-free")).toBe("opencode-deepseek-v4.1-flash-free");
+    expect(modelDir("a b:c\\d")).toBe("a-b-c-d");
+    for (const bad of ["", ".", ".."]) expect(modelDir(bad)).toBe("model");
+  });
+
   it("makes shims per platform", () => {
     const win = shimFiles("C:\\node.exe", "C:\\r\\dist\\cli\\main.js", "win32").map((f) => f.name);
     expect(win).toEqual(["trazo.cmd", "trazo"]);
@@ -285,6 +293,17 @@ describe("run-agent.mjs", () => {
     expect(r.stdout).toContain("1 run(s) planned");
     expect(existsSync(out)).toBe(false);
     expect(existsSync(join(work, "sb-dry"))).toBe(false);
+    expect(r.stdout).toContain(`cwd: ${join(work, "sb-dry", "arch-shop-skill-1")}`);
+  });
+
+  it("dry-run defaults the sandbox root to a per-model folder", () => {
+    const out = join(work, "dry-default.json");
+    const r = run(["--model", "vendor/m.1", "--task", "arch-shop", "--condition", "skill", "--runs", "1", "--dry-run", "--out", out]);
+    expect(r.status).toBe(0);
+    expect(r.stdout).toContain(`cwd: ${join(root, "tmp", "bench-runs", "vendor-m.1", "arch-shop-skill-1")}`);
+    expect(r.stdout).toContain("1 run(s) planned");
+    expect(existsSync(out)).toBe(false);
+    expect(existsSync(join(root, "tmp", "bench-runs", "vendor-m.1"))).toBe(false);
   });
 
   it("fails on a missing model with exit 2", () => {

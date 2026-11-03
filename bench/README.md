@@ -62,11 +62,11 @@ Options:
 - `--agent-cmd <path>` replaces the `claude` command; a `.mjs` or `.js` path is run with Node. Tests use it to inject a fake agent.
 - `--timeout <seconds>` per run (default 600). A run that times out is recorded with a note.
 - `--resume` skips runs already in the output file. Each run is written to the file as soon as it ends, so an interrupted session keeps its results.
-- `--sandbox-root <dir>` moves the sandboxes (default `tmp/bench-runs`).
+- `--sandbox-root <dir>` moves the sandboxes (default `tmp/bench-runs/<model>`, where `<model>` is the `--model` value with characters outside `A-Za-z0-9._-` replaced by `-`).
 
 What is isolated, for every run:
 
-- A new sandbox directory `tmp/bench-runs/<task>-<condition>-<n>/` is the working directory. It is deleted and recreated if it already exists.
+- A new sandbox directory `tmp/bench-runs/<model>/<task>-<condition>-<n>/` is the working directory. It is deleted and recreated if it already exists.
 - The agent is started with `--setting-sources project`, so user and local settings and skills are not loaded, and with `--strict-mcp-config`, so no MCP server is available.
 - `CLAUDE_CODE_DISABLE_CLAUDE_MDS=1` and `CLAUDE_CODE_DISABLE_AUTO_MEMORY=1` are set, because `--setting-sources` does not stop the user's own `~/.claude/CLAUDE.md` or auto memory from loading. `--bare` would also skip them, but it only accepts an API key, not a signed-in account.
 - `CLAUDE_CODE_DISABLE_GIT_INSTRUCTIONS=1` is set, because the sandboxes sit inside this repository: without it the agent sees the trazo repo's git status and history in its system prompt.
@@ -165,7 +165,7 @@ Deterministic results are in `bench/results/*-deterministic.json`.
 
 ## Limits
 
-- Sandboxes are named by task, condition and run, not by model, so a second model run in the default `--sandbox-root` replaces the first model's `stream.jsonl` files. Pass a separate `--sandbox-root` per model to keep both.
+- Each model gets its own sandbox folder under the default `--sandbox-root`, so a second model does not replace the first model's `stream.jsonl` files. An explicit `--sandbox-root` is used as given, with no model folder; reusing it for another model replaces the earlier sandboxes.
 - Agents are not deterministic. Three runs per task and condition show a trend, not a guarantee.
 - Timings depend on the machine, the Node version and background load. Compare numbers from the same machine only.
 - Token counts in the deterministic part are estimates (characters / 4), not a real tokenizer.

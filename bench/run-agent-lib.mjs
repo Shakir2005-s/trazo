@@ -85,6 +85,12 @@ export function runName(plan) {
   return `${plan.task}-${plan.condition}-${plan.run}`;
 }
 
+// One safe directory name per model id; "." and ".." would escape or collapse the folder.
+export function modelDir(model) {
+  const safe = String(model).replace(/[^A-Za-z0-9._-]/g, "-");
+  return safe === "" || safe === "." || safe === ".." ? "model" : safe;
+}
+
 export function formatCommandLine(cmd, args) {
   const quote = (s) => (/^[\w@%+=:,./\\()*-]+$/.test(s) ? s : `"${s.replace(/(["\\])/g, "\\$1")}"`);
   return [cmd, ...args].map(quote).join(" ");
