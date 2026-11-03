@@ -2,6 +2,8 @@ English | [Español](README_ES.md)
 
 # trazo
 
+[![CI](https://github.com/heidenber/trazo/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/heidenber/trazo/actions/workflows/ci.yml) [![npm](https://img.shields.io/npm/v/@heidenber/trazo)](https://www.npmjs.com/package/@heidenber/trazo)
+
 The agent says what is in the system; trazo decides where everything goes.
 
 Write a diagram as semantic JSON, with no coordinates. trazo validates it, lays it out and writes one self-contained HTML file.
