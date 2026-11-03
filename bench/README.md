@@ -38,7 +38,7 @@ The `make` target measures trazo itself: validation, layout and rendering, calle
 - `skill`: the trazo skill is installed.
 - `no-skill`: no skill; the agent only has `trazo --help`.
 
-Runs are driven by `bench/run-agent.mjs`, which uses the Claude Code CLI in headless mode. A real run spends model quota, so it is never part of `npm test` or CI.
+Runs are driven by `bench/run-agent.mjs`, which drives an agent CLI in headless mode: Claude Code (default) or OpenCode (`--agent opencode`, see [OpenCode runs](#opencode-runs)). A real run spends model quota, so it is never part of `npm test` or CI.
 
 Pilot (one task, skill condition, one run):
 
@@ -58,7 +58,7 @@ Options:
 - `--model <id>` is required.
 - `--task <id>` can be repeated; the default is every task in `tasks.json`.
 - `--condition skill|no-skill|both` (default `both`) and `--runs N` (default 3).
-- `--out <file>` (default `bench/results/<YYYY-MM-DD>-agent-claude-code.json`).
+- `--out <file>` (default `bench/results/<YYYY-MM-DD>-agent-<agent>.json`). An existing file must hold the same agent and model, or the runner stops.
 - `--agent-cmd <path>` replaces the `claude` command; a `.mjs` or `.js` path is run with Node. Tests use it to inject a fake agent.
 - `--timeout <seconds>` per run (default 600). A run that times out is recorded with a note.
 - `--resume` skips runs already in the output file. Each run is written to the file as soon as it ends, so an interrupted session keeps its results.
@@ -114,6 +114,26 @@ The runner saves the runs as `bench/results/<YYYY-MM-DD>-agent-<agent>.json`:
 - `cacheCreationTokens` and `cacheReadTokens` are reported separately from `inputTokens` and are 0 if the agent does not report them. With prompt caching `inputTokens` is only the uncached part, a few dozen tokens; the summary also gives the median total input (uncached + cache creation + cache read), which is what a run actually read.
 
 Run `node scripts/bench.mjs --summary <file>` to get, per condition, the number of runs, the first-try and final success rates, and the medians of repairs, uncached and total input tokens, output tokens and seconds.
+
+## OpenCode runs
+
+`--agent opencode` runs free OpenCode models (for example `opencode/deepseek-v4.1-flash-free`, no API key needed) with `opencode run --standalone -m <model> --format json <prompt>`. The harness is OpenCode, not Claude Code, so a result is labeled `"agent": "opencode"` with its `agentVersion` (the output of `opencode --version`) and is **not comparable 1:1 with a Claude Code run**: the system prompt, tools and context handling differ as well as the model. Compare an OpenCode result with the other conditions of the same agent and model. It spends free-model quota; run a pilot first:
+
+```sh
+node bench/run-agent.mjs --agent opencode --model opencode/deepseek-v4.1-flash-free --task arch-shop --condition skill --runs 1 --out tmp/pilot.json
+```
+
+**Which binary runs.** On Windows `opencode` is usually a `.cmd` shim, and `cmd.exe` cuts a command line at the first newline, which would drop everything after the first line of the prompt (including the instruction to save `diagram.html`). So the runner never passes a prompt through `cmd.exe`: it goes through the `where` results in order and takes the first that is an `.exe`, or a `.cmd`/`.bat` shim whose launch line is a quoted `%dp0%\...\opencode.exe` (the npm shim) that exists; a `.cmd` wrapper that does not reference an `.exe` is skipped. It spawns that `.exe` directly, prints `agent binary: <path>` at start and saves it as `agentBin` in the results file, so a run can be audited. If nothing qualifies it stops with an error; pass `--agent-cmd <path to opencode.exe>`. As a guard, a shell spawn with a newline in an argument throws instead of truncating it.
+
+What differs from the Claude Code runs:
+
+- **Sandbox outside the repository.** The default root is `<os temp dir>/trazo-bench-runs/<model>/`. OpenCode sees the git repository around its working directory (its snapshots hold the repo tree), so a sandbox inside this checkout would leak it. An explicit `--sandbox-root` still wins; keep it outside any repository.
+- **Working directory.** OpenCode takes its project directory from `$PWD`, not from the spawn directory. The runner sets `PWD` to the sandbox on every run (and drops `INIT_CWD` and `OLDPWD`); without it the agent works in the folder the runner was launched from and ignores the sandbox's `opencode.json`.
+- **Permissions.** Each sandbox gets an `opencode.json` with `"*": "deny"`, then `read` and `edit` (which covers `write`) allowed, `external_directory` denied, and the shell allowed only for `trazo *`. A call that does not match (`ls`, `bash -c 'trazo ...'`, `trazo check x && rm x`) is refused at once with `Permission denied` instead of waiting for approval. Skills are denied except `trazo`, and only in the `skill` condition. There is no glob, grep, list or web tool.
+- **Isolation.** `XDG_CONFIG_HOME`, `XDG_DATA_HOME`, `XDG_STATE_HOME`, `XDG_CACHE_HOME`, `HOME` and `USERPROFILE` point to `<sandbox root>/_opencode/`, so the user's OpenCode config, plugins, MCP servers, auth and sessions are not read. `OPENCODE_DISABLE_CLAUDE_CODE=1` stops it from loading `~/.claude` skills and CLAUDE.md. Other `OPENCODE_*` variables of the user are dropped. `--standalone` gives each run a private server instead of the shared background service. On the machine used to build this, OpenCode still found skills under the real `~/.agents/skills` whatever the environment said; the skill permission rules hide them (the agent saw only `trazo`).
+- **Skill.** Condition `skill` copies `skill/SKILL.md` to `.opencode/skills/trazo/SKILL.md`; `no-skill` adds nothing.
+- **Parser.** `parseOpencodeStream` reads the JSONL: a tool call is one `tool_use` event; a shell command that ran has `state.status: "completed"` and its exit code in `state.metadata.metadata.exit`; a refused call has `state.status: "error"` and is not counted. Failed commands, repairs and `firstTryOk` follow the definitions above. OpenCode has no final result message: a run counts as finished when the last event is a `text` or a `step_finish` other than `tool-calls` (an `error` event marks it as errored).
+- **Tokens.** They come from each `step_finish` event (`part.tokens`) and are summed over the steps: `inputTokens` is the uncached input, `cacheReadTokens` and `cacheCreationTokens` are `cache.read` and `cache.write`, and `outputTokens` is `output` plus `reasoning`. OpenCode sometimes omits the last `step_finish`, so a run can undercount its final step; a run with no `step_finish` at all shows 0 tokens.
 
 ## Results
 

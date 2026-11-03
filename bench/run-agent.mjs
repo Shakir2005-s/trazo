@@ -1,18 +1,27 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2026 Heidenber Palacio Garzón
 
-// Agent benchmark runner. Needs the built dist/ (npm run build) and the Claude Code CLI.
-//   node bench/run-agent.mjs --model <id> [--task <id>]... [--condition skill|no-skill|both]
-//     [--runs N] [--out <file>] [--agent-cmd <path>] [--timeout <s>] [--resume] [--dry-run]
-// Each run happens in a fresh sandbox under tmp/bench-runs/<model>/. Results are appended to --out as
-// each run finishes. Never run in CI: a real run spends model quota.
+// Agent benchmark runner. Needs the built dist/ (npm run build) and the CLI of the chosen agent
+// (Claude Code, or OpenCode with a free model). On Windows the agent is resolved to its real .exe (a .cmd shim is
+// followed to the .exe it launches, wrappers are skipped) and spawned without a shell, so multi-line prompts arrive
+// intact; if none is found pass --agent-cmd <path to the .exe>. The resolved path is printed and saved as agentBin.
+//   node bench/run-agent.mjs --model <id> [--agent claude-code|opencode] [--task <id>]...
+//     [--condition skill|no-skill|both] [--runs N] [--out <file>] [--agent-cmd <path>]
+//     [--sandbox-root <dir>] [--timeout <s>] [--resume] [--dry-run]
+// Each run happens in a fresh sandbox: tmp/bench-runs/<model>/ for claude-code, <os tmp>/trazo-bench-runs/<model>/
+// for opencode (outside the repository). Results are appended to --out as each run finishes.
+// Never run in CI: a real run spends model quota.
 
 import { spawn, spawnSync } from "node:child_process";
 import { chmodSync, copyFileSync, createWriteStream, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, isAbsolute, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { summarize } from "../scripts/bench-lib.mjs";
-import { agentEnv, buildAgentArgs, buildPrompt, formatCommandLine, modelDir, parseArgs, parseStream, planRuns, runName, shimFiles } from "./run-agent-lib.mjs";
+import { tmpdir } from "node:os";
+import {
+  agentEnv, buildAgentArgs, buildPrompt, defaultSandboxRoot, formatCommandLine, opencodeConfig, opencodeEnv, opencodeRunEnv, parseArgs,
+  parseOpencodeStream, parseStream, planRuns, runName, shellCommandLine, shimExePath, shimFiles, skillSegments,
+} from "./run-agent-lib.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const distCli = join(root, "dist", "cli", "main.js");
@@ -33,45 +42,74 @@ try {
   fail(e.message, 2);
 }
 const outFile = resolve(root, opts.out);
-const sandboxRoot = opts.sandboxRoot ? resolve(opts.sandboxRoot) : join(root, "tmp", "bench-runs", modelDir(opts.model));
+const sandboxRoot = opts.sandboxRoot ? resolve(opts.sandboxRoot) : defaultSandboxRoot(opts.agent, opts.model, root, tmpdir());
+const isOpencode = opts.agent === "opencode";
+const parseOutput = isOpencode ? parseOpencodeStream : parseStream;
 const plan = planRuns(opts.tasks, opts.conditions, opts.runs);
 
-/** Resolves the agent command to [file, ...prefixArgs, shell]. */
-function resolveAgent(cmd) {
-  if (/\.(mjs|cjs|js)$/.test(cmd)) return { file: process.execPath, prefix: [resolve(cmd)], shell: false };
-  if (process.platform === "win32" && !/[\\/]/.test(cmd) && !/\.\w+$/.test(cmd)) {
-    const found = spawnSync("where", [cmd], { encoding: "utf8" }).stdout?.split(/\r?\n/).filter(Boolean) ?? [];
-    const exe = found.find((f) => /\.exe$/i.test(f));
-    if (exe) return { file: exe, prefix: [], shell: false };
-    const bat = found.find((f) => /\.(cmd|bat)$/i.test(f));
-    if (bat) return { file: bat, prefix: [], shell: true };
+/** Real executable of a .cmd/.bat shim (see shimExePath), or null. */
+function exeBehindShim(shim) {
+  try {
+    const exe = shimExePath(readFileSync(shim, "utf8"), dirname(resolve(shim)));
+    return exe && existsSync(exe) ? exe : null;
+  } catch {
+    return null;
   }
-  return { file: cmd, prefix: [], shell: /\.(cmd|bat)$/i.test(cmd) };
 }
+
+/**
+ * Resolves the agent command to { file, prefix, shell }. A prompt never goes through cmd.exe: on Windows a
+ * .cmd/.bat is replaced by the .exe it launches, and a wrapper that does not reference one is skipped.
+ */
+function resolveAgentOnce(cmd) {
+  if (/\.(mjs|cjs|js)$/.test(cmd)) return { file: process.execPath, prefix: [resolve(cmd)], shell: false, bin: resolve(cmd) };
+  if (process.platform !== "win32") return { file: cmd, prefix: [], shell: false, bin: cmd };
+  const hint = `pass --agent-cmd <path to ${opts.agent === "opencode" ? "opencode" : "the agent"}.exe>`;
+  if (/[\\/]/.test(cmd) || /\.\w+$/.test(cmd)) {
+    if (/\.(cmd|bat)$/i.test(cmd)) {
+      const exe = exeBehindShim(cmd);
+      if (!exe) fail(`${cmd} does not launch an .exe directly; ${hint}`);
+      return { file: exe, prefix: [], shell: false, bin: exe };
+    }
+    return { file: cmd, prefix: [], shell: false, bin: cmd };
+  }
+  const found = spawnSync("where", [cmd], { encoding: "utf8" }).stdout?.split(/\r?\n/).map((f) => f.trim()).filter(Boolean) ?? [];
+  for (const f of found) {
+    const exe = /\.exe$/i.test(f) ? f : /\.(cmd|bat)$/i.test(f) ? exeBehindShim(f) : null;
+    if (exe) return { file: exe, prefix: [], shell: false, bin: exe };
+  }
+  return fail(`could not find an executable for "${cmd}" (wrappers and .cmd files that do not launch an .exe are skipped); ${hint}`);
+}
+let resolvedAgent;
+const resolveAgent = (cmd) => (resolvedAgent ??= resolveAgentOnce(cmd));
 
 if (opts.dryRun) {
   for (const p of plan) {
     const prompt = buildPrompt(taskById.get(p.task).prompt);
     console.log(`${runName(p)}  (${p.condition})`);
     console.log(`  cwd: ${join(sandboxRoot, runName(p))}`);
-    console.log(`  ${formatCommandLine(opts.agentCmd, buildAgentArgs(prompt, opts.model))}`);
+    console.log(`  ${formatCommandLine(opts.agentCmd, buildAgentArgs(prompt, opts.model, opts.agent))}`);
   }
   console.log(`${plan.length} run(s) planned, timeout ${opts.timeout} s each. Nothing was run.`);
   process.exit(0);
 }
 
 if (!existsSync(distCli)) fail("dist/ not found; run npm run build");
+const agentBin = resolveAgent(opts.agentCmd).bin;
+console.log(`agent binary: ${agentBin}`);
 const VERSION = JSON.parse(readFileSync(join(root, "package.json"), "utf8")).version ?? "unknown";
 
 // Output file: load the existing record or start a new one.
 let record;
 if (existsSync(outFile)) {
   record = JSON.parse(readFileSync(outFile, "utf8"));
+  if ((record.agent ?? "claude-code") !== opts.agent) fail(`${opts.out} holds agent ${record.agent}, not ${opts.agent}`);
   if (record.model !== opts.model) fail(`${opts.out} holds model ${record.model}, not ${opts.model}`);
   record.runsPerTask = opts.runs;
 } else {
-  record = { kind: "agent", date: today, trazoVersion: VERSION, agent: "claude-code", model: opts.model, runsPerTask: opts.runs, runs: [] };
+  record = { kind: "agent", date: today, trazoVersion: VERSION, agent: opts.agent, model: opts.model, runsPerTask: opts.runs, runs: [] };
 }
+record.agentBin = agentBin;
 const save = () => {
   mkdirSync(dirname(outFile), { recursive: true });
   writeFileSync(outFile, `${JSON.stringify(record, null, 2)}\n`);
@@ -85,7 +123,21 @@ for (const f of shimFiles(process.execPath, distCli, process.platform)) {
   writeFileSync(path, f.content);
   if (f.executable) chmodSync(path, 0o755);
 }
-const env = agentEnv(process.env, binDir, process.platform);
+const opencodeDir = join(sandboxRoot, "_opencode");
+const baseEnv = isOpencode ? opencodeEnv(process.env, binDir, opencodeDir, process.platform) : agentEnv(process.env, binDir, process.platform);
+if (isOpencode) {
+  for (const d of ["home", "config", "data", "state", "cache"]) mkdirSync(join(opencodeDir, d), { recursive: true });
+  // Same isolated env as the runs, so the version check cannot touch the user's OpenCode state.
+  const agent = resolveAgent(opts.agentCmd);
+  const argv = [...agent.prefix, "--version"];
+  const v = agent.shell
+    ? spawnSync(shellCommandLine(agent.file, argv), { cwd: sandboxRoot, env: opencodeRunEnv(baseEnv, sandboxRoot), shell: true, encoding: "utf8" })
+    : spawnSync(agent.file, argv, { cwd: sandboxRoot, env: opencodeRunEnv(baseEnv, sandboxRoot), encoding: "utf8" });
+  const version = v.status === 0 ? v.stdout.trim() : "";
+  if (!version) fail(`could not read the version from ${opts.agentCmd} --version`);
+  record.agentVersion = version;
+  save();
+}
 
 function killTree(child) {
   if (process.platform === "win32" && child.pid) spawnSync("taskkill", ["/PID", String(child.pid), "/T", "/F"]);
@@ -108,8 +160,9 @@ function runAgent(sandbox, args) {
       stderr.end(() => done(r));
     };
     const argv = [...agent.prefix, ...args];
+    const env = isOpencode ? opencodeRunEnv(baseEnv, sandbox) : baseEnv;
     const child = agent.shell
-      ? spawn(formatCommandLine(agent.file, argv), { cwd: sandbox, env, shell: true, stdio: ["ignore", "pipe", "pipe"] })
+      ? spawn(shellCommandLine(agent.file, argv), { cwd: sandbox, env, shell: true, stdio: ["ignore", "pipe", "pipe"] })
       : spawn(agent.file, argv, { cwd: sandbox, env, stdio: ["ignore", "pipe", "pipe"] });
     const timer = setTimeout(() => {
       timedOut = true;
@@ -143,17 +196,18 @@ for (const p of plan) {
   const sandbox = join(sandboxRoot, name);
   rmSync(sandbox, { recursive: true, force: true });
   mkdirSync(sandbox, { recursive: true });
+  if (isOpencode) writeFileSync(join(sandbox, "opencode.json"), `${JSON.stringify(opencodeConfig(p.condition), null, 2)}\n`);
   if (p.condition === "skill") {
-    const dest = join(sandbox, ".claude", "skills", "trazo");
+    const dest = join(sandbox, ...skillSegments(opts.agent));
     mkdirSync(dest, { recursive: true });
     copyFileSync(join(root, "skill", "SKILL.md"), join(dest, "SKILL.md"));
   }
   const prompt = buildPrompt(taskById.get(p.task).prompt);
   const started = Date.now();
-  const outcome = await runAgent(sandbox, buildAgentArgs(prompt, opts.model));
+  const outcome = await runAgent(sandbox, buildAgentArgs(prompt, opts.model, opts.agent));
   const seconds = Math.round((Date.now() - started) / 100) / 10;
   const streamText = existsSync(join(sandbox, "stream.jsonl")) ? readFileSync(join(sandbox, "stream.jsonl"), "utf8") : "";
-  const stats = parseStream(streamText);
+  const stats = parseOutput(streamText);
   const notes = [];
   if (outcome.timedOut) notes.push(`timeout after ${opts.timeout} s`);
   if (outcome.error) notes.push(`spawn error: ${outcome.error}`);

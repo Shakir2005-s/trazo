@@ -3,20 +3,25 @@
 
 // Pure helpers for bench/run-agent.mjs: no I/O, no clock, no randomness.
 
+import { join, resolve } from "node:path";
+
 export const PROMPT_SUFFIX =
   "\n\nThe `trazo` command is installed and turns a semantic JSON description into an HTML diagram; `trazo --help` explains it. Use the `trazo` command to build the diagram and save it as diagram.html in the current directory.";
 
 const CONDITIONS = ["skill", "no-skill"];
+const AGENTS = ["claude-code", "opencode"];
+const AGENT_CMDS = { "claude-code": "claude", opencode: "opencode" };
 
 /** Parses the runner arguments. Throws Error with a plain message on bad input. */
 export function parseArgs(argv, knownTasks, today) {
   const opts = {
+    agent: "claude-code",
     model: "",
     tasks: [],
     conditions: [...CONDITIONS],
     runs: 3,
-    out: `bench/results/${today}-agent-claude-code.json`,
-    agentCmd: "claude",
+    out: "",
+    agentCmd: "",
     timeout: 600,
     dryRun: false,
     resume: false,
@@ -50,6 +55,12 @@ export function parseArgs(argv, knownTasks, today) {
       }
       case "--runs": opts.runs = positive("--runs", valueOf(i++)); break;
       case "--timeout": opts.timeout = positive("--timeout", valueOf(i++)); break;
+      case "--agent": {
+        const a = valueOf(i++);
+        if (!AGENTS.includes(a)) throw new Error("--agent must be claude-code or opencode");
+        opts.agent = a;
+        break;
+      }
       case "--out": opts.out = valueOf(i++); break;
       case "--agent-cmd": opts.agentCmd = valueOf(i++); break;
       case "--sandbox-root": opts.sandboxRoot = valueOf(i++); break;
@@ -59,6 +70,9 @@ export function parseArgs(argv, knownTasks, today) {
     }
   }
   if (!opts.model) throw new Error("--model is required");
+  // Defaults that depend on the agent are resolved once all options are read.
+  if (!opts.out) opts.out = `bench/results/${today}-agent-${opts.agent}.json`;
+  if (!opts.agentCmd) opts.agentCmd = AGENT_CMDS[opts.agent];
   if (opts.tasks.length === 0) opts.tasks = [...knownTasks];
   return opts;
 }
@@ -67,7 +81,9 @@ export function buildPrompt(taskPrompt) {
   return taskPrompt + PROMPT_SUFFIX;
 }
 
-export function buildAgentArgs(prompt, model) {
+export function buildAgentArgs(prompt, model, agent = "claude-code") {
+  // --standalone: a private server per run, so the env overrides apply and no shared service is reused.
+  if (agent === "opencode") return ["run", "--standalone", "-m", model, "--format", "json", prompt];
   return [
     "-p", prompt, "--model", model, "--setting-sources", "project", "--strict-mcp-config",
     "--allowedTools", "Read", "Write", "Edit", "Bash(trazo:*)",
@@ -91,9 +107,90 @@ export function modelDir(model) {
   return safe === "" || safe === "." || safe === ".." ? "model" : safe;
 }
 
+/** Where each agent loads project skills from, relative to the sandbox. */
+export function skillSegments(agent) {
+  return agent === "opencode" ? [".opencode", "skills", "trazo"] : [".claude", "skills", "trazo"];
+}
+
+// OpenCode sees the git repository around its working directory (its snapshots hold the
+// repo tree), so its sandboxes default to the OS temp dir, outside this checkout.
+export function defaultSandboxRoot(agent, model, repoRoot, tmpDir) {
+  return agent === "opencode" ? join(tmpDir, "trazo-bench-runs", modelDir(model)) : join(repoRoot, "tmp", "bench-runs", modelDir(model));
+}
+
+/**
+ * opencode.json for one sandbox. "*": "deny" turns off every tool not listed, so a denied
+ * call fails at once instead of waiting for approval. The skill rules also hide the skills
+ * OpenCode finds in the user's home (~/.agents, ~/.claude): only trazo is visible, and only
+ * in the skill condition.
+ */
+export function opencodeConfig(condition) {
+  return {
+    $schema: "https://opencode.ai/config.json",
+    permission: {
+      "*": "deny",
+      read: "allow",
+      edit: "allow",
+      external_directory: "deny",
+      shell: { "*": "deny", "trazo *": "allow" },
+      skill: condition === "skill" ? { "*": "deny", trazo: "allow" } : "deny",
+    },
+  };
+}
+
+/**
+ * Environment for one OpenCode run: config, data, state, cache and home live under stateDir,
+ * so the user's own OpenCode config, auth and sessions are not read. OPENCODE_* variables of
+ * the user are dropped (OPENCODE_CONFIG and friends would inject their config).
+ */
+export function opencodeEnv(baseEnv, binDir, stateDir, platform) {
+  const env = {};
+  for (const [k, v] of Object.entries(baseEnv)) if (!k.toUpperCase().startsWith("OPENCODE_")) env[k] = v;
+  const pathKey = Object.keys(env).find((k) => k.toLowerCase() === "path") ?? "PATH";
+  env[pathKey] = `${binDir}${platform === "win32" ? ";" : ":"}${env[pathKey] ?? ""}`;
+  env.HOME = join(stateDir, "home");
+  env.USERPROFILE = join(stateDir, "home");
+  env.XDG_CONFIG_HOME = join(stateDir, "config");
+  env.XDG_DATA_HOME = join(stateDir, "data");
+  env.XDG_STATE_HOME = join(stateDir, "state");
+  env.XDG_CACHE_HOME = join(stateDir, "cache");
+  env.OPENCODE_DISABLE_CLAUDE_CODE = "1";
+  return env;
+}
+
+/**
+ * OpenCode takes its project directory from $PWD, not from the spawn cwd. A PWD inherited from
+ * the launching shell points at the repo and the agent would read and write there (and ignore
+ * the sandbox's opencode.json), so every run gets PWD = its sandbox.
+ */
+export function opencodeRunEnv(env, sandbox) {
+  const out = { ...env, PWD: sandbox };
+  delete out.INIT_CWD;
+  delete out.OLDPWD;
+  return out;
+}
+
 export function formatCommandLine(cmd, args) {
   const quote = (s) => (/^[\w@%+=:,./\\()*-]+$/.test(s) ? s : `"${s.replace(/(["\\])/g, "\\$1")}"`);
   return [cmd, ...args].map(quote).join(" ");
+}
+
+/** Like formatCommandLine, for a shell spawn: cmd.exe cuts the line at the first newline, so refuse instead of truncating. */
+export function shellCommandLine(cmd, args) {
+  if ([cmd, ...args].some((a) => a.includes("\n") || a.includes("\r"))) {
+    throw new Error("refusing to pass an argument with a newline through a shell: cmd.exe would truncate the prompt; use the real executable (--agent-cmd <path to the .exe>)");
+  }
+  return formatCommandLine(cmd, args);
+}
+
+/**
+ * Real executable behind a Windows .cmd/.bat shim: the quoted path ending in .exe that starts with
+ * %dp0% or %~dp0 (npm shims), resolved against the shim's folder. null when the text has none (a wrapper).
+ */
+export function shimExePath(text, shimDir) {
+  const sep = "[\\\\/]";
+  const m = [...text.matchAll(new RegExp(`"%~?dp0%?${sep}*([^"%]*?\\.exe)"`, "gi"))].pop(); // the last one is the launch line
+  return m ? resolve(shimDir, ...m[1].split(new RegExp(`${sep}+`)).filter(Boolean)) : null;
 }
 
 export function shimFiles(nodePath, distCli, platform) {
@@ -204,5 +301,90 @@ export function parseStream(text) {
       }
     }
   }
+  return stats;
+}
+
+const SHELL_TOOLS = ["shell", "bash"];
+const FILE_TOOLS = ["write", "edit", "multiedit"];
+
+/**
+ * Reads `opencode run --format json` output (v2.1.3), one JSON object per line. Shapes seen:
+ * a tool call is ONE {type:"tool_use", part:{tool, state:{status, input, metadata:{metadata:{exit}}}}}
+ * event; a refused call has state.status "error" ("Permission denied: <tool>"); a command that
+ * ran has status "completed" and the exit code in metadata.metadata.exit. Tokens come from each
+ * step_finish (part.tokens), output tokens include reasoning. There is no final result
+ * event: the run is finished when the last event is a text or a step_finish that is not
+ * "tool-calls" (the very last step_finish is sometimes missing). Fatal errors are {type:"error"}.
+ */
+export function parseOpencodeStream(text) {
+  const stats = {
+    inputTokens: 0,
+    outputTokens: 0,
+    cacheCreationTokens: 0,
+    cacheReadTokens: 0,
+    failedCommands: 0,
+    repairs: 0,
+    firstTryOk: false,
+    hasResult: false,
+    resultIsError: false,
+    lastMakeInput: null,
+  };
+  let failedSeen = false;
+  let firstMakeSeen = false;
+  let closing = false;
+  for (const raw of text.split("\n")) {
+    const trimmed = raw.trim();
+    if (!trimmed) continue;
+    let ev;
+    try {
+      ev = JSON.parse(trimmed);
+    } catch {
+      continue;
+    }
+    if (!ev || typeof ev !== "object") continue;
+    const part = ev.part ?? {};
+    if (ev.type === "error") {
+      stats.resultIsError = true;
+      closing = true;
+    } else if (ev.type === "text") {
+      closing = true;
+    } else if (ev.type === "step_finish") {
+      const t = part.tokens ?? {};
+      stats.inputTokens += t.input ?? 0;
+      stats.outputTokens += (t.output ?? 0) + (t.reasoning ?? 0);
+      stats.cacheCreationTokens += t.cache?.write ?? 0;
+      stats.cacheReadTokens += t.cache?.read ?? 0;
+      closing = part.reason !== "tool-calls";
+    } else if (ev.type === "tool_use") {
+      closing = false;
+      const state = part.state ?? {};
+      if (state.status === "error") continue; // refused: the tool never ran
+      const tool = part.tool;
+      if (FILE_TOOLS.includes(tool)) {
+        const file = state.input?.path ?? state.input?.filePath ?? state.input?.file_path;
+        if (typeof file === "string" && file.endsWith(".json") && failedSeen) stats.repairs++;
+        continue;
+      }
+      const cmd = state.input?.command;
+      if (!SHELL_TOOLS.includes(tool) || typeof cmd !== "string") continue;
+      for (const seg of segments(cmd)) {
+        const m = /^trazo\s+make\s+(\S+)/.exec(seg);
+        if (m) stats.lastMakeInput = m[1];
+      }
+      const verbs = trazoVerbs(cmd);
+      if (verbs.length === 0) continue;
+      const exit = state.metadata?.metadata?.exit;
+      const failed = typeof exit === "number" && exit !== 0;
+      if (failed) {
+        stats.failedCommands++;
+        failedSeen = true;
+      }
+      if (verbs.includes("make") && !firstMakeSeen) {
+        firstMakeSeen = true;
+        stats.firstTryOk = !failed;
+      }
+    }
+  }
+  stats.hasResult = closing;
   return stats;
 }
