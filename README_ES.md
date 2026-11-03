@@ -27,6 +27,8 @@ Escribís un diagrama como JSON semántico, sin coordenadas. trazo lo valida, lo
 trazo make demo.json
 ```
 
+![El diagrama de la demo: web, api y db conectados de izquierda a derecha con flechas HTTPS y SQL](https://raw.githubusercontent.com/heidenber/trazo/main/docs/demo-light.png)
+
 Esto escribe `demo.html` junto al archivo de entrada e imprime su ruta. Abrilo en el navegador: podés mover y hacer zoom, pasar el mouse sobre un nodo (o enfocarlo con el teclado) para ver su nota y resaltar sus conexiones, y exportar a SVG o PNG. No necesita servidor ni hace pedidos de red.
 
 ## Cuándo usarlo
@@ -94,6 +96,12 @@ trazo example erd | trazo make - -o erd.html
 - `sequence`: mensajes entre participantes, con notas y fragmentos `alt`, `opt` y `loop`. `trazo example sequence`
 
 `trazo schema <type>` imprime los campos de cada tipo en unas 40 líneas.
+
+Los ejemplos incluidos (`trazo example <type>`) tal como los dibuja trazo; el ERD es la imagen del principio. Hacé clic en uno para verlo en tamaño completo.
+
+<p align="center"><a href="https://github.com/heidenber/trazo/blob/main/docs/architecture-light.png"><img src="https://raw.githubusercontent.com/heidenber/trazo/main/docs/architecture-light.png" width="100%" alt="Ejemplo de arquitectura: una tienda de impresión de fotos con storefront, API gateway, servicios de backend, almacenes de datos y proveedores externos"></a></p>
+<p align="center"><a href="https://github.com/heidenber/trazo/blob/main/docs/workflow-light.png"><img src="https://raw.githubusercontent.com/heidenber/trazo/main/docs/workflow-light.png" width="100%" alt="Ejemplo de workflow: una solicitud de compra que pasa por los carriles Requester, Procurement y Finance, con decisiones y un reintento"></a></p>
+<p align="center"><a href="https://github.com/heidenber/trazo/blob/main/docs/sequence-light.png"><img src="https://raw.githubusercontent.com/heidenber/trazo/main/docs/sequence-light.png" width="600" alt="Ejemplo de secuencia: un checkout entre comprador, storefront, API de pedidos, inventario y proveedor de pago, con fragmentos alt y loop"></a></p>
 
 ## Skill para agentes
 

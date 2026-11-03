@@ -27,6 +27,8 @@ Write a diagram as semantic JSON, with no coordinates. trazo validates it, lays 
 trazo make demo.json
 ```
 
+![The demo diagram: web, api and db connected left to right by HTTPS and SQL arrows](https://raw.githubusercontent.com/heidenber/trazo/main/docs/demo-light.png)
+
 This writes `demo.html` next to the input and prints its path. Open it in a browser: pan, zoom, hover or focus a node to see its note and highlight its connections, export to SVG or PNG. No server and no network requests.
 
 ## When to use it
@@ -94,6 +96,12 @@ trazo example erd | trazo make - -o erd.html
 - `sequence`: messages between participants, with notes and `alt`, `opt` and `loop` fragments. `trazo example sequence`
 
 `trazo schema <type>` prints the fields of each type in about 40 lines.
+
+The bundled examples (`trazo example <type>`) as trazo draws them; the ERD is the image at the top. Click one to see it full size.
+
+<p align="center"><a href="https://github.com/heidenber/trazo/blob/main/docs/architecture-light.png"><img src="https://raw.githubusercontent.com/heidenber/trazo/main/docs/architecture-light.png" width="100%" alt="Architecture example: a photo print shop with a storefront, an API gateway, backend services, data stores and external providers"></a></p>
+<p align="center"><a href="https://github.com/heidenber/trazo/blob/main/docs/workflow-light.png"><img src="https://raw.githubusercontent.com/heidenber/trazo/main/docs/workflow-light.png" width="100%" alt="Workflow example: a purchase request moving through Requester, Procurement and Finance lanes, with decisions and a retry loop"></a></p>
+<p align="center"><a href="https://github.com/heidenber/trazo/blob/main/docs/sequence-light.png"><img src="https://raw.githubusercontent.com/heidenber/trazo/main/docs/sequence-light.png" width="600" alt="Sequence example: a checkout between shopper, storefront, orders API, inventory and payment provider, with alt and loop fragments"></a></p>
 
 ## Skill for agents
 
