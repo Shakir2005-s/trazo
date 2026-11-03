@@ -4,7 +4,7 @@
 // Agent benchmark runner. Needs the built dist/ (npm run build) and the Claude Code CLI.
 //   node bench/run-agent.mjs --model <id> [--task <id>]... [--condition skill|no-skill|both]
 //     [--runs N] [--out <file>] [--agent-cmd <path>] [--timeout <s>] [--resume] [--dry-run]
-// Each run happens in a fresh sandbox under tmp/bench-runs/. Results are appended to --out as
+// Each run happens in a fresh sandbox under tmp/bench-runs/<model>/. Results are appended to --out as
 // each run finishes. Never run in CI: a real run spends model quota.
 
 import { spawn, spawnSync } from "node:child_process";
@@ -12,7 +12,7 @@ import { chmodSync, copyFileSync, createWriteStream, existsSync, mkdirSync, read
 import { dirname, isAbsolute, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { summarize } from "../scripts/bench-lib.mjs";
-import { agentEnv, buildAgentArgs, buildPrompt, formatCommandLine, parseArgs, parseStream, planRuns, runName, shimFiles } from "./run-agent-lib.mjs";
+import { agentEnv, buildAgentArgs, buildPrompt, formatCommandLine, modelDir, parseArgs, parseStream, planRuns, runName, shimFiles } from "./run-agent-lib.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const distCli = join(root, "dist", "cli", "main.js");
@@ -33,7 +33,7 @@ try {
   fail(e.message, 2);
 }
 const outFile = resolve(root, opts.out);
-const sandboxRoot = opts.sandboxRoot ? resolve(opts.sandboxRoot) : join(root, "tmp", "bench-runs");
+const sandboxRoot = opts.sandboxRoot ? resolve(opts.sandboxRoot) : join(root, "tmp", "bench-runs", modelDir(opts.model));
 const plan = planRuns(opts.tasks, opts.conditions, opts.runs);
 
 /** Resolves the agent command to [file, ...prefixArgs, shell]. */
