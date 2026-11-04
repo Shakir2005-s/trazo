@@ -330,9 +330,10 @@ describe("--help and --version", () => {
     }
   });
 
-  it("prints the version", () => {
+  it("prints the version from package.json", () => {
+    const { version } = JSON.parse(readFileSync(resolve("package.json"), "utf8")) as { version: string };
     for (const flag of ["--version", "-v"]) {
-      expect(run([flag])).toEqual({ code: 0, stdout: "0.1.0\n", stderr: "" });
+      expect(run([flag])).toEqual({ code: 0, stdout: `${version}\n`, stderr: "" });
     }
   });
 });
