@@ -2,6 +2,12 @@
 
 All notable changes to trazo are listed here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html). While trazo is in 0.x, a change that breaks the JSON input, the CLI or the library API bumps the minor version.
 
+## [Unreleased]
+
+### Fixed
+
+- `make` and `check` read input saved as UTF-16 with a byte order mark, which is what `>` writes in Windows PowerShell 5.1 (for example `trazo example erd > diagram.json`). Before, such a file failed with `invalid JSON at line 1, column 1`.
+
 ## [0.1.0] - 2026-11-02
 
 First release. Needs Node 22 or later.

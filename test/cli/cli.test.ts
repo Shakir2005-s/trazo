@@ -30,7 +30,7 @@ afterEach(() => {
   rmSync(dir, { recursive: true, force: true });
 });
 
-function run(args: string[], input?: string) {
+function run(args: string[], input?: string | Buffer) {
   const result = spawnSync(process.execPath, [BIN, ...args], {
     cwd: dir,
     encoding: "utf8",
@@ -41,7 +41,7 @@ function run(args: string[], input?: string) {
 
 function write(name: string, value: unknown): string {
   const path = join(dir, name);
-  writeFileSync(path, typeof value === "string" ? value : JSON.stringify(value));
+  writeFileSync(path, typeof value === "string" || Buffer.isBuffer(value) ? value : JSON.stringify(value));
   return path;
 }
 
@@ -191,7 +191,36 @@ describe("make", () => {
   });
 });
 
+const utf16le = (text: string) => Buffer.concat([Buffer.from([0xff, 0xfe]), Buffer.from(text, "utf16le")]);
+const utf16be = (text: string) =>
+  Buffer.concat([Buffer.from([0xfe, 0xff]), Buffer.from(text, "utf16le").swap16()]);
+const utf8bom = (text: string) => Buffer.concat([Buffer.from([0xef, 0xbb, 0xbf]), Buffer.from(text, "utf8")]);
+
 describe("check", () => {
+  const ok = { code: 0, stdout: "ok\n", stderr: "" };
+  const text = JSON.stringify(valid);
+
+  it.each([
+    ["UTF-16LE", utf16le],
+    ["UTF-16BE", utf16be],
+    ["UTF-8", utf8bom],
+  ])("reads a %s file with a BOM", (_name, encode) => {
+    write("d.json", encode(text));
+    expect(run(["check", "d.json"])).toEqual(ok);
+  });
+
+  it("reads UTF-16LE with a BOM from stdin", () => {
+    expect(run(["check", "-"], utf16le(text))).toEqual(ok);
+  });
+
+  it("make gives the same html for a UTF-16LE input as for UTF-8", () => {
+    write("a.json", text);
+    write("b.json", utf16le(text));
+    expect(run(["make", "a.json", "-o", "a.html"]).code).toBe(0);
+    expect(run(["make", "b.json", "-o", "b.html"]).code).toBe(0);
+    expect(readFileSync(join(dir, "b.html")).equals(readFileSync(join(dir, "a.html")))).toBe(true);
+  });
+
   it("prints ok and writes nothing", () => {
     write("d.json", valid);
     expect(run(["check", "d.json"])).toEqual({ code: 0, stdout: "ok\n", stderr: "" });
