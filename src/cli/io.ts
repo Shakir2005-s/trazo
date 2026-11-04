@@ -6,11 +6,24 @@ import { dirname } from "node:path";
 import { UsageError } from "./usage.js";
 
 export function readInput(input: string): string {
+  let bytes: Buffer;
   try {
-    return readFileSync(input === "-" ? 0 : input, "utf8");
+    bytes = readFileSync(input === "-" ? 0 : input);
   } catch {
     throw new UsageError(input === "-" ? "cannot read stdin" : `cannot read "${input}"`);
   }
+  return decode(bytes);
+}
+
+// Windows PowerShell 5.1 `>` writes UTF-16LE with a BOM, so honor the BOM.
+function decode(bytes: Buffer): string {
+  if (bytes[0] === 0xff && bytes[1] === 0xfe) return bytes.subarray(2).toString("utf16le");
+  if (bytes[0] === 0xfe && bytes[1] === 0xff) {
+    const body = Buffer.from(bytes.subarray(2));
+    return body.subarray(0, body.length - (body.length % 2)).swap16().toString("utf16le");
+  }
+  if (bytes[0] === 0xef && bytes[1] === 0xbb && bytes[2] === 0xbf) return bytes.subarray(3).toString("utf8");
+  return bytes.toString("utf8");
 }
 
 /**
