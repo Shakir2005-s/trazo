@@ -47,7 +47,7 @@
         "of": 23
       },
       "runsWithDefects": {
-        "ok": 0,
+        "count": 0,
         "of": 23
       },
       "defectsTotal": 0,
@@ -89,7 +89,7 @@
         "of": 23
       },
       "runsWithDefects": {
-        "ok": 0,
+        "count": 0,
         "of": 23
       },
       "defectsTotal": 0,
@@ -126,7 +126,7 @@
         "of": 24
       },
       "runsWithDefects": {
-        "ok": 20,
+        "count": 20,
         "of": 24
       },
       "defectsTotal": 113,
@@ -163,16 +163,16 @@
         "of": 24
       },
       "runsWithDefects": {
-        "ok": 8,
+        "count": 7,
         "of": 24
       },
-      "defectsTotal": 15,
+      "defectsTotal": 14,
       "defectsByKind": {
         "text-overlap": 0,
         "text-outside-canvas": 0,
         "text-overflow-node": 4,
         "edge-through-node": 10,
-        "node-overlap": 1
+        "node-overlap": 0
       },
       "deterministic": {
         "ok": 13,
@@ -185,7 +185,15 @@
       "failedCommands": 5,
       "repairs": 10,
       "runsWithOtherCommands": 7,
-      "scriptErrors": 0
+      "scriptErrors": 0,
+      "detectorRaw": {
+        "runsWithDefects": {
+          "count": 8,
+          "of": 24
+        },
+        "defectsTotal": 15
+      },
+      "note": "runsWithDefects, defectsTotal and defectsByKind exclude the known false positive (wf-expenses-mermaid-2 node-overlap); detectorRaw keeps the detector's own counts. These are the numbers published in bench/README.md."
     }
   },
   "rows": [
