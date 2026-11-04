@@ -31,6 +31,10 @@ trazo make demo.json
 
 Esto escribe `demo.html` junto al archivo de entrada e imprime su ruta. Abrilo en el navegador: podés mover y hacer zoom, pasar el mouse sobre un nodo (o enfocarlo con el teclado) para ver su nota y resaltar sus conexiones, y exportar a SVG o PNG. No necesita servidor ni hace pedidos de red.
 
+## ¿Por qué no pedirle el diagrama directamente al agente?
+
+Puede dibujarlo, pero tiene que ubicar él mismo cada caja, flecha y etiqueta, y la geometría le sale mal. En nuestro benchmark, 20 de 24 diagramas SVG escritos a mano tenían texto superpuesto, etiquetas fuera de sus cajas o aristas que cruzaban nodos, y fueron los de mayor costo en tokens: el agente escribe todo el dibujo como tokens de salida, los más caros. Con trazo el agente solo dice qué hay en el sistema; trazo hace el layout, valida la entrada y genera siempre el mismo HTML: ningún defecto de layout en 46 corridas, válido al primer intento. Mermaid es más barato, pero 7 de 24 de sus diagramas tenían defectos de layout. Detalles: [bench/README.md](bench/README.md#baseline-trazo-vs-hand-written-svg-vs-mermaid)
+
 ## Cuándo usarlo
 
 trazo hace una sola cosa: un agente (o vos) describe el diagrama, y el código lo acomoda.
@@ -40,7 +44,7 @@ trazo hace una sola cosa: un agente (o vos) describe el diagrama, y el código l
 - El mismo JSON siempre da el mismo HTML, byte por byte, sin navegador y sin red.
 - Las claves foráneas del ERD apuntan a columnas, no solo a tablas.
 
-Números y método: [bench/README.md](bench/README.md).
+Números y método: [bench/README.md](bench/README.md). En el mismo benchmark (Codex, gpt-6-luna, 8 tareas, 3 corridas cada una): el costo en tokens de Mermaid fue entre un 35 y un 40% menor que el de trazo (con la salida ponderada entre 4 y 8 veces la entrada y la entrada en caché a un décimo; ver la sección de costo en tokens), y 5 de 24 corridas de Mermaid necesitaron una corrección tras un error de sintaxis.
 
 Lo que no hace:
 

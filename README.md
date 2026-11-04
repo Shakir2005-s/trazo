@@ -31,6 +31,10 @@ trazo make demo.json
 
 This writes `demo.html` next to the input and prints its path. Open it in a browser: pan, zoom, hover or focus a node to see its note and highlight its connections, export to SVG or PNG. No server and no network requests.
 
+## Why not just ask the agent for a diagram?
+
+It can draw one, but it has to place every box, arrow and label itself, and it gets the geometry wrong. In our bench, 20 of 24 hand-written SVG diagrams had overlapping text, labels outside their boxes or edges crossing nodes, and they had the highest token cost: the agent writes the whole drawing as output tokens, the most expensive kind. With trazo the agent only says what is in the system; trazo does the layout, checks the input and renders the same HTML every time: no layout defects in 46 runs, valid on the first try. Mermaid is cheaper, but 7 of 24 of its diagrams had layout defects. Details: [bench/README.md](bench/README.md#baseline-trazo-vs-hand-written-svg-vs-mermaid)
+
 ## When to use it
 
 trazo does one job: an agent (or you) describes the diagram, and code lays it out.
@@ -40,7 +44,7 @@ trazo does one job: an agent (or you) describes the diagram, and code lays it ou
 - The same JSON always gives the same HTML, byte for byte, with no browser and no network.
 - ERD foreign keys point at columns, not only at tables.
 
-Numbers and method: [bench/README.md](bench/README.md).
+Numbers and method: [bench/README.md](bench/README.md). Same bench (Codex, gpt-6-luna, 8 tasks, 3 runs each): Mermaid's token cost was about 35–40% lower than trazo's (output weighted 4 to 8 times input, cached input at a tenth; see the token cost section), and 5 of 24 Mermaid runs needed a fix after a syntax error.
 
 What it does not do:
 
