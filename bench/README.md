@@ -183,6 +183,93 @@ Two no-skill runs were first recorded with `firstTryOk: false`: the agent chaine
 
 Deterministic results are in `bench/results/*-deterministic.json`.
 
+## trazo across agents
+
+trazo only, same 8 tasks. First-try is the share of runs whose first `make` exited with 0; final is the share that ended with a valid diagram. The Claude Code rows are the reruns after H7 (detailed tables in [Results](#results)); the Codex rows are runs with trazo 0.1.1 from npm.
+
+| Agent | Model | trazo | Condition | Runs | First-try | Final |
+|---|---|---|---|---|---|---|
+| Claude Code 2.1.308 | claude-sonnet-5-5 | 0.1.0 | skill | 24 | 100% | 100% |
+| Claude Code 2.1.308 | claude-sonnet-5-5 | 0.1.0 | no-skill | 24 | 100% | 100% |
+| Claude Code 2.1.308 | claude-haiku-4-5 | 0.1.0 | skill | 24 | 96% | 100% |
+| Claude Code 2.1.308 | claude-haiku-4-5 | 0.1.0 | no-skill | 24 | 92% | 100% |
+| Codex CLI 0.166.0 | gpt-6-luna | 0.1.1 | skill | 23 | 100% (23/23) | 100% (23/23) |
+| Codex CLI 0.166.0 | gpt-6-luna | 0.1.1 | no-skill | 23 | 100% (23/23) | 100% (23/23) |
+
+The Codex runs were driven by a local manual harness, not by `bench/run-agent.mjs`, and are summarized in `bench/results/2026-11-04-baseline-codex-gpt-6-luna.json`. Two of the 48 Codex trazo runs (`wf-expenses-skill-2`, `erd-payments-no-skill-2`) are excluded: Codex could not start a shell, so trazo never ran. The two harnesses differ in system prompt, tools and context handling, so Codex and Claude Code rows are not comparable 1:1.
+
+## Baseline: trazo vs hand-written SVG vs Mermaid
+
+The question: what does an agent get without trazo?
+
+### Method
+
+- Same 8 tasks and the same task prompts as above, 3 runs per task and condition, Codex CLI 0.166.0 with `gpt-6-luna`, run on 2026-11-04.
+- Conditions:
+  - `trazo`: the agent uses trazo 0.1.1. `no-skill` is the main reference; `skill` is shown too.
+  - `svg`: the agent writes one self-contained `diagram.html` with inline SVG and runs no shell commands.
+  - `mermaid`: the agent writes `diagram.mmd` and may run only `mmdc` (11.17.1) to render it.
+- Final success: a diagram was produced and rendered without a page script error (for trazo, `trazo check` also passes on the final JSON).
+- First try: the first `make` (trazo) or the first `mmdc` call (mermaid) exited with 0. Not applicable to svg, which has no command to run.
+- Text checklist: each task has a short list of labels that must appear in the rendered text (for example `web`, `api`, `database`, `queue`, `payment` for `arch-shop`). The same lists apply to every condition. It is a text match, so it does not judge the layout.
+- Layout defects: every output is opened in headless Chromium and measured by one detector for all conditions. It counts 5 kinds: text overlapping text, text outside the canvas, text overflowing its node, an edge crossing a node it does not connect, and two nodes overlapping. A run has a defect if the detector reports at least one.
+- Render determinism: the same source is rendered twice and the outputs are compared byte by byte.
+- Tokens and seconds come from the Codex session log; the table gives medians per run.
+
+### Results
+
+| | trazo no-skill | trazo skill | svg | mermaid |
+|---|---|---|---|---|
+| Runs (excluded as infrastructure failures) | 23 (1) | 23 (1) | 24 | 24 |
+| Final success | 23/23 | 23/23 | 23/24 | 24/24 |
+| First try | 23/23 | 23/23 | n/a | 19/24 |
+| Text checklist | 21/23 | 22/23 | 21/24 | 21/24 |
+| Runs with layout defects | 0/23 | 0/23 | 20/24 | 7/24 |
+| Total defects | 0 | 0 | 113 | 14 |
+| Render determinism | 23/23 | 23/23 | static file | 13/24 |
+| Median input tokens | 72.7k | 106.3k | 44.0k | 56.1k |
+| Median cached input tokens | 65.5k | 97.0k | 36.5k | 52.4k |
+| Median output tokens | 0.9k | 1.1k | 3.6k | 0.5k |
+| Median seconds | 45.2 | 58.7 | 85.0 | 40.0 |
+
+Notes on the table:
+
+- The detector found 8 runs with defects in Mermaid (15 defects). One report was a false positive: in `wf-expenses-mermaid-2` it flagged two nodes as overlapping, but a screenshot shows nothing overlapping. The table counts 7 runs and 14 defects. Two other Mermaid reports (edges through nodes in `arch-monorepo-mermaid-1`, a note whose text passes its box in `seq-checkout-retry-mermaid-1`) and one svg run (`wf-onboarding-svg-1`) were checked in screenshots and are real. The remaining reports were not all checked by hand.
+- Defects by kind: svg 24 text overlap, 45 text overflowing a node, 22 edges through a node, 22 overlapping nodes; mermaid (after the correction) 4 text overflowing a node, 10 edges through a node. The trazo outputs had none of the 5 kinds.
+- Median input tokens include cached input. The 5 Mermaid runs that did not pass on the first `mmdc` call fixed a syntax error and ran it again; all 24 ended with a rendered diagram.
+- One svg run (`wf-expenses-svg-3`) ended with a script error in the page (a negative rect height) and counts as a failure.
+- Shell commands outside the allowed set (mostly `Get-Location`) appeared in 9 svg and 7 mermaid runs; they changed nothing and the runs are kept.
+
+### Token cost
+
+Cached input is billed at a lower rate than uncached input, and output at a higher one, so the three are kept apart. Relative cost per run, from the medians above:
+
+`cost = (input - cached) + 0.1 * cached + w * output`, in thousands of token-equivalents, with `w = 4` and `w = 8` for output.
+
+| Condition | Uncached input | Cached input | Output | Cost, w = 4 | Cost, w = 8 |
+|---|---|---|---|---|---|
+| mermaid | 3.8k | 52.4k | 0.5k | about 11 | about 13 |
+| trazo no-skill | 7.2k | 65.5k | 0.9k | about 17 | about 21 |
+| trazo skill | 9.3k | 97.0k | 1.1k | about 23 | about 28 |
+| svg | 7.5k | 36.5k | 3.6k | about 26 | about 40 |
+
+Against trazo without the skill, Mermaid costs 38% less at `w = 4` and 40% less at `w = 8`, and hand-written SVG costs more (47% more at `w = 4`, 90% more at `w = 8`). The weights are assumptions, not a price list; the ranking of mermaid, trazo no-skill and svg holds for both. These are medians of different runs, so the figures are not a sum over the table rows.
+
+### What the numbers do not show
+
+- The 13/24 Mermaid render determinism is a byte comparison. In a spot check of two runs that differ, one rendered the same pixels twice and the other did not; how much the visible layout changes was not measured.
+- The svg runs read no help and no examples and still used a median of 44k input tokens, so most of the input in every condition is context the agent carries in every run. On tasks this small it dominates.
+- The trazo `skill` condition costs more than `no-skill` here, with the same final success. With Claude Code it cost more with Haiku 4.5 and less with Sonnet 5.5.
+
+### Limits
+
+- One model and one harness for the baseline. Results may differ with another model or agent.
+- 8 small tasks and 3 runs each; the rates are a trend, not a guarantee.
+- The layout detector is a heuristic with one confirmed false positive, and it cannot see problems it does not measure (for example a diamond whose text leaves a corner but stays inside its bounding box).
+- This bench was made by the author of the tool.
+- The scripts that drive Codex and analyze the sessions are local and are not part of this repository, which is why the numbers come with a summary file instead of a command. To reproduce: run the 8 prompts from `tasks.json` three times per condition in Codex CLI 0.166.0 with `gpt-6-luna`, a clean work folder and no user instructions or skills, allow only the commands named above, then open each output in headless Chromium and count the 5 defect kinds.
+- The summary and per-run numbers are in `bench/results/2026-11-04-baseline-codex-gpt-6-luna.json`.
+
 ## Limits
 
 - Each model gets its own sandbox folder under the default `--sandbox-root`, so a second model does not replace the first model's `stream.jsonl` files. An explicit `--sandbox-root` is used as given, with no model folder; reusing it for another model replaces the earlier sandboxes.

@@ -1,0 +1,2593 @@
+{
+  "kind": "baseline",
+  "date": "2026-11-04",
+  "harness": {
+    "name": "Codex CLI",
+    "version": "0.166.0",
+    "driver": "local manual harness"
+  },
+  "model": "gpt-6-luna",
+  "trazoVersion": "0.1.1",
+  "mmdcVersion": "11.17.1",
+  "tasks": 8,
+  "runsPerTaskAndCondition": 3,
+  "conditions": [
+    "no-skill",
+    "skill",
+    "svg",
+    "mermaid"
+  ],
+  "infraExcluded": [
+    "wf-expenses-skill-2",
+    "erd-payments-no-skill-2"
+  ],
+  "knownFalsePositives": [
+    {
+      "run": "wf-expenses-mermaid-2",
+      "kind": "node-overlap",
+      "note": "checked in a screenshot, nothing overlaps; mermaid runs with real defects 7 of 24, real defects 14 of 15"
+    }
+  ],
+  "summary": {
+    "no-skill": {
+      "runs": 23,
+      "infraExcluded": [
+        "erd-payments-no-skill-2"
+      ],
+      "finalOk": {
+        "ok": 23,
+        "of": 23
+      },
+      "firstTryOk": {
+        "ok": 23,
+        "of": 23
+      },
+      "checklistOk": {
+        "ok": 21,
+        "of": 23
+      },
+      "runsWithDefects": {
+        "ok": 0,
+        "of": 23
+      },
+      "defectsTotal": 0,
+      "defectsByKind": {
+        "text-overlap": 0,
+        "text-outside-canvas": 0,
+        "text-overflow-node": 0,
+        "edge-through-node": 0,
+        "node-overlap": 0
+      },
+      "deterministic": {
+        "ok": 23,
+        "of": 23
+      },
+      "medianInputTokens": 72716,
+      "medianCachedInputTokens": 65536,
+      "medianOutputTokens": 924,
+      "medianSeconds": 45.2,
+      "failedCommands": 1,
+      "repairs": 1,
+      "runsWithOtherCommands": 0,
+      "scriptErrors": 0
+    },
+    "skill": {
+      "runs": 23,
+      "infraExcluded": [
+        "wf-expenses-skill-2"
+      ],
+      "finalOk": {
+        "ok": 23,
+        "of": 23
+      },
+      "firstTryOk": {
+        "ok": 23,
+        "of": 23
+      },
+      "checklistOk": {
+        "ok": 22,
+        "of": 23
+      },
+      "runsWithDefects": {
+        "ok": 0,
+        "of": 23
+      },
+      "defectsTotal": 0,
+      "defectsByKind": {
+        "text-overlap": 0,
+        "text-outside-canvas": 0,
+        "text-overflow-node": 0,
+        "edge-through-node": 0,
+        "node-overlap": 0
+      },
+      "deterministic": {
+        "ok": 23,
+        "of": 23
+      },
+      "medianInputTokens": 106282,
+      "medianCachedInputTokens": 97024,
+      "medianOutputTokens": 1086,
+      "medianSeconds": 58.7,
+      "failedCommands": 2,
+      "repairs": 2,
+      "runsWithOtherCommands": 0,
+      "scriptErrors": 0
+    },
+    "svg": {
+      "runs": 24,
+      "infraExcluded": [],
+      "finalOk": {
+        "ok": 23,
+        "of": 24
+      },
+      "firstTryOk": null,
+      "checklistOk": {
+        "ok": 21,
+        "of": 24
+      },
+      "runsWithDefects": {
+        "ok": 20,
+        "of": 24
+      },
+      "defectsTotal": 113,
+      "defectsByKind": {
+        "text-overlap": 24,
+        "text-outside-canvas": 0,
+        "text-overflow-node": 45,
+        "edge-through-node": 22,
+        "node-overlap": 22
+      },
+      "deterministic": null,
+      "medianInputTokens": 44009,
+      "medianCachedInputTokens": 36544,
+      "medianOutputTokens": 3628,
+      "medianSeconds": 85,
+      "failedCommands": 0,
+      "repairs": 0,
+      "runsWithOtherCommands": 9,
+      "scriptErrors": 1
+    },
+    "mermaid": {
+      "runs": 24,
+      "infraExcluded": [],
+      "finalOk": {
+        "ok": 24,
+        "of": 24
+      },
+      "firstTryOk": {
+        "ok": 19,
+        "of": 24
+      },
+      "checklistOk": {
+        "ok": 21,
+        "of": 24
+      },
+      "runsWithDefects": {
+        "ok": 8,
+        "of": 24
+      },
+      "defectsTotal": 15,
+      "defectsByKind": {
+        "text-overlap": 0,
+        "text-outside-canvas": 0,
+        "text-overflow-node": 4,
+        "edge-through-node": 10,
+        "node-overlap": 1
+      },
+      "deterministic": {
+        "ok": 13,
+        "of": 24
+      },
+      "medianInputTokens": 56142,
+      "medianCachedInputTokens": 52352,
+      "medianOutputTokens": 458,
+      "medianSeconds": 40,
+      "failedCommands": 5,
+      "repairs": 10,
+      "runsWithOtherCommands": 7,
+      "scriptErrors": 0
+    }
+  },
+  "rows": [
+    {
+      "name": "arch-monorepo-mermaid-1",
+      "task": "arch-monorepo",
+      "condition": "mermaid",
+      "run": 1,
+      "finalOk": true,
+      "firstTryOk": true,
+      "checklist": {
+        "ok": true,
+        "missing": []
+      },
+      "defects": {
+        "text-overlap": 0,
+        "text-outside-canvas": 0,
+        "text-overflow-node": 0,
+        "edge-through-node": 4,
+        "node-overlap": 0
+      },
+      "deterministic": true,
+      "inputTokens": 56735,
+      "cachedInputTokens": 48896,
+      "outputTokens": 919,
+      "seconds": 44.9,
+      "infra": false
+    },
+    {
+      "name": "arch-monorepo-mermaid-2",
+      "task": "arch-monorepo",
+      "condition": "mermaid",
+      "run": 2,
+      "finalOk": true,
+      "firstTryOk": true,
+      "checklist": {
+        "ok": true,
+        "missing": []
+      },
+      "defects": {
+        "text-overlap": 0,
+        "text-outside-canvas": 0,
+        "text-overflow-node": 1,
+        "edge-through-node": 2,
+        "node-overlap": 0
+      },
+      "deterministic": true,
+      "inputTokens": 58475,
+      "cachedInputTokens": 52352,
+      "outputTokens": 831,
+      "seconds": 44.6,
+      "infra": false
+    },
+    {
+      "name": "arch-monorepo-mermaid-3",
+      "task": "arch-monorepo",
+      "condition": "mermaid",
+      "run": 3,
+      "finalOk": true,
+      "firstTryOk": true,
+      "checklist": {
+        "ok": true,
+        "missing": []
+      },
+      "defects": {
+        "text-overlap": 0,
+        "text-outside-canvas": 0,
+        "text-overflow-node": 0,
+        "edge-through-node": 2,
+        "node-overlap": 0
+      },
+      "deterministic": true,
+      "inputTokens": 56406,
+      "cachedInputTokens": 52864,
+      "outputTokens": 744,
+      "seconds": 41.7,
+      "infra": false
+    },
+    {
+      "name": "arch-monorepo-no-skill-1",
+      "task": "arch-monorepo",
+      "condition": "no-skill",
+      "run": 1,
+      "finalOk": true,
+      "firstTryOk": true,
+      "checklist": {
+        "ok": true,
+        "missing": []
+      },
+      "defects": {
+        "text-overlap": 0,
+        "text-outside-canvas": 0,
+        "text-overflow-node": 0,
+        "edge-through-node": 0,
+        "node-overlap": 0
+      },
+      "deterministic": true,
+      "inputTokens": 74114,
+      "cachedInputTokens": 66432,
+      "outputTokens": 1622,
+      "seconds": 53.6,
+      "infra": false
+    },
+    {
+      "name": "arch-monorepo-no-skill-2",
+      "task": "arch-monorepo",
+      "condition": "no-skill",
+      "run": 2,
+      "finalOk": true,
+      "firstTryOk": true,
+      "checklist": {
+        "ok": true,
+        "missing": []
+      },
+      "defects": {
+        "text-overlap": 0,
+        "text-outside-canvas": 0,
+        "text-overflow-node": 0,
+        "edge-through-node": 0,
+        "node-overlap": 0
+      },
+      "deterministic": true,
+      "inputTokens": 73991,
+      "cachedInputTokens": 64640,
+      "outputTokens": 1554,
+      "seconds": 56.5,
+      "infra": false
+    },
+    {
+      "name": "arch-monorepo-no-skill-3",
+      "task": "arch-monorepo",
+      "condition": "no-skill",
+      "run": 3,
+      "finalOk": true,
+      "firstTryOk": true,
+      "checklist": {
+        "ok": true,
+        "missing": []
+      },
+      "defects": {
+        "text-overlap": 0,
+        "text-outside-canvas": 0,
+        "text-overflow-node": 0,
+        "edge-through-node": 0,
+        "node-overlap": 0
+      },
+      "deterministic": true,
+      "inputTokens": 90220,
+      "cachedInputTokens": 84608,
+      "outputTokens": 1698,
+      "seconds": 58.9,
+      "infra": false
+    },
+    {
+      "name": "arch-monorepo-skill-1",
+      "task": "arch-monorepo",
+      "condition": "skill",
+      "run": 1,
+      "finalOk": true,
+      "firstTryOk": true,
+      "checklist": {
+        "ok": true,
+        "missing": []
+      },
+      "defects": {
+        "text-overlap": 0,
+        "text-outside-canvas": 0,
+        "text-overflow-node": 0,
+        "edge-through-node": 0,
+        "node-overlap": 0
+      },
+      "deterministic": true,
+      "inputTokens": 162704,
+      "cachedInputTokens": 150784,
+      "outputTokens": 2527,
+      "seconds": 83.3,
+      "infra": false
+    },
+    {
+      "name": "arch-monorepo-skill-2",
+      "task": "arch-monorepo",
+      "condition": "skill",
+      "run": 2,
+      "finalOk": true,
+      "firstTryOk": true,
+      "checklist": {
+        "ok": true,
+        "missing": []
+      },
+      "defects": {
+        "text-overlap": 0,
+        "text-outside-canvas": 0,
+        "text-overflow-node": 0,
+        "edge-through-node": 0,
+        "node-overlap": 0
+      },
+      "deterministic": true,
+      "inputTokens": 160156,
+      "cachedInputTokens": 144128,
+      "outputTokens": 1996,
+      "seconds": 69.3,
+      "infra": false
+    },
+    {
+      "name": "arch-monorepo-skill-3",
+      "task": "arch-monorepo",
+      "condition": "skill",
+      "run": 3,
+      "finalOk": true,
+      "firstTryOk": true,
+      "checklist": {
+        "ok": true,
+        "missing": []
+      },
+      "defects": {
+        "text-overlap": 0,
+        "text-outside-canvas": 0,
+        "text-overflow-node": 0,
+        "edge-through-node": 0,
+        "node-overlap": 0
+      },
+      "deterministic": true,
+      "inputTokens": 109044,
+      "cachedInputTokens": 97408,
+      "outputTokens": 1860,
+      "seconds": 69.4,
+      "infra": false
+    },
+    {
+      "name": "arch-monorepo-svg-1",
+      "task": "arch-monorepo",
+      "condition": "svg",
+      "run": 1,
+      "finalOk": true,
+      "firstTryOk": null,
+      "checklist": {
+        "ok": true,
+        "missing": []
+      },
+      "defects": {
+        "text-overlap": 0,
+        "text-outside-canvas": 0,
+        "text-overflow-node": 0,
+        "edge-through-node": 0,
+        "node-overlap": 0
+      },
+      "deterministic": null,
+      "inputTokens": 31436,
+      "cachedInputTokens": 24960,
+      "outputTokens": 4165,
+      "seconds": 93,
+      "infra": false
+    },
+    {
+      "name": "arch-monorepo-svg-2",
+      "task": "arch-monorepo",
+      "condition": "svg",
+      "run": 2,
+      "finalOk": true,
+      "firstTryOk": null,
+      "checklist": {
+        "ok": true,
+        "missing": []
+      },
+      "defects": {
+        "text-overlap": 0,
+        "text-outside-canvas": 0,
+        "text-overflow-node": 1,
+        "edge-through-node": 2,
+        "node-overlap": 8
+      },
+      "deterministic": null,
+      "inputTokens": 44827,
+      "cachedInputTokens": 38528,
+      "outputTokens": 3730,
+      "seconds": 87.8,
+      "infra": false
+    },
+    {
+      "name": "arch-monorepo-svg-3",
+      "task": "arch-monorepo",
+      "condition": "svg",
+      "run": 3,
+      "finalOk": true,
+      "firstTryOk": null,
+      "checklist": {
+        "ok": true,
+        "missing": []
+      },
+      "defects": {
+        "text-overlap": 0,
+        "text-outside-canvas": 0,
+        "text-overflow-node": 0,
+        "edge-through-node": 4,
+        "node-overlap": 0
+      },
+      "deterministic": null,
+      "inputTokens": 54549,
+      "cachedInputTokens": 43520,
+      "outputTokens": 3596,
+      "seconds": 84.2,
+      "infra": false
+    },
+    {
+      "name": "arch-shop-mermaid-1",
+      "task": "arch-shop",
+      "condition": "mermaid",
+      "run": 1,
+      "finalOk": true,
+      "firstTryOk": true,
+      "checklist": {
+        "ok": true,
+        "missing": []
+      },
+      "defects": {
+        "text-overlap": 0,
+        "text-outside-canvas": 0,
+        "text-overflow-node": 0,
+        "edge-through-node": 0,
+        "node-overlap": 0
+      },
+      "deterministic": true,
+      "inputTokens": 55632,
+      "cachedInputTokens": 52352,
+      "outputTokens": 433,
+      "seconds": 48.2,
+      "infra": false
+    },
+    {
+      "name": "arch-shop-mermaid-2",
+      "task": "arch-shop",
+      "condition": "mermaid",
+      "run": 2,
+      "finalOk": true,
+      "firstTryOk": false,
+      "checklist": {
+        "ok": true,
+        "missing": []
+      },
+      "defects": {
+        "text-overlap": 0,
+        "text-outside-canvas": 0,
+        "text-overflow-node": 0,
+        "edge-through-node": 0,
+        "node-overlap": 0
+      },
+      "deterministic": true,
+      "inputTokens": 55561,
+      "cachedInputTokens": 52352,
+      "outputTokens": 390,
+      "seconds": 37.4,
+      "infra": false
+    },
+    {
+      "name": "arch-shop-mermaid-3",
+      "task": "arch-shop",
+      "condition": "mermaid",
+      "run": 3,
+      "finalOk": true,
+      "firstTryOk": true,
+      "checklist": {
+        "ok": true,
+        "missing": []
+      },
+      "defects": {
+        "text-overlap": 0,
+        "text-outside-canvas": 0,
+        "text-overflow-node": 0,
+        "edge-through-node": 0,
+        "node-overlap": 0
+      },
+      "deterministic": true,
+      "inputTokens": 27717,
+      "cachedInputTokens": 23040,
+      "outputTokens": 400,
+      "seconds": 37.1,
+      "infra": false
+    },
+    {
+      "name": "arch-shop-no-skill-1",
+      "task": "arch-shop",
+      "condition": "no-skill",
+      "run": 1,
+      "finalOk": true,
+      "firstTryOk": true,
+      "checklist": {
+        "ok": true,
+        "missing": []
+      },
+      "defects": {
+        "text-overlap": 0,
+        "text-outside-canvas": 0,
+        "text-overflow-node": 0,
+        "edge-through-node": 0,
+        "node-overlap": 0
+      },
+      "deterministic": true,
+      "inputTokens": 72716,
+      "cachedInputTokens": 53120,
+      "outputTokens": 822,
+      "seconds": 43.1,
+      "infra": false
+    },
+    {
+      "name": "arch-shop-no-skill-2",
+      "task": "arch-shop",
+      "condition": "no-skill",
+      "run": 2,
+      "finalOk": true,
+      "firstTryOk": true,
+      "checklist": {
+        "ok": true,
+        "missing": []
+      },
+      "defects": {
+        "text-overlap": 0,
+        "text-outside-canvas": 0,
+        "text-overflow-node": 0,
+        "edge-through-node": 0,
+        "node-overlap": 0
+      },
+      "deterministic": true,
+      "inputTokens": 73092,
+      "cachedInputTokens": 65536,
+      "outputTokens": 1028,
+      "seconds": 42.7,
+      "infra": false
+    },
+    {
+      "name": "arch-shop-no-skill-3",
+      "task": "arch-shop",
+      "condition": "no-skill",
+      "run": 3,
+      "finalOk": true,
+      "firstTryOk": true,
+      "checklist": {
+        "ok": true,
+        "missing": []
+      },
+      "defects": {
+        "text-overlap": 0,
+        "text-outside-canvas": 0,
+        "text-overflow-node": 0,
+        "edge-through-node": 0,
+        "node-overlap": 0
+      },
+      "deterministic": true,
+      "inputTokens": 73289,
+      "cachedInputTokens": 64768,
+      "outputTokens": 1060,
+      "seconds": 46.2,
+      "infra": false
+    },
+    {
+      "name": "arch-shop-skill-1",
+      "task": "arch-shop",
+      "condition": "skill",
+      "run": 1,
+      "finalOk": true,
+      "firstTryOk": true,
+      "checklist": {
+        "ok": true,
+        "missing": []
+      },
+      "defects": {
+        "text-overlap": 0,
+        "text-outside-canvas": 0,
+        "text-overflow-node": 0,
+        "edge-through-node": 0,
+        "node-overlap": 0
+      },
+      "deterministic": true,
+      "inputTokens": 73439,
+      "cachedInputTokens": 65792,
+      "outputTokens": 905,
+      "seconds": 46.1,
+      "infra": false
+    },
+    {
+      "name": "arch-shop-skill-2",
+      "task": "arch-shop",
+      "condition": "skill",
+      "run": 2,
+      "finalOk": true,
+      "firstTryOk": true,
+      "checklist": {
+        "ok": true,
+        "missing": []
+      },
+      "defects": {
+        "text-overlap": 0,
+        "text-outside-canvas": 0,
+        "text-overflow-node": 0,
+        "edge-through-node": 0,
+        "node-overlap": 0
+      },
+      "deterministic": true,
+      "inputTokens": 73185,
+      "cachedInputTokens": 68608,
+      "outputTokens": 1004,
+      "seconds": 45.9,
+      "infra": false
+    },
+    {
+      "name": "arch-shop-skill-3",
+      "task": "arch-shop",
+      "condition": "skill",
+      "run": 3,
+      "finalOk": true,
+      "firstTryOk": true,
+      "checklist": {
+        "ok": true,
+        "missing": []
+      },
+      "defects": {
+        "text-overlap": 0,
+        "text-outside-canvas": 0,
+        "text-overflow-node": 0,
+        "edge-through-node": 0,
+        "node-overlap": 0
+      },
+      "deterministic": true,
+      "inputTokens": 105805,
+      "cachedInputTokens": 80256,
+      "outputTokens": 947,
+      "seconds": 46.6,
+      "infra": false
+    },
+    {
+      "name": "arch-shop-svg-1",
+      "task": "arch-shop",
+      "condition": "svg",
+      "run": 1,
+      "finalOk": true,
+      "firstTryOk": null,
+      "checklist": {
+        "ok": true,
+        "missing": []
+      },
+      "defects": {
+        "text-overlap": 1,
+        "text-outside-canvas": 0,
+        "text-overflow-node": 7,
+        "edge-through-node": 0,
+        "node-overlap": 0
+      },
+      "deterministic": null,
+      "inputTokens": 45228,
+      "cachedInputTokens": 38528,
+      "outputTokens": 4207,
+      "seconds": 111.9,
+      "infra": false
+    },
+    {
+      "name": "arch-shop-svg-2",
+      "task": "arch-shop",
+      "condition": "svg",
+      "run": 2,
+      "finalOk": true,
+      "firstTryOk": null,
+      "checklist": {
+        "ok": false,
+        "missing": [
+          "database|db"
+        ]
+      },
+      "defects": {
+        "text-overlap": 4,
+        "text-outside-canvas": 0,
+        "text-overflow-node": 5,
+        "edge-through-node": 1,
+        "node-overlap": 0
+      },
+      "deterministic": null,
+      "inputTokens": 45535,
+      "cachedInputTokens": 38656,
+      "outputTokens": 4238,
+      "seconds": 111.5,
+      "infra": false
+    },
+    {
+      "name": "arch-shop-svg-3",
+      "task": "arch-shop",
+      "condition": "svg",
+      "run": 3,
+      "finalOk": true,
+      "firstTryOk": null,
+      "checklist": {
+        "ok": true,
+        "missing": []
+      },
+      "defects": {
+        "text-overlap": 1,
+        "text-outside-canvas": 0,
+        "text-overflow-node": 11,
+        "edge-through-node": 0,
+        "node-overlap": 0
+      },
+      "deterministic": null,
+      "inputTokens": 31327,
+      "cachedInputTokens": 24960,
+      "outputTokens": 4104,
+      "seconds": 101.2,
+      "infra": false
+    },
+    {
+      "name": "erd-blog-mermaid-1",
+      "task": "erd-blog",
+      "condition": "mermaid",
+      "run": 1,
+      "finalOk": true,
+      "firstTryOk": true,
+      "checklist": {
+        "ok": true,
+        "missing": []
+      },
+      "defects": {
+        "text-overlap": 0,
+        "text-outside-canvas": 0,
+        "text-overflow-node": 0,
+        "edge-through-node": 0,
+        "node-overlap": 0
+      },
+      "deterministic": false,
+      "inputTokens": 187775,
+      "cachedInputTokens": 175872,
+      "outputTokens": 936,
+      "seconds": 238.3,
+      "infra": false
+    },
+    {
+      "name": "erd-blog-mermaid-2",
+      "task": "erd-blog",
+      "condition": "mermaid",
+      "run": 2,
+      "finalOk": true,
+      "firstTryOk": true,
+      "checklist": {
+        "ok": true,
+        "missing": []
+      },
+      "defects": {
+        "text-overlap": 0,
+        "text-outside-canvas": 0,
+        "text-overflow-node": 0,
+        "edge-through-node": 0,
+        "node-overlap": 0
+      },
+      "deterministic": false,
+      "inputTokens": 55886,
+      "cachedInputTokens": 52480,
+      "outputTokens": 527,
+      "seconds": 34.9,
+      "infra": false
+    },
+    {
+      "name": "erd-blog-mermaid-3",
+      "task": "erd-blog",
+      "condition": "mermaid",
+      "run": 3,
+      "finalOk": true,
+      "firstTryOk": true,
+      "checklist": {
+        "ok": true,
+        "missing": []
+      },
+      "defects": {
+        "text-overlap": 0,
+        "text-outside-canvas": 0,
+        "text-overflow-node": 0,
+        "edge-through-node": 0,
+        "node-overlap": 0
+      },
+      "deterministic": false,
+      "inputTokens": 42029,
+      "cachedInputTokens": 36992,
+      "outputTokens": 570,
+      "seconds": 31.7,
+      "infra": false
+    },
+    {
+      "name": "erd-blog-no-skill-1",
+      "task": "erd-blog",
+      "condition": "no-skill",
+      "run": 1,
+      "finalOk": true,
+      "firstTryOk": true,
+      "checklist": {
+        "ok": true,
+        "missing": []
+      },
+      "defects": {
+        "text-overlap": 0,
+        "text-outside-canvas": 0,
+        "text-overflow-node": 0,
+        "edge-through-node": 0,
+        "node-overlap": 0
+      },
+      "deterministic": true,
+      "inputTokens": 73006,
+      "cachedInputTokens": 61184,
+      "outputTokens": 939,
+      "seconds": 52,
+      "infra": false
+    },
+    {
+      "name": "erd-blog-no-skill-2",
+      "task": "erd-blog",
+      "condition": "no-skill",
+      "run": 2,
+      "finalOk": true,
+      "firstTryOk": true,
+      "checklist": {
+        "ok": true,
+        "missing": []
+      },
+      "defects": {
+        "text-overlap": 0,
+        "text-outside-canvas": 0,
+        "text-overflow-node": 0,
+        "edge-through-node": 0,
+        "node-overlap": 0
+      },
+      "deterministic": true,
+      "inputTokens": 115164,
+      "cachedInputTokens": 106112,
+      "outputTokens": 968,
+      "seconds": 163.7,
+      "infra": false
+    },
+    {
+      "name": "erd-blog-no-skill-3",
+      "task": "erd-blog",
+      "condition": "no-skill",
+      "run": 3,
+      "finalOk": true,
+      "firstTryOk": true,
+      "checklist": {
+        "ok": true,
+        "missing": []
+      },
+      "defects": {
+        "text-overlap": 0,
+        "text-outside-canvas": 0,
+        "text-overflow-node": 0,
+        "edge-through-node": 0,
+        "node-overlap": 0
+      },
+      "deterministic": true,
+      "inputTokens": 72179,
+      "cachedInputTokens": 63232,
+      "outputTokens": 749,
+      "seconds": 43.3,
+      "infra": false
+    },
+    {
+      "name": "erd-blog-skill-1",
+      "task": "erd-blog",
+      "condition": "skill",
+      "run": 1,
+      "finalOk": true,
+      "firstTryOk": true,
+      "checklist": {
+        "ok": true,
+        "missing": []
+      },
+      "defects": {
+        "text-overlap": 0,
+        "text-outside-canvas": 0,
+        "text-overflow-node": 0,
+        "edge-through-node": 0,
+        "node-overlap": 0
+      },
+      "deterministic": true,
+      "inputTokens": 95421,
+      "cachedInputTokens": 86144,
+      "outputTokens": 1086,
+      "seconds": 64.3,
+      "infra": false
+    },
+    {
+      "name": "erd-blog-skill-2",
+      "task": "erd-blog",
+      "condition": "skill",
+      "run": 2,
+      "finalOk": true,
+      "firstTryOk": true,
+      "checklist": {
+        "ok": true,
+        "missing": []
+      },
+      "defects": {
+        "text-overlap": 0,
+        "text-outside-canvas": 0,
+        "text-overflow-node": 0,
+        "edge-through-node": 0,
+        "node-overlap": 0
+      },
+      "deterministic": true,
+      "inputTokens": 105046,
+      "cachedInputTokens": 91776,
+      "outputTokens": 755,
+      "seconds": 68.3,
+      "infra": false
+    },
+    {
+      "name": "erd-blog-skill-3",
+      "task": "erd-blog",
+      "condition": "skill",
+      "run": 3,
+      "finalOk": true,
+      "firstTryOk": true,
+      "checklist": {
+        "ok": true,
+        "missing": []
+      },
+      "defects": {
+        "text-overlap": 0,
+        "text-outside-canvas": 0,
+        "text-overflow-node": 0,
+        "edge-through-node": 0,
+        "node-overlap": 0
+      },
+      "deterministic": true,
+      "inputTokens": 89454,
+      "cachedInputTokens": 80128,
+      "outputTokens": 989,
+      "seconds": 46.1,
+      "infra": false
+    },
+    {
+      "name": "erd-blog-svg-1",
+      "task": "erd-blog",
+      "condition": "svg",
+      "run": 1,
+      "finalOk": true,
+      "firstTryOk": null,
+      "checklist": {
+        "ok": true,
+        "missing": []
+      },
+      "defects": {
+        "text-overlap": 3,
+        "text-outside-canvas": 0,
+        "text-overflow-node": 1,
+        "edge-through-node": 0,
+        "node-overlap": 0
+      },
+      "deterministic": null,
+      "inputTokens": 45132,
+      "cachedInputTokens": 36480,
+      "outputTokens": 4110,
+      "seconds": 96.4,
+      "infra": false
+    },
+    {
+      "name": "erd-blog-svg-2",
+      "task": "erd-blog",
+      "condition": "svg",
+      "run": 2,
+      "finalOk": true,
+      "firstTryOk": null,
+      "checklist": {
+        "ok": true,
+        "missing": []
+      },
+      "defects": {
+        "text-overlap": 3,
+        "text-outside-canvas": 0,
+        "text-overflow-node": 1,
+        "edge-through-node": 1,
+        "node-overlap": 4
+      },
+      "deterministic": null,
+      "inputTokens": 54513,
+      "cachedInputTokens": 41472,
+      "outputTokens": 3659,
+      "seconds": 86.4,
+      "infra": false
+    },
+    {
+      "name": "erd-blog-svg-3",
+      "task": "erd-blog",
+      "condition": "svg",
+      "run": 3,
+      "finalOk": true,
+      "firstTryOk": null,
+      "checklist": {
+        "ok": true,
+        "missing": []
+      },
+      "defects": {
+        "text-overlap": 3,
+        "text-outside-canvas": 0,
+        "text-overflow-node": 0,
+        "edge-through-node": 0,
+        "node-overlap": 0
+      },
+      "deterministic": null,
+      "inputTokens": 44839,
+      "cachedInputTokens": 38400,
+      "outputTokens": 3910,
+      "seconds": 90.3,
+      "infra": false
+    },
+    {
+      "name": "erd-payments-mermaid-1",
+      "task": "erd-payments",
+      "condition": "mermaid",
+      "run": 1,
+      "finalOk": true,
+      "firstTryOk": true,
+      "checklist": {
+        "ok": true,
+        "missing": []
+      },
+      "defects": {
+        "text-overlap": 0,
+        "text-outside-canvas": 0,
+        "text-overflow-node": 0,
+        "edge-through-node": 0,
+        "node-overlap": 0
+      },
+      "deterministic": false,
+      "inputTokens": 56868,
+      "cachedInputTokens": 50048,
+      "outputTokens": 1010,
+      "seconds": 45.1,
+      "infra": false
+    },
+    {
+      "name": "erd-payments-mermaid-2",
+      "task": "erd-payments",
+      "condition": "mermaid",
+      "run": 2,
+      "finalOk": true,
+      "firstTryOk": true,
+      "checklist": {
+        "ok": true,
+        "missing": []
+      },
+      "defects": {
+        "text-overlap": 0,
+        "text-outside-canvas": 0,
+        "text-overflow-node": 0,
+        "edge-through-node": 0,
+        "node-overlap": 0
+      },
+      "deterministic": false,
+      "inputTokens": 56594,
+      "cachedInputTokens": 52864,
+      "outputTokens": 859,
+      "seconds": 46.6,
+      "infra": false
+    },
+    {
+      "name": "erd-payments-mermaid-3",
+      "task": "erd-payments",
+      "condition": "mermaid",
+      "run": 3,
+      "finalOk": true,
+      "firstTryOk": true,
+      "checklist": {
+        "ok": true,
+        "missing": []
+      },
+      "defects": {
+        "text-overlap": 0,
+        "text-outside-canvas": 0,
+        "text-overflow-node": 0,
+        "edge-through-node": 2,
+        "node-overlap": 0
+      },
+      "deterministic": false,
+      "inputTokens": 58546,
+      "cachedInputTokens": 52224,
+      "outputTokens": 901,
+      "seconds": 43.2,
+      "infra": false
+    },
+    {
+      "name": "erd-payments-no-skill-1",
+      "task": "erd-payments",
+      "condition": "no-skill",
+      "run": 1,
+      "finalOk": true,
+      "firstTryOk": true,
+      "checklist": {
+        "ok": true,
+        "missing": []
+      },
+      "defects": {
+        "text-overlap": 0,
+        "text-outside-canvas": 0,
+        "text-overflow-node": 0,
+        "edge-through-node": 0,
+        "node-overlap": 0
+      },
+      "deterministic": true,
+      "inputTokens": 73397,
+      "cachedInputTokens": 59520,
+      "outputTokens": 1307,
+      "seconds": 47.3,
+      "infra": false
+    },
+    {
+      "name": "erd-payments-no-skill-2",
+      "task": "erd-payments",
+      "condition": "no-skill",
+      "run": 2,
+      "finalOk": false,
+      "firstTryOk": false,
+      "checklist": null,
+      "defects": null,
+      "deterministic": null,
+      "inputTokens": 261736,
+      "cachedInputTokens": 241920,
+      "outputTokens": 1514,
+      "seconds": 256.7,
+      "infra": true
+    },
+    {
+      "name": "erd-payments-no-skill-3",
+      "task": "erd-payments",
+      "condition": "no-skill",
+      "run": 3,
+      "finalOk": true,
+      "firstTryOk": true,
+      "checklist": {
+        "ok": true,
+        "missing": []
+      },
+      "defects": {
+        "text-overlap": 0,
+        "text-outside-canvas": 0,
+        "text-overflow-node": 0,
+        "edge-through-node": 0,
+        "node-overlap": 0
+      },
+      "deterministic": true,
+      "inputTokens": 74689,
+      "cachedInputTokens": 59904,
+      "outputTokens": 1953,
+      "seconds": 79.8,
+      "infra": false
+    },
+    {
+      "name": "erd-payments-skill-1",
+      "task": "erd-payments",
+      "condition": "skill",
+      "run": 1,
+      "finalOk": true,
+      "firstTryOk": true,
+      "checklist": {
+        "ok": true,
+        "missing": []
+      },
+      "defects": {
+        "text-overlap": 0,
+        "text-outside-canvas": 0,
+        "text-overflow-node": 0,
+        "edge-through-node": 0,
+        "node-overlap": 0
+      },
+      "deterministic": true,
+      "inputTokens": 122228,
+      "cachedInputTokens": 106880,
+      "outputTokens": 1802,
+      "seconds": 218.8,
+      "infra": false
+    },
+    {
+      "name": "erd-payments-skill-2",
+      "task": "erd-payments",
+      "condition": "skill",
+      "run": 2,
+      "finalOk": true,
+      "firstTryOk": true,
+      "checklist": {
+        "ok": true,
+        "missing": []
+      },
+      "defects": {
+        "text-overlap": 0,
+        "text-outside-canvas": 0,
+        "text-overflow-node": 0,
+        "edge-through-node": 0,
+        "node-overlap": 0
+      },
+      "deterministic": true,
+      "inputTokens": 117295,
+      "cachedInputTokens": 107264,
+      "outputTokens": 1983,
+      "seconds": 79.9,
+      "infra": false
+    },
+    {
+      "name": "erd-payments-skill-3",
+      "task": "erd-payments",
+      "condition": "skill",
+      "run": 3,
+      "finalOk": true,
+      "firstTryOk": true,
+      "checklist": {
+        "ok": true,
+        "missing": []
+      },
+      "defects": {
+        "text-overlap": 0,
+        "text-outside-canvas": 0,
+        "text-overflow-node": 0,
+        "edge-through-node": 0,
+        "node-overlap": 0
+      },
+      "deterministic": true,
+      "inputTokens": 98025,
+      "cachedInputTokens": 84864,
+      "outputTokens": 1862,
+      "seconds": 64.7,
+      "infra": false
+    },
+    {
+      "name": "erd-payments-svg-1",
+      "task": "erd-payments",
+      "condition": "svg",
+      "run": 1,
+      "finalOk": true,
+      "firstTryOk": null,
+      "checklist": {
+        "ok": true,
+        "missing": []
+      },
+      "defects": {
+        "text-overlap": 0,
+        "text-outside-canvas": 0,
+        "text-overflow-node": 3,
+        "edge-through-node": 3,
+        "node-overlap": 2
+      },
+      "deterministic": null,
+      "inputTokens": 56912,
+      "cachedInputTokens": 43392,
+      "outputTokens": 6026,
+      "seconds": 129.2,
+      "infra": false
+    },
+    {
+      "name": "erd-payments-svg-2",
+      "task": "erd-payments",
+      "condition": "svg",
+      "run": 2,
+      "finalOk": true,
+      "firstTryOk": null,
+      "checklist": {
+        "ok": true,
+        "missing": []
+      },
+      "defects": {
+        "text-overlap": 0,
+        "text-outside-canvas": 0,
+        "text-overflow-node": 0,
+        "edge-through-node": 0,
+        "node-overlap": 0
+      },
+      "deterministic": null,
+      "inputTokens": 45414,
+      "cachedInputTokens": 36480,
+      "outputTokens": 4465,
+      "seconds": 99.6,
+      "infra": false
+    },
+    {
+      "name": "erd-payments-svg-3",
+      "task": "erd-payments",
+      "condition": "svg",
+      "run": 3,
+      "finalOk": true,
+      "firstTryOk": null,
+      "checklist": {
+        "ok": true,
+        "missing": []
+      },
+      "defects": {
+        "text-overlap": 6,
+        "text-outside-canvas": 0,
+        "text-overflow-node": 0,
+        "edge-through-node": 3,
+        "node-overlap": 1
+      },
+      "deterministic": null,
+      "inputTokens": 32576,
+      "cachedInputTokens": 23040,
+      "outputTokens": 5343,
+      "seconds": 113.9,
+      "infra": false
+    },
+    {
+      "name": "seq-checkout-retry-mermaid-1",
+      "task": "seq-checkout-retry",
+      "condition": "mermaid",
+      "run": 1,
+      "finalOk": true,
+      "firstTryOk": false,
+      "checklist": {
+        "ok": true,
+        "missing": []
+      },
+      "defects": {
+        "text-overlap": 0,
+        "text-outside-canvas": 0,
+        "text-overflow-node": 1,
+        "edge-through-node": 0,
+        "node-overlap": 0
+      },
+      "deterministic": true,
+      "inputTokens": 55774,
+      "cachedInputTokens": 50432,
+      "outputTokens": 460,
+      "seconds": 39.5,
+      "infra": false
+    },
+    {
+      "name": "seq-checkout-retry-mermaid-2",
+      "task": "seq-checkout-retry",
+      "condition": "mermaid",
+      "run": 2,
+      "finalOk": true,
+      "firstTryOk": false,
+      "checklist": {
+        "ok": true,
+        "missing": []
+      },
+      "defects": {
+        "text-overlap": 0,
+        "text-outside-canvas": 0,
+        "text-overflow-node": 1,
+        "edge-through-node": 0,
+        "node-overlap": 0
+      },
+      "deterministic": true,
+      "inputTokens": 55715,
+      "cachedInputTokens": 52480,
+      "outputTokens": 422,
+      "seconds": 40.8,
+      "infra": false
+    },
+    {
+      "name": "seq-checkout-retry-mermaid-3",
+      "task": "seq-checkout-retry",
+      "condition": "mermaid",
+      "run": 3,
+      "finalOk": true,
+      "firstTryOk": true,
+      "checklist": {
+        "ok": true,
+        "missing": []
+      },
+      "defects": {
+        "text-overlap": 0,
+        "text-outside-canvas": 0,
+        "text-overflow-node": 1,
+        "edge-through-node": 0,
+        "node-overlap": 0
+      },
+      "deterministic": true,
+      "inputTokens": 57750,
+      "cachedInputTokens": 53888,
+      "outputTokens": 466,
+      "seconds": 36.8,
+      "infra": false
+    },
+    {
+      "name": "seq-checkout-retry-no-skill-1",
+      "task": "seq-checkout-retry",
+      "condition": "no-skill",
+      "run": 1,
+      "finalOk": true,
+      "firstTryOk": true,
+      "checklist": {
+        "ok": true,
+        "missing": []
+      },
+      "defects": {
+        "text-overlap": 0,
+        "text-outside-canvas": 0,
+        "text-overflow-node": 0,
+        "edge-through-node": 0,
+        "node-overlap": 0
+      },
+      "deterministic": true,
+      "inputTokens": 72032,
+      "cachedInputTokens": 65920,
+      "outputTokens": 552,
+      "seconds": 33.2,
+      "infra": false
+    },
+    {
+      "name": "seq-checkout-retry-no-skill-2",
+      "task": "seq-checkout-retry",
+      "condition": "no-skill",
+      "run": 2,
+      "finalOk": true,
+      "firstTryOk": true,
+      "checklist": {
+        "ok": true,
+        "missing": []
+      },
+      "defects": {
+        "text-overlap": 0,
+        "text-outside-canvas": 0,
+        "text-overflow-node": 0,
+        "edge-through-node": 0,
+        "node-overlap": 0
+      },
+      "deterministic": true,
+      "inputTokens": 72566,
+      "cachedInputTokens": 67968,
+      "outputTokens": 804,
+      "seconds": 39.2,
+      "infra": false
+    },
+    {
+      "name": "seq-checkout-retry-no-skill-3",
+      "task": "seq-checkout-retry",
+      "condition": "no-skill",
+      "run": 3,
+      "finalOk": true,
+      "firstTryOk": true,
+      "checklist": {
+        "ok": true,
+        "missing": []
+      },
+      "defects": {
+        "text-overlap": 0,
+        "text-outside-canvas": 0,
+        "text-overflow-node": 0,
+        "edge-through-node": 0,
+        "node-overlap": 0
+      },
+      "deterministic": true,
+      "inputTokens": 72413,
+      "cachedInputTokens": 57472,
+      "outputTokens": 690,
+      "seconds": 37.6,
+      "infra": false
+    },
+    {
+      "name": "seq-checkout-retry-skill-1",
+      "task": "seq-checkout-retry",
+      "condition": "skill",
+      "run": 1,
+      "finalOk": true,
+      "firstTryOk": true,
+      "checklist": {
+        "ok": true,
+        "missing": []
+      },
+      "defects": {
+        "text-overlap": 0,
+        "text-outside-canvas": 0,
+        "text-overflow-node": 0,
+        "edge-through-node": 0,
+        "node-overlap": 0
+      },
+      "deterministic": true,
+      "inputTokens": 138338,
+      "cachedInputTokens": 126080,
+      "outputTokens": 1303,
+      "seconds": 56.6,
+      "infra": false
+    },
+    {
+      "name": "seq-checkout-retry-skill-2",
+      "task": "seq-checkout-retry",
+      "condition": "skill",
+      "run": 2,
+      "finalOk": true,
+      "firstTryOk": true,
+      "checklist": {
+        "ok": true,
+        "missing": []
+      },
+      "defects": {
+        "text-overlap": 0,
+        "text-outside-canvas": 0,
+        "text-overflow-node": 0,
+        "edge-through-node": 0,
+        "node-overlap": 0
+      },
+      "deterministic": true,
+      "inputTokens": 138032,
+      "cachedInputTokens": 113152,
+      "outputTokens": 1203,
+      "seconds": 57.8,
+      "infra": false
+    },
+    {
+      "name": "seq-checkout-retry-skill-3",
+      "task": "seq-checkout-retry",
+      "condition": "skill",
+      "run": 3,
+      "finalOk": true,
+      "firstTryOk": true,
+      "checklist": {
+        "ok": true,
+        "missing": []
+      },
+      "defects": {
+        "text-overlap": 0,
+        "text-outside-canvas": 0,
+        "text-overflow-node": 0,
+        "edge-through-node": 0,
+        "node-overlap": 0
+      },
+      "deterministic": true,
+      "inputTokens": 105239,
+      "cachedInputTokens": 91520,
+      "outputTokens": 772,
+      "seconds": 47.3,
+      "infra": false
+    },
+    {
+      "name": "seq-checkout-retry-svg-1",
+      "task": "seq-checkout-retry",
+      "condition": "svg",
+      "run": 1,
+      "finalOk": true,
+      "firstTryOk": null,
+      "checklist": {
+        "ok": true,
+        "missing": []
+      },
+      "defects": {
+        "text-overlap": 0,
+        "text-outside-canvas": 0,
+        "text-overflow-node": 1,
+        "edge-through-node": 0,
+        "node-overlap": 0
+      },
+      "deterministic": null,
+      "inputTokens": 29696,
+      "cachedInputTokens": 23040,
+      "outputTokens": 2431,
+      "seconds": 65.7,
+      "infra": false
+    },
+    {
+      "name": "seq-checkout-retry-svg-2",
+      "task": "seq-checkout-retry",
+      "condition": "svg",
+      "run": 2,
+      "finalOk": true,
+      "firstTryOk": null,
+      "checklist": {
+        "ok": true,
+        "missing": []
+      },
+      "defects": {
+        "text-overlap": 0,
+        "text-outside-canvas": 0,
+        "text-overflow-node": 0,
+        "edge-through-node": 0,
+        "node-overlap": 2
+      },
+      "deterministic": null,
+      "inputTokens": 29731,
+      "cachedInputTokens": 24960,
+      "outputTokens": 2466,
+      "seconds": 61.5,
+      "infra": false
+    },
+    {
+      "name": "seq-checkout-retry-svg-3",
+      "task": "seq-checkout-retry",
+      "condition": "svg",
+      "run": 3,
+      "finalOk": true,
+      "firstTryOk": null,
+      "checklist": {
+        "ok": true,
+        "missing": []
+      },
+      "defects": {
+        "text-overlap": 0,
+        "text-outside-canvas": 0,
+        "text-overflow-node": 0,
+        "edge-through-node": 0,
+        "node-overlap": 2
+      },
+      "deterministic": null,
+      "inputTokens": 43526,
+      "cachedInputTokens": 38528,
+      "outputTokens": 2534,
+      "seconds": 65.1,
+      "infra": false
+    },
+    {
+      "name": "seq-oauth-mermaid-1",
+      "task": "seq-oauth",
+      "condition": "mermaid",
+      "run": 1,
+      "finalOk": true,
+      "firstTryOk": true,
+      "checklist": {
+        "ok": true,
+        "missing": []
+      },
+      "defects": {
+        "text-overlap": 0,
+        "text-outside-canvas": 0,
+        "text-overflow-node": 0,
+        "edge-through-node": 0,
+        "node-overlap": 0
+      },
+      "deterministic": true,
+      "inputTokens": 70489,
+      "cachedInputTokens": 60416,
+      "outputTokens": 446,
+      "seconds": 35.2,
+      "infra": false
+    },
+    {
+      "name": "seq-oauth-mermaid-2",
+      "task": "seq-oauth",
+      "condition": "mermaid",
+      "run": 2,
+      "finalOk": true,
+      "firstTryOk": true,
+      "checklist": {
+        "ok": true,
+        "missing": []
+      },
+      "defects": {
+        "text-overlap": 0,
+        "text-outside-canvas": 0,
+        "text-overflow-node": 0,
+        "edge-through-node": 0,
+        "node-overlap": 0
+      },
+      "deterministic": true,
+      "inputTokens": 56398,
+      "cachedInputTokens": 50944,
+      "outputTokens": 364,
+      "seconds": 32.6,
+      "infra": false
+    },
+    {
+      "name": "seq-oauth-mermaid-3",
+      "task": "seq-oauth",
+      "condition": "mermaid",
+      "run": 3,
+      "finalOk": true,
+      "firstTryOk": true,
+      "checklist": {
+        "ok": true,
+        "missing": []
+      },
+      "defects": {
+        "text-overlap": 0,
+        "text-outside-canvas": 0,
+        "text-overflow-node": 0,
+        "edge-through-node": 0,
+        "node-overlap": 0
+      },
+      "deterministic": true,
+      "inputTokens": 55637,
+      "cachedInputTokens": 52352,
+      "outputTokens": 444,
+      "seconds": 55.9,
+      "infra": false
+    },
+    {
+      "name": "seq-oauth-no-skill-1",
+      "task": "seq-oauth",
+      "condition": "no-skill",
+      "run": 1,
+      "finalOk": true,
+      "firstTryOk": true,
+      "checklist": {
+        "ok": true,
+        "missing": []
+      },
+      "defects": {
+        "text-overlap": 0,
+        "text-outside-canvas": 0,
+        "text-overflow-node": 0,
+        "edge-through-node": 0,
+        "node-overlap": 0
+      },
+      "deterministic": true,
+      "inputTokens": 72562,
+      "cachedInputTokens": 65280,
+      "outputTokens": 825,
+      "seconds": 67.4,
+      "infra": false
+    },
+    {
+      "name": "seq-oauth-no-skill-2",
+      "task": "seq-oauth",
+      "condition": "no-skill",
+      "run": 2,
+      "finalOk": true,
+      "firstTryOk": true,
+      "checklist": {
+        "ok": true,
+        "missing": []
+      },
+      "defects": {
+        "text-overlap": 0,
+        "text-outside-canvas": 0,
+        "text-overflow-node": 0,
+        "edge-through-node": 0,
+        "node-overlap": 0
+      },
+      "deterministic": true,
+      "inputTokens": 72170,
+      "cachedInputTokens": 64640,
+      "outputTokens": 638,
+      "seconds": 46.7,
+      "infra": false
+    },
+    {
+      "name": "seq-oauth-no-skill-3",
+      "task": "seq-oauth",
+      "condition": "no-skill",
+      "run": 3,
+      "finalOk": true,
+      "firstTryOk": true,
+      "checklist": {
+        "ok": true,
+        "missing": []
+      },
+      "defects": {
+        "text-overlap": 0,
+        "text-outside-canvas": 0,
+        "text-overflow-node": 0,
+        "edge-through-node": 0,
+        "node-overlap": 0
+      },
+      "deterministic": true,
+      "inputTokens": 72226,
+      "cachedInputTokens": 67968,
+      "outputTokens": 686,
+      "seconds": 39.4,
+      "infra": false
+    },
+    {
+      "name": "seq-oauth-skill-1",
+      "task": "seq-oauth",
+      "condition": "skill",
+      "run": 1,
+      "finalOk": true,
+      "firstTryOk": true,
+      "checklist": {
+        "ok": true,
+        "missing": []
+      },
+      "defects": {
+        "text-overlap": 0,
+        "text-outside-canvas": 0,
+        "text-overflow-node": 0,
+        "edge-through-node": 0,
+        "node-overlap": 0
+      },
+      "deterministic": true,
+      "inputTokens": 137878,
+      "cachedInputTokens": 127616,
+      "outputTokens": 1047,
+      "seconds": 64.3,
+      "infra": false
+    },
+    {
+      "name": "seq-oauth-skill-2",
+      "task": "seq-oauth",
+      "condition": "skill",
+      "run": 2,
+      "finalOk": true,
+      "firstTryOk": true,
+      "checklist": {
+        "ok": true,
+        "missing": []
+      },
+      "defects": {
+        "text-overlap": 0,
+        "text-outside-canvas": 0,
+        "text-overflow-node": 0,
+        "edge-through-node": 0,
+        "node-overlap": 0
+      },
+      "deterministic": true,
+      "inputTokens": 106067,
+      "cachedInputTokens": 89600,
+      "outputTokens": 1033,
+      "seconds": 47.8,
+      "infra": false
+    },
+    {
+      "name": "seq-oauth-skill-3",
+      "task": "seq-oauth",
+      "condition": "skill",
+      "run": 3,
+      "finalOk": true,
+      "firstTryOk": true,
+      "checklist": {
+        "ok": true,
+        "missing": []
+      },
+      "defects": {
+        "text-overlap": 0,
+        "text-outside-canvas": 0,
+        "text-overflow-node": 0,
+        "edge-through-node": 0,
+        "node-overlap": 0
+      },
+      "deterministic": true,
+      "inputTokens": 106072,
+      "cachedInputTokens": 84736,
+      "outputTokens": 1059,
+      "seconds": 58.7,
+      "infra": false
+    },
+    {
+      "name": "seq-oauth-svg-1",
+      "task": "seq-oauth",
+      "condition": "svg",
+      "run": 1,
+      "finalOk": true,
+      "firstTryOk": null,
+      "checklist": {
+        "ok": true,
+        "missing": []
+      },
+      "defects": {
+        "text-overlap": 0,
+        "text-outside-canvas": 0,
+        "text-overflow-node": 4,
+        "edge-through-node": 3,
+        "node-overlap": 2
+      },
+      "deterministic": null,
+      "inputTokens": 30005,
+      "cachedInputTokens": 24960,
+      "outputTokens": 2770,
+      "seconds": 74.4,
+      "infra": false
+    },
+    {
+      "name": "seq-oauth-svg-2",
+      "task": "seq-oauth",
+      "condition": "svg",
+      "run": 2,
+      "finalOk": true,
+      "firstTryOk": null,
+      "checklist": {
+        "ok": true,
+        "missing": []
+      },
+      "defects": {
+        "text-overlap": 0,
+        "text-outside-canvas": 0,
+        "text-overflow-node": 0,
+        "edge-through-node": 0,
+        "node-overlap": 1
+      },
+      "deterministic": null,
+      "inputTokens": 29428,
+      "cachedInputTokens": 24960,
+      "outputTokens": 2191,
+      "seconds": 68.5,
+      "infra": false
+    },
+    {
+      "name": "seq-oauth-svg-3",
+      "task": "seq-oauth",
+      "condition": "svg",
+      "run": 3,
+      "finalOk": true,
+      "firstTryOk": null,
+      "checklist": {
+        "ok": true,
+        "missing": []
+      },
+      "defects": {
+        "text-overlap": 0,
+        "text-outside-canvas": 0,
+        "text-overflow-node": 0,
+        "edge-through-node": 0,
+        "node-overlap": 0
+      },
+      "deterministic": null,
+      "inputTokens": 29996,
+      "cachedInputTokens": 23040,
+      "outputTokens": 2765,
+      "seconds": 67,
+      "infra": false
+    },
+    {
+      "name": "wf-expenses-mermaid-1",
+      "task": "wf-expenses",
+      "condition": "mermaid",
+      "run": 1,
+      "finalOk": true,
+      "firstTryOk": true,
+      "checklist": {
+        "ok": true,
+        "missing": []
+      },
+      "defects": {
+        "text-overlap": 0,
+        "text-outside-canvas": 0,
+        "text-overflow-node": 0,
+        "edge-through-node": 0,
+        "node-overlap": 0
+      },
+      "deterministic": true,
+      "inputTokens": 99411,
+      "cachedInputTokens": 95104,
+      "outputTokens": 804,
+      "seconds": 54,
+      "infra": false
+    },
+    {
+      "name": "wf-expenses-mermaid-2",
+      "task": "wf-expenses",
+      "condition": "mermaid",
+      "run": 2,
+      "finalOk": true,
+      "firstTryOk": true,
+      "checklist": {
+        "ok": true,
+        "missing": []
+      },
+      "defects": {
+        "text-overlap": 0,
+        "text-outside-canvas": 0,
+        "text-overflow-node": 0,
+        "edge-through-node": 0,
+        "node-overlap": 1
+      },
+      "deterministic": false,
+      "inputTokens": 57567,
+      "cachedInputTokens": 50944,
+      "outputTokens": 421,
+      "seconds": 33.7,
+      "infra": false
+    },
+    {
+      "name": "wf-expenses-mermaid-3",
+      "task": "wf-expenses",
+      "condition": "mermaid",
+      "run": 3,
+      "finalOk": true,
+      "firstTryOk": false,
+      "checklist": {
+        "ok": true,
+        "missing": []
+      },
+      "defects": {
+        "text-overlap": 0,
+        "text-outside-canvas": 0,
+        "text-overflow-node": 0,
+        "edge-through-node": 0,
+        "node-overlap": 0
+      },
+      "deterministic": false,
+      "inputTokens": 55589,
+      "cachedInputTokens": 52480,
+      "outputTokens": 393,
+      "seconds": 33.1,
+      "infra": false
+    },
+    {
+      "name": "wf-expenses-no-skill-1",
+      "task": "wf-expenses",
+      "condition": "no-skill",
+      "run": 1,
+      "finalOk": true,
+      "firstTryOk": true,
+      "checklist": {
+        "ok": true,
+        "missing": []
+      },
+      "defects": {
+        "text-overlap": 0,
+        "text-outside-canvas": 0,
+        "text-overflow-node": 0,
+        "edge-through-node": 0,
+        "node-overlap": 0
+      },
+      "deterministic": true,
+      "inputTokens": 72693,
+      "cachedInputTokens": 68224,
+      "outputTokens": 792,
+      "seconds": 39.4,
+      "infra": false
+    },
+    {
+      "name": "wf-expenses-no-skill-2",
+      "task": "wf-expenses",
+      "condition": "no-skill",
+      "run": 2,
+      "finalOk": true,
+      "firstTryOk": true,
+      "checklist": {
+        "ok": true,
+        "missing": []
+      },
+      "defects": {
+        "text-overlap": 0,
+        "text-outside-canvas": 0,
+        "text-overflow-node": 0,
+        "edge-through-node": 0,
+        "node-overlap": 0
+      },
+      "deterministic": true,
+      "inputTokens": 72617,
+      "cachedInputTokens": 68096,
+      "outputTokens": 924,
+      "seconds": 42.2,
+      "infra": false
+    },
+    {
+      "name": "wf-expenses-no-skill-3",
+      "task": "wf-expenses",
+      "condition": "no-skill",
+      "run": 3,
+      "finalOk": true,
+      "firstTryOk": true,
+      "checklist": {
+        "ok": false,
+        "missing": [
+          "reject"
+        ]
+      },
+      "defects": {
+        "text-overlap": 0,
+        "text-outside-canvas": 0,
+        "text-overflow-node": 0,
+        "edge-through-node": 0,
+        "node-overlap": 0
+      },
+      "deterministic": true,
+      "inputTokens": 72607,
+      "cachedInputTokens": 68096,
+      "outputTokens": 791,
+      "seconds": 38.2,
+      "infra": false
+    },
+    {
+      "name": "wf-expenses-skill-1",
+      "task": "wf-expenses",
+      "condition": "skill",
+      "run": 1,
+      "finalOk": true,
+      "firstTryOk": true,
+      "checklist": {
+        "ok": true,
+        "missing": []
+      },
+      "defects": {
+        "text-overlap": 0,
+        "text-outside-canvas": 0,
+        "text-overflow-node": 0,
+        "edge-through-node": 0,
+        "node-overlap": 0
+      },
+      "deterministic": true,
+      "inputTokens": 97077,
+      "cachedInputTokens": 80896,
+      "outputTokens": 1032,
+      "seconds": 45.4,
+      "infra": false
+    },
+    {
+      "name": "wf-expenses-skill-2",
+      "task": "wf-expenses",
+      "condition": "skill",
+      "run": 2,
+      "finalOk": false,
+      "firstTryOk": false,
+      "checklist": null,
+      "defects": null,
+      "deterministic": null,
+      "inputTokens": 248535,
+      "cachedInputTokens": 224128,
+      "outputTokens": 1365,
+      "seconds": 336.8,
+      "infra": true
+    },
+    {
+      "name": "wf-expenses-skill-3",
+      "task": "wf-expenses",
+      "condition": "skill",
+      "run": 3,
+      "finalOk": true,
+      "firstTryOk": true,
+      "checklist": {
+        "ok": true,
+        "missing": []
+      },
+      "defects": {
+        "text-overlap": 0,
+        "text-outside-canvas": 0,
+        "text-overflow-node": 0,
+        "edge-through-node": 0,
+        "node-overlap": 0
+      },
+      "deterministic": true,
+      "inputTokens": 106282,
+      "cachedInputTokens": 100608,
+      "outputTokens": 1040,
+      "seconds": 47.1,
+      "infra": false
+    },
+    {
+      "name": "wf-expenses-svg-1",
+      "task": "wf-expenses",
+      "condition": "svg",
+      "run": 1,
+      "finalOk": true,
+      "firstTryOk": null,
+      "checklist": {
+        "ok": false,
+        "missing": [
+          "reject"
+        ]
+      },
+      "defects": {
+        "text-overlap": 1,
+        "text-outside-canvas": 0,
+        "text-overflow-node": 0,
+        "edge-through-node": 0,
+        "node-overlap": 0
+      },
+      "deterministic": null,
+      "inputTokens": 43662,
+      "cachedInputTokens": 36480,
+      "outputTokens": 2704,
+      "seconds": 69.9,
+      "infra": false
+    },
+    {
+      "name": "wf-expenses-svg-2",
+      "task": "wf-expenses",
+      "condition": "svg",
+      "run": 2,
+      "finalOk": true,
+      "firstTryOk": null,
+      "checklist": {
+        "ok": true,
+        "missing": []
+      },
+      "defects": {
+        "text-overlap": 0,
+        "text-outside-canvas": 0,
+        "text-overflow-node": 0,
+        "edge-through-node": 1,
+        "node-overlap": 0
+      },
+      "deterministic": null,
+      "inputTokens": 43286,
+      "cachedInputTokens": 38528,
+      "outputTokens": 2320,
+      "seconds": 61.5,
+      "infra": false
+    },
+    {
+      "name": "wf-expenses-svg-3",
+      "task": "wf-expenses",
+      "condition": "svg",
+      "run": 3,
+      "finalOk": false,
+      "firstTryOk": null,
+      "checklist": {
+        "ok": false,
+        "missing": [
+          "reject"
+        ]
+      },
+      "defects": {
+        "text-overlap": 0,
+        "text-outside-canvas": 0,
+        "text-overflow-node": 0,
+        "edge-through-node": 0,
+        "node-overlap": 0
+      },
+      "deterministic": null,
+      "inputTokens": 44062,
+      "cachedInputTokens": 36480,
+      "outputTokens": 3032,
+      "seconds": 81.9,
+      "infra": false
+    },
+    {
+      "name": "wf-onboarding-mermaid-1",
+      "task": "wf-onboarding",
+      "condition": "mermaid",
+      "run": 1,
+      "finalOk": true,
+      "firstTryOk": false,
+      "checklist": {
+        "ok": false,
+        "missing": [
+          "retry|fail"
+        ]
+      },
+      "defects": {
+        "text-overlap": 0,
+        "text-outside-canvas": 0,
+        "text-overflow-node": 0,
+        "edge-through-node": 0,
+        "node-overlap": 0
+      },
+      "deterministic": false,
+      "inputTokens": 55589,
+      "cachedInputTokens": 50432,
+      "outputTokens": 402,
+      "seconds": 32.6,
+      "infra": false
+    },
+    {
+      "name": "wf-onboarding-mermaid-2",
+      "task": "wf-onboarding",
+      "condition": "mermaid",
+      "run": 2,
+      "finalOk": true,
+      "firstTryOk": true,
+      "checklist": {
+        "ok": false,
+        "missing": [
+          "retry|fail"
+        ]
+      },
+      "defects": {
+        "text-overlap": 0,
+        "text-outside-canvas": 0,
+        "text-overflow-node": 0,
+        "edge-through-node": 0,
+        "node-overlap": 0
+      },
+      "deterministic": false,
+      "inputTokens": 42816,
+      "cachedInputTokens": 39168,
+      "outputTokens": 370,
+      "seconds": 41.1,
+      "infra": false
+    },
+    {
+      "name": "wf-onboarding-mermaid-3",
+      "task": "wf-onboarding",
+      "condition": "mermaid",
+      "run": 3,
+      "finalOk": true,
+      "firstTryOk": true,
+      "checklist": {
+        "ok": false,
+        "missing": [
+          "retry|fail"
+        ]
+      },
+      "defects": {
+        "text-overlap": 0,
+        "text-outside-canvas": 0,
+        "text-overflow-node": 0,
+        "edge-through-node": 0,
+        "node-overlap": 0
+      },
+      "deterministic": false,
+      "inputTokens": 55703,
+      "cachedInputTokens": 50432,
+      "outputTokens": 455,
+      "seconds": 36.1,
+      "infra": false
+    },
+    {
+      "name": "wf-onboarding-no-skill-1",
+      "task": "wf-onboarding",
+      "condition": "no-skill",
+      "run": 1,
+      "finalOk": true,
+      "firstTryOk": true,
+      "checklist": {
+        "ok": true,
+        "missing": []
+      },
+      "defects": {
+        "text-overlap": 0,
+        "text-outside-canvas": 0,
+        "text-overflow-node": 0,
+        "edge-through-node": 0,
+        "node-overlap": 0
+      },
+      "deterministic": true,
+      "inputTokens": 159696,
+      "cachedInputTokens": 151552,
+      "outputTokens": 1400,
+      "seconds": 253.4,
+      "infra": false
+    },
+    {
+      "name": "wf-onboarding-no-skill-2",
+      "task": "wf-onboarding",
+      "condition": "no-skill",
+      "run": 2,
+      "finalOk": true,
+      "firstTryOk": true,
+      "checklist": {
+        "ok": false,
+        "missing": [
+          "retry|fail"
+        ]
+      },
+      "defects": {
+        "text-overlap": 0,
+        "text-outside-canvas": 0,
+        "text-overflow-node": 0,
+        "edge-through-node": 0,
+        "node-overlap": 0
+      },
+      "deterministic": true,
+      "inputTokens": 72299,
+      "cachedInputTokens": 64512,
+      "outputTokens": 799,
+      "seconds": 36.9,
+      "infra": false
+    },
+    {
+      "name": "wf-onboarding-no-skill-3",
+      "task": "wf-onboarding",
+      "condition": "no-skill",
+      "run": 3,
+      "finalOk": true,
+      "firstTryOk": true,
+      "checklist": {
+        "ok": true,
+        "missing": []
+      },
+      "defects": {
+        "text-overlap": 0,
+        "text-outside-canvas": 0,
+        "text-overflow-node": 0,
+        "edge-through-node": 0,
+        "node-overlap": 0
+      },
+      "deterministic": true,
+      "inputTokens": 72995,
+      "cachedInputTokens": 66304,
+      "outputTokens": 970,
+      "seconds": 45.2,
+      "infra": false
+    },
+    {
+      "name": "wf-onboarding-skill-1",
+      "task": "wf-onboarding",
+      "condition": "skill",
+      "run": 1,
+      "finalOk": true,
+      "firstTryOk": true,
+      "checklist": {
+        "ok": true,
+        "missing": []
+      },
+      "defects": {
+        "text-overlap": 0,
+        "text-outside-canvas": 0,
+        "text-overflow-node": 0,
+        "edge-through-node": 0,
+        "node-overlap": 0
+      },
+      "deterministic": true,
+      "inputTokens": 138549,
+      "cachedInputTokens": 122368,
+      "outputTokens": 1600,
+      "seconds": 61.3,
+      "infra": false
+    },
+    {
+      "name": "wf-onboarding-skill-2",
+      "task": "wf-onboarding",
+      "condition": "skill",
+      "run": 2,
+      "finalOk": true,
+      "firstTryOk": true,
+      "checklist": {
+        "ok": true,
+        "missing": []
+      },
+      "defects": {
+        "text-overlap": 0,
+        "text-outside-canvas": 0,
+        "text-overflow-node": 0,
+        "edge-through-node": 0,
+        "node-overlap": 0
+      },
+      "deterministic": true,
+      "inputTokens": 107605,
+      "cachedInputTokens": 97024,
+      "outputTokens": 1422,
+      "seconds": 53.4,
+      "infra": false
+    },
+    {
+      "name": "wf-onboarding-skill-3",
+      "task": "wf-onboarding",
+      "condition": "skill",
+      "run": 3,
+      "finalOk": true,
+      "firstTryOk": true,
+      "checklist": {
+        "ok": false,
+        "missing": [
+          "retry|fail"
+        ]
+      },
+      "defects": {
+        "text-overlap": 0,
+        "text-outside-canvas": 0,
+        "text-overflow-node": 0,
+        "edge-through-node": 0,
+        "node-overlap": 0
+      },
+      "deterministic": true,
+      "inputTokens": 106798,
+      "cachedInputTokens": 100864,
+      "outputTokens": 1610,
+      "seconds": 60.9,
+      "infra": false
+    },
+    {
+      "name": "wf-onboarding-svg-1",
+      "task": "wf-onboarding",
+      "condition": "svg",
+      "run": 1,
+      "finalOk": true,
+      "firstTryOk": null,
+      "checklist": {
+        "ok": true,
+        "missing": []
+      },
+      "defects": {
+        "text-overlap": 1,
+        "text-outside-canvas": 0,
+        "text-overflow-node": 5,
+        "edge-through-node": 2,
+        "node-overlap": 0
+      },
+      "deterministic": null,
+      "inputTokens": 44820,
+      "cachedInputTokens": 36608,
+      "outputTokens": 3794,
+      "seconds": 88.8,
+      "infra": false
+    },
+    {
+      "name": "wf-onboarding-svg-2",
+      "task": "wf-onboarding",
+      "condition": "svg",
+      "run": 2,
+      "finalOk": true,
+      "firstTryOk": null,
+      "checklist": {
+        "ok": true,
+        "missing": []
+      },
+      "defects": {
+        "text-overlap": 0,
+        "text-outside-canvas": 0,
+        "text-overflow-node": 6,
+        "edge-through-node": 2,
+        "node-overlap": 0
+      },
+      "deterministic": null,
+      "inputTokens": 43955,
+      "cachedInputTokens": 36608,
+      "outputTokens": 2936,
+      "seconds": 74.2,
+      "infra": false
+    },
+    {
+      "name": "wf-onboarding-svg-3",
+      "task": "wf-onboarding",
+      "condition": "svg",
+      "run": 3,
+      "finalOk": true,
+      "firstTryOk": null,
+      "checklist": {
+        "ok": true,
+        "missing": []
+      },
+      "defects": {
+        "text-overlap": 1,
+        "text-outside-canvas": 0,
+        "text-overflow-node": 0,
+        "edge-through-node": 0,
+        "node-overlap": 0
+      },
+      "deterministic": null,
+      "inputTokens": 44386,
+      "cachedInputTokens": 38912,
+      "outputTokens": 2561,
+      "seconds": 66,
+      "infra": false
+    }
+  ]
+}
