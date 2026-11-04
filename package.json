@@ -1,6 +1,6 @@
 {
   "name": "@heidenber/trazo",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Semantic JSON in, laid-out interactive HTML out: diagrams for coding agents.",
   "license": "Apache-2.0",
   "author": "Heidenber Palacio Garzón",

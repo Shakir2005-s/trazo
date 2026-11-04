@@ -2,7 +2,7 @@
 
 All notable changes to trazo are listed here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html). While trazo is in 0.x, a change that breaks the JSON input, the CLI or the library API bumps the minor version.
 
-## [Unreleased]
+## [0.1.1] - 2026-11-04
 
 ### Fixed
 
@@ -22,4 +22,5 @@ First release. Needs Node 22 or later.
 - Library API: `check` and `make`, which accept JSON text or a parsed object.
 - An agent skill for Claude Code and Pi (`skill/SKILL.md`) and the same text for Codex (`skill/AGENTS.md`).
 
+[0.1.1]: https://github.com/heidenber/trazo/releases/tag/v0.1.1
 [0.1.0]: https://github.com/heidenber/trazo/releases/tag/v0.1.0
