@@ -10,6 +10,28 @@ Escribís un diagrama como JSON semántico, sin coordenadas. trazo lo valida, lo
 
 ![Diagrama entidad-relación generado por trazo, con tablas, columnas y claves foráneas](https://raw.githubusercontent.com/heidenber/trazo/main/docs/erd-light.png)
 
+## Inicio rápido
+
+Necesitás un agente que pueda correr comandos, como Claude Code, Codex o Pi.
+
+1. Instalá trazo. Corré esto en una terminal (necesita [Node.js](https://nodejs.org) 22 o superior):
+
+   ```sh
+   npm i -g @heidenber/trazo
+   ```
+
+2. Opcional: instalá la skill, que le explica a tu agente cómo usar bien trazo. Copiá los comandos de [Skill para agentes](#skill-para-agentes) o pedíselo a tu agente:
+
+   > Instalá la skill de trazo para vos, siguiendo https://github.com/heidenber/trazo/blob/main/README_ES.md#skill-para-agentes
+
+3. Pedile un diagrama a tu agente, por ejemplo:
+
+   > Usá trazo para dibujar la arquitectura de este proyecto. Corré `trazo example architecture` para ver el formato, escribí el JSON, corré `trazo make` y decime dónde quedó el archivo HTML.
+
+   Abrí el archivo HTML en el navegador. Para cambiar el diagrama, volvé a pedírselo al agente.
+
+Los otros tipos son `workflow`, `erd` y `sequence` (ver [Tipos de diagrama](#tipos-de-diagrama)).
+
 ## Demo
 
 `demo.json`:
@@ -123,7 +145,7 @@ mkdir -p ~/.codex && cat "$SK/AGENTS.md" >> ~/.codex/AGENTS.md                  
 PowerShell:
 
 ```powershell
-$sk = Join-Path (npm root -g) "trazo\skill"
+$sk = Join-Path (npm root -g) "@heidenber\trazo\skill"
 New-Item -ItemType Directory -Force "$HOME\.claude\skills\trazo" | Out-Null
 Copy-Item "$sk\SKILL.md" "$HOME\.claude\skills\trazo\"                              # Claude Code
 New-Item -ItemType Directory -Force "$HOME\.pi\agent\skills\trazo" | Out-Null
