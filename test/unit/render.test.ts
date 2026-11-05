@@ -159,7 +159,9 @@ describe("renderHtml", () => {
   it("loads nothing from the network", () => {
     const html = renderHtml(scene);
     expect(html).not.toMatch(/src="http/);
-    expect(html).not.toMatch(/href="http/);
+    // The only absolute link is the credit anchor, which loads nothing until the reader clicks it.
+    expect(html.match(/href="http[^"]*"/g)).toEqual(['href="https://github.com/heidenber/trazo"']);
+    expect(html).toMatch(/<a href="https:\/\/github\.com\/heidenber\/trazo" target="_blank" rel="noopener noreferrer">/);
     expect(html).not.toMatch(/url\(\s*["']?http/);
   });
 

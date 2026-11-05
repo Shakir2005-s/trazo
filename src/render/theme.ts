@@ -97,7 +97,11 @@ button:focus-visible { outline: 2px solid var(--t-accent); outline-offset: 2px; 
 button svg { width: 18px; height: 18px; }
 [data-theme="dark"] .i-moon, :root:not([data-theme="dark"]) .i-sun { display: none; }
 .is-fullscreen .i-maximize, :root:not(.is-fullscreen) .i-minimize { display: none; }
-main { flex: 1; min-height: 0; overflow: hidden; padding: 16px 24px 24px; }
+main { flex: 1; min-height: 0; overflow: hidden; padding: 16px 24px 8px; }
+.credit { padding: 0 24px 10px; text-align: right; font-size: 11px; line-height: 1.4; }
+.credit a { color: var(--t-muted); text-decoration: none; }
+.credit a:hover { color: var(--t-text); text-decoration: underline; }
+.credit a:focus-visible { outline: 2px solid var(--t-accent); outline-offset: 2px; border-radius: 2px; }
 .stage { height: 100%; touch-action: none; cursor: grab; border-radius: 8px; }
 .stage.is-grabbing { cursor: grabbing; }
 .stage:focus-visible { outline: 2px solid var(--t-accent); outline-offset: 2px; }

@@ -75,6 +75,22 @@ describe("stage", () => {
   });
 });
 
+describe("credit", () => {
+  it("links to the project in a footer after the diagram", () => {
+    expect(html).toContain(
+      '<footer class="credit"><a href="https://github.com/heidenber/trazo" target="_blank" rel="noopener noreferrer">Made with trazo</a></footer>',
+    );
+    expect(html.indexOf('<footer class="credit">')).toBeGreaterThan(html.indexOf("</main>"));
+    expect(html).toContain(".credit {");
+  });
+
+  it("stays out of the diagram, so exported SVG and PNG carry no credit", () => {
+    const svg = html.slice(html.indexOf('<svg xmlns="http://www.w3.org/2000/svg" class="diagram'), html.indexOf("</main>"));
+    expect(svg).toMatch(/^<svg [\s\S]*<\/svg>\s*<\/div>\s*$/);
+    expect(svg).not.toContain("Made with trazo");
+  });
+});
+
 describe("output", () => {
   it("is deterministic and small", async () => {
     expect(renderHtml(await sameScene())).toBe(html);
