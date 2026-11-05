@@ -6,29 +6,29 @@
 
 El agente dice qué hay en el sistema; trazo decide dónde va cada cosa.
 
-Escribís un diagrama como JSON semántico, sin coordenadas. trazo lo valida, lo acomoda y escribe un único archivo HTML autocontenido.
+Escribes un diagrama como JSON semántico, sin coordenadas. trazo lo valida, lo acomoda y escribe un único archivo HTML autocontenido.
 
 ![Diagrama entidad-relación generado por trazo, con tablas, columnas y claves foráneas](https://raw.githubusercontent.com/heidenber/trazo/main/docs/erd-light.png)
 
 ## Inicio rápido
 
-Necesitás un agente que pueda correr comandos, como Claude Code, Codex o Pi.
+Necesitas un agente que pueda ejecutar comandos, como Claude Code, Codex o Pi.
 
-1. Instalá trazo. Corré esto en una terminal (necesita [Node.js](https://nodejs.org) 22 o superior):
+1. Instala trazo. Ejecuta esto en una terminal (necesita [Node.js](https://nodejs.org) 22 o superior):
 
    ```sh
    npm i -g @heidenber/trazo
    ```
 
-2. Opcional: instalá la skill, que le explica a tu agente cómo usar bien trazo. Copiá los comandos de [Skill para agentes](#skill-para-agentes) o pedíselo a tu agente:
+2. Opcional: instala la skill, que le explica a tu agente cómo usar bien trazo. Copia los comandos de [Skill para agentes](#skill-para-agentes) o pídeselo a tu agente:
 
-   > Instalá la skill de trazo para vos, siguiendo https://github.com/heidenber/trazo/blob/main/README_ES.md#skill-para-agentes
+   > Instala la skill de trazo para ti, siguiendo https://github.com/heidenber/trazo/blob/main/README_ES.md#skill-para-agentes
 
-3. Pedile un diagrama a tu agente, por ejemplo:
+3. Pide un diagrama a tu agente, por ejemplo:
 
-   > Usá trazo para dibujar la arquitectura de este proyecto. Corré `trazo example architecture` para ver el formato, escribí el JSON, corré `trazo make` y decime dónde quedó el archivo HTML.
+   > Usa trazo para dibujar la arquitectura de este proyecto. Ejecuta `trazo example architecture` para ver el formato, escribe el JSON, ejecuta `trazo make` y dime dónde quedó el archivo HTML.
 
-   Abrí el archivo HTML en el navegador. Para cambiar el diagrama, volvé a pedírselo al agente.
+   Abre el archivo HTML en el navegador. Para cambiar el diagrama, vuelve a pedírselo al agente.
 
 Los otros tipos son `workflow`, `erd` y `sequence` (ver [Tipos de diagrama](#tipos-de-diagrama)).
 
@@ -51,28 +51,34 @@ trazo make demo.json
 
 ![El diagrama de la demo: web, api y db conectados de izquierda a derecha con flechas HTTPS y SQL](https://raw.githubusercontent.com/heidenber/trazo/main/docs/demo-light.png)
 
-Esto escribe `demo.html` junto al archivo de entrada e imprime su ruta. Abrilo en el navegador: podés mover y hacer zoom, pasar el mouse sobre un nodo (o enfocarlo con el teclado) para ver su nota y resaltar sus conexiones, y exportar a SVG o PNG. No necesita servidor ni hace pedidos de red. Abajo de la página hay un link discreto "Made with trazo"; los SVG y PNG exportados no lo incluyen.
+Esto escribe `demo.html` junto al archivo de entrada e imprime su ruta. Ábrelo en el navegador: puedes mover y hacer zoom, pasar el cursor sobre un nodo (o enfocarlo con el teclado) para ver su nota y resaltar sus conexiones, y exportar a SVG o PNG. No necesita servidor ni realiza solicitudes de red. Al pie de la página hay un enlace discreto "Made with trazo"; los SVG y PNG exportados no lo incluyen.
 
 ## ¿Por qué no pedirle el diagrama directamente al agente?
 
-Puede dibujarlo, pero tiene que ubicar él mismo cada caja, flecha y etiqueta, y la geometría le sale mal. En nuestro benchmark, 20 de 24 diagramas SVG escritos a mano tenían texto superpuesto, etiquetas fuera de sus cajas o aristas que cruzaban nodos, y fueron los de mayor costo en tokens: el agente escribe todo el dibujo como tokens de salida, los más caros. Con trazo el agente solo dice qué hay en el sistema; trazo hace el layout, valida la entrada y genera siempre el mismo HTML: ningún defecto de layout en 46 corridas, válido al primer intento. Mermaid es más barato, pero 7 de 24 de sus diagramas tenían defectos de layout. Detalles: [bench/README.md](bench/README.md#baseline-trazo-vs-hand-written-svg-vs-mermaid)
+Puede dibujarlo, pero tiene que ubicar él mismo cada caja, flecha y etiqueta. En nuestro benchmark:
+
+- **SVG escrito a mano:** 20 de 24 diagramas tenían texto superpuesto, etiquetas fuera de sus cajas o aristas que cruzaban nodos. También fue la opción de mayor costo en tokens: el agente escribe todo el dibujo como tokens de salida, los más caros.
+- **Mermaid:** es más barato, pero 7 de 24 de sus diagramas tenían defectos de layout.
+- **trazo:** el agente solo dice qué hay en el sistema; trazo hace el layout, valida la entrada y genera siempre el mismo HTML. Ningún defecto de layout en 46 ejecuciones, válido al primer intento.
+
+Detalles: [bench/README.md](bench/README.md#baseline-trazo-vs-hand-written-svg-vs-mermaid)
 
 ## Cuándo usarlo
 
-trazo hace una sola cosa: un agente (o vos) describe el diagrama, y el código lo acomoda.
+trazo hace una sola cosa: un agente (o tú) describe el diagrama, y el código lo acomoda.
 
-- La entrada no tiene coordenadas, tamaños ni estilos, así que hay poco para leer y poco para errarle. Antes de escribir un diagrama, un agente lee `trazo schema` y `trazo example` de ese tipo: unos 700 tokens, unos 1.100 con la skill (estimado como caracteres / 4).
-- Los errores nombran la ruta exacta dentro del JSON y traen una pista, así que un agente puede corregir su entrada a partir del mensaje. En las corridas de agentes registradas, Claude Sonnet 5.5 obtuvo un diagrama válido en el primer `make` en todas las corridas y Claude Haiku 4.5 en el 92 a 96%; todas terminaron con un diagrama válido.
+- La entrada no tiene coordenadas, tamaños ni estilos, así que hay poco para leer y poco que pueda fallar. Antes de escribir un diagrama, un agente lee `trazo schema` y `trazo example` de ese tipo: unos 700 tokens, unos 1.100 con la skill (estimado como caracteres / 4).
+- Los errores nombran la ruta exacta dentro del JSON y traen una pista, así que un agente puede corregir su entrada a partir del mensaje. En las ejecuciones de agentes registradas, Claude Sonnet 5.5 obtuvo un diagrama válido en el primer `make` en todas las ejecuciones y Claude Haiku 4.5 en el 92 a 96%; todas terminaron con un diagrama válido.
 - El mismo JSON siempre da el mismo HTML, byte por byte, sin navegador y sin red.
 - Las claves foráneas del ERD apuntan a columnas, no solo a tablas.
 
-Números y método: [bench/README.md](bench/README.md). En el mismo benchmark (Codex, gpt-6-luna, 8 tareas, 3 corridas cada una): el costo en tokens de Mermaid fue entre un 35 y un 40% menor que el de trazo (con la salida ponderada entre 4 y 8 veces la entrada y la entrada en caché a un décimo; ver la sección de costo en tokens), y 5 de 24 corridas de Mermaid necesitaron una corrección tras un error de sintaxis.
+Números y método: [bench/README.md](bench/README.md). En el mismo benchmark (Codex, gpt-6-luna, 8 tareas, 3 ejecuciones cada una): el costo en tokens de Mermaid fue entre un 35 y un 40% menor que el de trazo (con la salida ponderada entre 4 y 8 veces la entrada y la entrada en caché a un décimo; ver la sección de costo en tokens), y 5 de 24 ejecuciones de Mermaid necesitaron una corrección tras un error de sintaxis.
 
 Lo que no hace:
 
 - Solo cuatro tipos: arquitectura, workflow, ERD y secuencia. Mermaid, PlantUML y D2 cubren muchos más.
-- No se renderiza dentro de Markdown. GitHub, GitLab y muchos editores muestran bloques de Mermaid directamente; con trazo abrís el HTML o exportás SVG o PNG desde ahí.
-- No se edita en la salida: cambiás el JSON y volvés a correr `make`.
+- No se renderiza dentro de Markdown. GitHub, GitLab y muchos editores muestran bloques de Mermaid directamente; con trazo abres el HTML o exportas SVG o PNG desde ahí.
+- No se edita en la salida: cambias el JSON y vuelves a ejecutar `make`.
 - No importa Mermaid, no trae íconos de nube ni de marcas, no genera páginas explicativas ni revisa el resultado en un navegador.
 
 Las skills de diagramas para agentes más grandes hacen más de esto. trazo lo cambia por menos para leer y un layout que no depende del modelo.
@@ -85,7 +91,7 @@ Node 22 o superior:
 npm i -g @heidenber/trazo
 ```
 
-Esto instala el comando `trazo`. Para usar trazo como librería en un proyecto, corré `npm i @heidenber/trazo` en su lugar.
+Esto instala el comando `trazo`. Para usar trazo como librería en un proyecto, ejecuta `npm i @heidenber/trazo` en su lugar.
 
 Para instalarlo desde el código fuente:
 
@@ -123,7 +129,7 @@ trazo example erd | trazo make - -o erd.html
 
 `trazo schema <type>` imprime los campos de cada tipo en unas 40 líneas.
 
-Los ejemplos incluidos (`trazo example <type>`) tal como los dibuja trazo; el ERD es la imagen del principio. Hacé clic en uno para verlo en tamaño completo.
+Los ejemplos incluidos (`trazo example <type>`) tal como los dibuja trazo; el ERD es la imagen del principio. Haz clic en uno para verlo en tamaño completo.
 
 <p align="center"><a href="https://github.com/heidenber/trazo/blob/main/docs/architecture-light.png"><img src="https://raw.githubusercontent.com/heidenber/trazo/main/docs/architecture-light.png" width="100%" alt="Ejemplo de arquitectura: una tienda de impresión de fotos con storefront, API gateway, servicios de backend, almacenes de datos y proveedores externos"></a></p>
 <p align="center"><a href="https://github.com/heidenber/trazo/blob/main/docs/workflow-light.png"><img src="https://raw.githubusercontent.com/heidenber/trazo/main/docs/workflow-light.png" width="100%" alt="Ejemplo de workflow: una solicitud de compra que pasa por los carriles Requester, Procurement y Finance, con decisiones y un reintento"></a></p>
@@ -131,7 +137,7 @@ Los ejemplos incluidos (`trazo example <type>`) tal como los dibuja trazo; el ER
 
 ## Skill para agentes
 
-`skill/` trae una skill corta que le indica al agente que lea el código antes de dibujar y dibuje solo lo que encontró, cite cada parte en `source`, parta de `trazo example`, valide el JSON y corrija los errores a partir de los mensajes. `skill/SKILL.md` es para Claude Code y Pi; `skill/AGENTS.md` es el mismo texto para Codex. trazo no instala nada por su cuenta: copiá los archivos después de instalar el paquete de forma global. Son las ubicaciones documentadas de cada agente; comprobalas contra la versión que uses.
+`skill/` trae una skill corta que le indica al agente que lea el código antes de dibujar y dibuje solo lo que encontró, cite cada parte en `source`, parta de `trazo example`, valide el JSON y corrija los errores a partir de los mensajes. `skill/SKILL.md` es para Claude Code y Pi; `skill/AGENTS.md` es el mismo texto para Codex. trazo no instala nada por su cuenta: copia los archivos después de instalar el paquete de forma global. Son las ubicaciones documentadas de cada agente; compruébalas con la versión que uses.
 
 Bash:
 
@@ -154,7 +160,7 @@ New-Item -ItemType Directory -Force "$HOME\.codex" | Out-Null
 Get-Content "$sk\AGENTS.md" | Add-Content "$HOME\.codex\AGENTS.md"                  # Codex
 ```
 
-Si corrés el comando de Codex dos veces, el bloque queda duplicado. Para actualizarlo, borrá antes todo lo que hay entre `<!-- trazo:start -->` y `<!-- trazo:end -->` en `~/.codex/AGENTS.md`. En Claude Code y Pi, volvé a copiar el archivo.
+Si ejecutas el comando de Codex dos veces, el bloque queda duplicado. Para actualizarlo, borra antes todo lo que hay entre `<!-- trazo:start -->` y `<!-- trazo:end -->` en `~/.codex/AGENTS.md`. En Claude Code y Pi, vuelve a copiar el archivo.
 
 ## Librería
 
@@ -174,7 +180,7 @@ La parte estable de un `Issue` es `severity`, `code`, `path` y `hint`. El texto 
 
 ## Rendimiento
 
-El costo de lectura, el tiempo de generación y el tamaño de la salida los mide un script de este repositorio. En [bench/README.md](bench/README.md) está qué se mide, cómo correrlo y los resultados registrados.
+El costo de lectura, el tiempo de generación y el tamaño de la salida los mide un script de este repositorio. En [bench/README.md](bench/README.md) está qué se mide, cómo ejecutarlo y los resultados registrados.
 
 ## Desarrollo
 
