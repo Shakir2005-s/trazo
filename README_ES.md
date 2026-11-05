@@ -51,7 +51,7 @@ trazo make demo.json
 
 ![El diagrama de la demo: web, api y db conectados de izquierda a derecha con flechas HTTPS y SQL](https://raw.githubusercontent.com/heidenber/trazo/main/docs/demo-light.png)
 
-Esto escribe `demo.html` junto al archivo de entrada e imprime su ruta. Abrilo en el navegador: podés mover y hacer zoom, pasar el mouse sobre un nodo (o enfocarlo con el teclado) para ver su nota y resaltar sus conexiones, y exportar a SVG o PNG. No necesita servidor ni hace pedidos de red.
+Esto escribe `demo.html` junto al archivo de entrada e imprime su ruta. Abrilo en el navegador: podés mover y hacer zoom, pasar el mouse sobre un nodo (o enfocarlo con el teclado) para ver su nota y resaltar sus conexiones, y exportar a SVG o PNG. No necesita servidor ni hace pedidos de red. Abajo de la página hay un link discreto "Made with trazo"; los SVG y PNG exportados no lo incluyen.
 
 ## ¿Por qué no pedirle el diagrama directamente al agente?
 

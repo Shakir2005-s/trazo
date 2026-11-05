@@ -58,6 +58,7 @@ export function renderHtml(scene: Scene): string {
 ${renderSvg(scene)}
   </div>
 </main>
+<footer class="credit"><a href="https://github.com/heidenber/trazo" target="_blank" rel="noopener noreferrer">Made with trazo</a></footer>
 <div class="tip" id="tip" role="tooltip"></div>
 <script>${VIEWER_SCRIPT}</script>
 </body>
