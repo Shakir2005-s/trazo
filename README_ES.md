@@ -177,6 +177,7 @@ const made = await make(jsonTextOrObject, { theme: "dark" });
 Las dos aceptan texto JSON o un objeto ya parseado. `make` también devuelve en `issues` los avisos de geometría.
 
 La parte estable de un `Issue` es `severity`, `code`, `path` y `hint`. El texto de `message` puede cambiar entre versiones, así que no lo uses para comparar.
+Consulta la [lista de códigos de validación](docs/issue-codes.md) (en inglés).
 
 ## Rendimiento
 
