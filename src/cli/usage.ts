@@ -27,4 +27,6 @@ Options:
 <input> is a JSON file, or "-" to read stdin.
 <type> is architecture, workflow, erd or sequence.
 Exit codes: 0 ok, 1 invalid input, 2 usage error, 3 internal error.
+
+Find trazo useful? Star it on GitHub: https://github.com/heidenber/trazo
 `;

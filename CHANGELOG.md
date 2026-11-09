@@ -6,6 +6,7 @@ All notable changes to trazo are listed here. The format follows [Keep a Changel
 
 ### Changed
 
+- `trazo --help` ends with a line inviting you to star the project on GitHub. Nothing else prints it.
 - The README lists the bench comparison (hand-written SVG, Mermaid, trazo) as points instead of one paragraph.
 - New CONTRIBUTING.md, issue templates and a pull request template, linked from both READMEs.
 

@@ -327,6 +327,7 @@ describe("--help and --version", () => {
       for (const word of ["trazo make", "trazo check", "--out", "--theme", "--json", "--version"]) {
         expect(r.stdout).toContain(word);
       }
+      expect(r.stdout.endsWith("\nFind trazo useful? Star it on GitHub: https://github.com/heidenber/trazo\n")).toBe(true);
     }
   });
 
