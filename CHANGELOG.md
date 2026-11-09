@@ -4,6 +4,12 @@ All notable changes to trazo are listed here. The format follows [Keep a Changel
 
 ## [Unreleased]
 
+## [0.1.4] - 2026-11-09
+
+### Added
+
+- `docs/issue-codes.md` lists every validation and geometry issue code with its severity and meaning, linked from both READMEs. Thanks to @jeelthacker1 for the first outside contribution (#32).
+
 ### Changed
 
 - `trazo --help` ends with a line inviting you to star the project on GitHub. Nothing else prints it.
@@ -47,7 +53,8 @@ First release. Needs Node 22 or later.
 - Library API: `check` and `make`, which accept JSON text or a parsed object.
 - An agent skill for Claude Code and Pi (`skill/SKILL.md`) and the same text for Codex (`skill/AGENTS.md`).
 
-[Unreleased]: https://github.com/heidenber/trazo/compare/v0.1.3...HEAD
+[Unreleased]: https://github.com/heidenber/trazo/compare/v0.1.4...HEAD
+[0.1.4]: https://github.com/heidenber/trazo/releases/tag/v0.1.4
 [0.1.3]: https://github.com/heidenber/trazo/releases/tag/v0.1.3
 [0.1.2]: https://github.com/heidenber/trazo/releases/tag/v0.1.2
 [0.1.1]: https://github.com/heidenber/trazo/releases/tag/v0.1.1
