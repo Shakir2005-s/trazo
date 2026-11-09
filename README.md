@@ -55,7 +55,13 @@ This writes `demo.html` next to the input and prints its path. Open it in a brow
 
 ## Why not just ask the agent for a diagram?
 
-It can draw one, but it has to place every box, arrow and label itself, and it gets the geometry wrong. In our bench, 20 of 24 hand-written SVG diagrams had overlapping text, labels outside their boxes or edges crossing nodes, and they had the highest token cost: the agent writes the whole drawing as output tokens, the most expensive kind. With trazo the agent only says what is in the system; trazo does the layout, checks the input and renders the same HTML every time: no layout defects in 46 runs, valid on the first try. Mermaid is cheaper, but 7 of 24 of its diagrams had layout defects. Details: [bench/README.md](bench/README.md#baseline-trazo-vs-hand-written-svg-vs-mermaid)
+It can draw one, but it has to place every box, arrow and label itself. In our bench:
+
+- **Hand-written SVG:** 20 of 24 diagrams had overlapping text, labels outside their boxes or edges crossing nodes. It also had the highest token cost: the agent writes the whole drawing as output tokens, the most expensive kind.
+- **Mermaid:** cheaper, but 7 of 24 of its diagrams had layout defects.
+- **trazo:** the agent only says what is in the system; trazo does the layout, checks the input and renders the same HTML every time. No layout defects in 46 runs, valid on the first try.
+
+Details: [bench/README.md](bench/README.md#baseline-trazo-vs-hand-written-svg-vs-mermaid)
 
 ## When to use it
 
@@ -183,6 +189,8 @@ npm test            # unit and CLI tests
 npm run gen:check   # generated files are up to date
 npm run bench       # deterministic benchmark (needs npm run build)
 ```
+
+Want to help? Read [CONTRIBUTING.md](CONTRIBUTING.md) and look for issues labeled [good first issue](https://github.com/heidenber/trazo/labels/good%20first%20issue).
 
 ## License
 

@@ -2,6 +2,13 @@
 
 All notable changes to trazo are listed here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html). While trazo is in 0.x, a change that breaks the JSON input, the CLI or the library API bumps the minor version.
 
+## [Unreleased]
+
+### Changed
+
+- The README lists the bench comparison (hand-written SVG, Mermaid, trazo) as points instead of one paragraph.
+- New CONTRIBUTING.md, issue templates and a pull request template, linked from both READMEs.
+
 ## [0.1.3] - 2026-11-05
 
 ### Added
@@ -39,6 +46,7 @@ First release. Needs Node 22 or later.
 - Library API: `check` and `make`, which accept JSON text or a parsed object.
 - An agent skill for Claude Code and Pi (`skill/SKILL.md`) and the same text for Codex (`skill/AGENTS.md`).
 
+[Unreleased]: https://github.com/heidenber/trazo/compare/v0.1.3...HEAD
 [0.1.3]: https://github.com/heidenber/trazo/releases/tag/v0.1.3
 [0.1.2]: https://github.com/heidenber/trazo/releases/tag/v0.1.2
 [0.1.1]: https://github.com/heidenber/trazo/releases/tag/v0.1.1

@@ -1,0 +1,22 @@
+name: Feature request
+description: A new field, option or diagram type.
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What are you trying to draw?
+      description: The diagram you need and what trazo cannot express today.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposal
+      description: How the JSON could look. Keep in mind an agent has to read the schema before every diagram, so smaller is better.
+      render: json
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives
+      description: Workarounds you tried, or how another tool handles it.

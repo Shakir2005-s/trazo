@@ -1,0 +1,39 @@
+name: Bug report
+description: trazo rejects valid input, draws something wrong or crashes.
+labels: [bug]
+body:
+  - type: input
+    id: version
+    attributes:
+      label: trazo version
+      description: Output of `trazo --version`.
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Node version and OS
+      placeholder: Node 22.12, Windows 11
+    validations:
+      required: true
+  - type: textarea
+    id: input
+    attributes:
+      label: Input
+      description: The JSON file or the command that shows the problem. Trim it to the smallest input that still fails.
+      render: json
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: What happened
+      description: Error message, wrong output or a screenshot of the diagram.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+    validations:
+      required: true

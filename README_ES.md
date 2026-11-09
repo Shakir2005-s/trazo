@@ -190,6 +190,8 @@ npm run gen:check   # los archivos generados están al día
 npm run bench       # benchmark determinista (requiere npm run build)
 ```
 
+¿Quieres ayudar? Lee [CONTRIBUTING.md](CONTRIBUTING.md) (en inglés) y busca los issues con la etiqueta [good first issue](https://github.com/heidenber/trazo/labels/good%20first%20issue).
+
 ## Licencia
 
 trazo se distribuye bajo la Apache License 2.0. Copyright 2026 Heidenber Palacio Garzón. Ver LICENSE y NOTICE.
